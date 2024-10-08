@@ -75,10 +75,28 @@ k3sup join \
 ```
 
 ## lab
+### setup
 ```bash
 mv /root/kubeconfig /home/tier940/.kube/config
 mkdir -p /home/tier940/.kube
 chown tier940:tier940 /home/tier940/.kube/ -R
 kubectl config use-context default
 kubectl get node -o wide
+
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+echo "source <(helm completion bash)" >> ~/.bashrc
+source ~/.bashrc
+```
+
+### istio
+```bash
+helm repo add istio https://istio-release.storage.googleapis.com/charts
+helm repo update
+kubectl create namespace istio-system
+helm install istio-base istio/base -n istio-system --set defaultRevision=default
+helm ls -n istio-system
+helm install istiod istio/istiod -n istio-system --wait
+helm ls -n istio-system
+helm status istiod -n istio-system
+kubectl get deployments -n istio-system --output wide
 ```
