@@ -85,6 +85,7 @@ kubectl get node -o wide
 
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 echo "source <(helm completion bash)" >> ~/.bashrc
+echo "source <(istioctl completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -99,30 +100,35 @@ helm install istiod istio/istiod -n istio-system --wait
 helm ls -n istio-system
 helm status istiod -n istio-system
 kubectl get deployments -n istio-system --output wide
+kubectl label namespace default istio-injection=enabled
 ```
 
 #### kiali
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/kiali.yaml
 kubectl get svc -n istio-system
+istioctl dashboard kiali
 ```
 
 #### jaeger
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/jaeger.yaml
 kubectl get svc -n istio-system
+istioctl dashboard jaeger
 ```
 
 #### grafana
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/grafana.yaml
 kubectl get svc -n istio-system
+istioctl dashboard grafana
 ```
 
 #### prometheus
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/prometheus.yaml
 kubectl get svc -n istio-system
+istioctl dashboard prometheus
 ```
 
 ### k8s-dashboard
