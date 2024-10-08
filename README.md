@@ -131,6 +131,12 @@ kubectl get svc -n istio-system
 istioctl dashboard prometheus
 ```
 
+#### loki
+```bash
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/loki.yaml
+kubectl get svc -n istio-system
+```
+
 ### k8s-dashboard
 ```bash
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
