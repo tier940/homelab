@@ -100,3 +100,42 @@ helm ls -n istio-system
 helm status istiod -n istio-system
 kubectl get deployments -n istio-system --output wide
 ```
+
+#### kiali
+```bash
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/kiali.yaml
+kubectl get svc -n istio-system
+```
+
+#### jaeger
+```bash
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/jaeger.yaml
+kubectl get svc -n istio-system
+```
+
+#### grafana
+```bash
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/grafana.yaml
+kubectl get svc -n istio-system
+```
+
+#### prometheus
+```bash
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/prometheus.yaml
+kubectl get svc -n istio-system
+```
+
+### k8s-dashboard
+```bash
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+kubectl get svc -n kubernetes-dashboard
+kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+```
+
+#### k8s-dashboard token
+```bash
+kubectl apply -f k8s-dashboard/dashboard-adminuser.yaml
+kubectl apply -f k8s-dashboard/dashboard-rbac.yaml
+kubectl -n kubernetes-dashboard create token admin-user
+```
