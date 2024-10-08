@@ -76,7 +76,9 @@ k3sup join \
 
 ## lab
 ```bash
-export KUBECONFIG=/root/kubeconfig
+mv /root/kubeconfig /home/tier940/.kube/config
+mkdir -p /home/tier940/.kube
+chown tier940:tier940 /home/tier940/.kube/ -R
 kubectl config use-context default
 kubectl get node -o wide
 ```
