@@ -90,18 +90,27 @@ echo "source <(kustomize completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
 
+### MetalLB
+```bash
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+kubectl apply -f MetalLB/addresspool.yaml
+```
+
+#### Disable servicelb
+```bash
+vim /etc/rancher/k3s/k3s.yaml
+systemctl restart k3s
+```
+
+```yaml
+disable:
+  - servicelb
+```
+
 ### Istio
 ```bash
-helm repo add istio https://istio-release.storage.googleapis.com/charts
-helm repo update
-kubectl create namespace istio-system
-helm install istio-base istio/base -n istio-system --set defaultRevision=default
-helm ls -n istio-system
-helm install istiod istio/istiod -n istio-system --wait
-helm ls -n istio-system
-helm status istiod -n istio-system
+istioctl install
 kubectl get deployments -n istio-system --output wide
-kubectl label namespace default istio-injection=enabled
 ```
 
 #### Kiali
