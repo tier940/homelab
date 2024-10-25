@@ -93,4 +93,14 @@ kubectl apply -f calico.yaml
 ```bash
 wget -O metrics-server-components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
 kubectl apply -f metrics-server-components.yaml
+kubectl get deployment metrics-server -n kube-system
+```
+
+### metrics-serverが起動しない
+- deployment.appsに以下を追加すると起動する
+```bash
+command: #added
+- /metrics-server #added
+- --kubelet-insecure-tls #added
+- --kubelet-preferred-address-types=InternalIP #added
 ```
