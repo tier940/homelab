@@ -1,170 +1,96 @@
-# k3s install on lxc container
-## pve
-`vim /etc/pve/lxc/$ID.conf`
-```
-lxc.apparmor.profile: unconfined
-lxc.cgroup.devices.allow: a
-lxc.cap.drop:
-lxc.mount.auto: "proc:rw sys:rw"
-```
-
-* * *
-
-## lxc
-`apt update && apt install -y vim curl`
-
-`vim /etc/hosts`
+# k8s install on vm
+## カーネルパラメータの追加
 ```bash
-# k8s host address
-172.16.8.0 k8s-master
-172.16.8.10 k8s-node1
-172.16.8.11 k8s-node2
+tee /etc/modules-load.d/containerd.conf << EOF
+overlay
+br_netfilter
+EOF
+modprobe overlay
+modprobe br_netfilter
+
+tee /etc/sysctl.d/kubernetes.conf << EOF 
+net.bridge.bridge-nf-call-ip6tables = 1 
+net.bridge.bridge-nf-call-iptables = 1 
+net.ipv4.ip_forward = 1 
+EOF
+
+sysctl --system
 ```
 
-`vim /etc/rc.local`
+## Containerd Runtimeをインストール
 ```bash
-#!/bin/sh -e
+apt update && apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
 
-# Kubeadm 1.15 needs /dev/kmsg to be there, but it's not in lxc, but we can just use /dev/console instead
-# see: https://github.com/kubernetes-sigs/kind/issues/662
-if [ ! -e /dev/kmsg ]; then
-    ln -s /dev/console /dev/kmsg
-fi
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg 
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
-# https://medium.com/@kvaps/run-kubernetes-in-lxc-container-f04aa94b6c9c
-mount --make-rshared /
+apt update && apt install -y containerd.io
+
+containerd config default | tee /etc/containerd/config.toml >/dev/null 2>&1 
+sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
 ```
 
+### sandboxのバージョンを更新
+- registry.k8s.io/pauseで検索して最新のバージョンに更新する
+> 2024/10/25現在は 3.10 だった
+
+### containerdの再起動
 ```bash
-chmod +x /etc/rc.local
-reboot
+systemctl restart containerd
+systemctl enable containerd
 ```
 
-* * *
-
-## k3s install
+## Kubernetes用のAptリポジトリを追加
 ```bash
-k3sup install \
-    --cluster \
-    --host k8s-master \
-    --user root \
-    --ssh-key $HOME/.ssh/yotsunagi_proxmox \
-    --k3s-channel stable
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 ```
 
+## Kubectl / Kubeadm / Kubeletをインストール
 ```bash
-k3sup join \
-    --server \
-    --host k8s-node1 \
-    --user root \
-    --ssh-key $HOME/.ssh/yotsunagi_proxmox \
-    --server-host k8s-master \
-    --server-user root \
-    --k3s-channel stable
+apt update 
+apt install -y kubelet kubeadm kubectl 
+apt-mark hold kubelet kubeadm kubectl
 ```
 
+## コントロールプレーンの作成
+- ひとまずデフォルトの設定で初期化
 ```bash
-k3sup join \
-    --server \
-    --host k8s-node2 \
-    --user root \
-    --ssh-key $HOME/.ssh/yotsunagi_proxmox \
-    --server-host k8s-master \
-    --server-user root \
-    --k3s-channel stable
+kubeadm init
 ```
 
-## lab
-### setup
+### コントロールプレーン作成後
 ```bash
-mv /root/kubeconfig /home/tier940/.kube/config
-mkdir -p /home/tier940/.kube
-chown tier940:tier940 /home/tier940/.kube/ -R
-kubectl config use-context default
-kubectl get node -o wide
-
-echo "source <(kubectl completion bash)" >> ~/.bashrc
-echo "source <(helm completion bash)" >> ~/.bashrc
-echo "source <(istioctl completion bash)" >> ~/.bashrc
-echo "source <(kustomize completion bash)" >> ~/.bashrc
-source ~/.bashrc
+mkdir -p $HOME /.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME /.kube/config
+sudo chown $( id -u):$( id -g) $HOME /.kube/config
 ```
 
-### MetalLB
+## ワーカーノードの追加
+- コントロールプレーン作成時に表示されたコマンドを実行
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
-kubectl apply -f MetalLB/addresspool.yaml
+kubeadm join 172.16.8.0:6443 --token XXXXX --discovery-token-ca-cert-hash sha256:YYYY
 ```
 
-#### Disable servicelb
+### トークンの再作成
+- どうやらトークンは有効期限があるらしい
+    - コントロールプレーンがあるVM(172.16.8.0)で実行する
 ```bash
-vim /etc/rancher/k3s/k3s.yaml
-systemctl restart k3s
+kubeadm token create
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
 ```
 
-```yaml
-disable:
-  - servicelb
-```
-
-### Istio
+## CNIプラグインのインストール
+- Calicoを使用
+    - 2024/10/25現在は v3.28.2 だった
 ```bash
-istioctl install
-kubectl get deployments -n istio-system --output wide
+wget https://raw.githubusercontent.com/projectcalico/calico/calico/v3.28.2/manifests/calico.yaml
+kubectl apply -f calico.yaml
 ```
 
-#### Kiali
+## MetricsServerのインストール
+- 2024/10/25現在は v0.7.2 だった
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/kiali.yaml
-kubectl get svc -n istio-system
-istioctl dashboard kiali
-```
-
-#### Jaeger
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/jaeger.yaml
-kubectl get svc -n istio-system
-istioctl dashboard jaeger
-```
-
-#### Grafana
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/grafana.yaml
-kubectl get svc -n istio-system
-istioctl dashboard grafana
-```
-
-#### Prometheus
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/prometheus.yaml
-kubectl get svc -n istio-system
-istioctl dashboard prometheus
-```
-
-#### Loki
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/loki.yaml
-kubectl get svc -n istio-system
-```
-
-### k8s-dashboard
-```bash
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
-kubectl get svc -n kubernetes-dashboard
-kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-
-kubectl apply -f k8s-dashboard/dashboard-adminuser.yaml
-kubectl apply -f k8s-dashboard/dashboard-rbac.yaml
-kubectl -n kubernetes-dashboard create token admin-user
-```
-
-### ArgoCD
-```bash
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/refs/tags/v2.12.4/manifests/ha/install.yaml
-kubectl get svc -n argocd
-
-kubectl -n argocd port-forward svc/argocd-server 8443:443 --address='0.0.0.0'
-kubectl -n argocd get secrets argocd-initial-admin-secret -ojsonpath={.data.password} | base64 -d
+wget -O metrics-server-components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
+kubectl apply -f metrics-server-components.yaml
 ```
