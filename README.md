@@ -17,6 +17,16 @@ EOF
 sysctl --system
 ```
 
+## hostsファイルの編集
+```bash
+cat <<EOF | sudo tee -a /etc/hosts
+# k8s host address
+172.16.8.0 k8s-master
+172.16.8.10 k8s-node1
+172.16.8.11 k8s-node2
+EOF
+```
+
 ## Containerd Runtimeをインストール
 ```bash
 apt update && apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
@@ -56,7 +66,8 @@ apt-mark hold kubelet kubeadm kubectl
 ## コントロールプレーンの作成
 - ひとまずデフォルトの設定で初期化
 ```bash
-kubeadm init
+kubeadm init --control-plane-endpoint 172.16.8.0 \
+    --pod-network-cidr=10.1.0.0/16
 ```
 
 ### コントロールプレーン作成後
@@ -99,8 +110,20 @@ kubectl get deployment metrics-server -n kube-system
 ### metrics-serverが起動しない
 - deployment.appsに以下を追加すると起動する
 ```bash
-command: #added
-- /metrics-server #added
-- --kubelet-insecure-tls #added
-- --kubelet-preferred-address-types=InternalIP #added
+command:
+- /metrics-server
+- --kubelet-insecure-tls
+- --kubelet-preferred-address-types=InternalIP
+```
+
+### istio-ingressgatewayがpending
+- 最適解ではない...?
+```bash
+kubectl get svc -n istio-system
+
+# 以下の方法で解決
+kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec": {"type": "NodePort"}}'
+
+# 戻す場合
+kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec": {"type": "LoadBalancer"}}'
 ```

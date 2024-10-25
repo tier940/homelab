@@ -12,13 +12,13 @@ lxc.mount.auto: "proc:rw sys:rw"
 
 ## lxc
 `apt update && apt install -y vim curl`
-
-`vim /etc/hosts`
 ```bash
+cat <<EOF | sudo tee -a /etc/hosts
 # k8s host address
-172.16.8.0 k8s-master
-172.16.8.10 k8s-node1
-172.16.8.11 k8s-node2
+172.16.8.0 k8s-controller-1
+172.16.8.10 k8s-worker-1
+172.16.8.11 k8s-worker-2
+EOF
 ```
 
 `vim /etc/rc.local`
@@ -97,66 +97,4 @@ source ~/.bashrc
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
 kubectl apply -f MetalLB/addresspool.yaml
-```
-
-### Istio
-```bash
-istioctl install
-kubectl get deployments -n istio-system --output wide
-```
-
-#### Kiali
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/kiali.yaml
-kubectl get svc -n istio-system
-istioctl dashboard kiali
-```
-
-#### Jaeger
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/jaeger.yaml
-kubectl get svc -n istio-system
-istioctl dashboard jaeger
-```
-
-#### Grafana
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/grafana.yaml
-kubectl get svc -n istio-system
-istioctl dashboard grafana
-```
-
-#### Prometheus
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/prometheus.yaml
-kubectl get svc -n istio-system
-istioctl dashboard prometheus
-```
-
-#### Loki
-```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/refs/tags/1.23.2/samples/addons/loki.yaml
-kubectl get svc -n istio-system
-```
-
-### k8s-dashboard
-```bash
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
-kubectl get svc -n kubernetes-dashboard
-kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-
-kubectl apply -f k8s-dashboard/dashboard-adminuser.yaml
-kubectl apply -f k8s-dashboard/dashboard-rbac.yaml
-kubectl -n kubernetes-dashboard create token admin-user
-```
-
-### ArgoCD
-```bash
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/refs/tags/v2.12.4/manifests/ha/install.yaml
-kubectl get svc -n argocd
-
-kubectl -n argocd port-forward svc/argocd-server 8443:443 --address='0.0.0.0'
-kubectl -n argocd get secrets argocd-initial-admin-secret -ojsonpath={.data.password} | base64 -d
 ```
