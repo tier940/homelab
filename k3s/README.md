@@ -92,9 +92,3 @@ echo "source <(istioctl completion bash)" >> ~/.bashrc
 echo "source <(kustomize completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
-
-### MetalLB
-```bash
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
-kubectl apply -f MetalLB/addresspool.yaml
-```

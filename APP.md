@@ -68,6 +68,8 @@ kubectl delete namespaces argocd
 kubectl apply -f ./sample-deploy.yaml
 kubectl port-forward services/nginx-service 8080:80 --address='0.0.0.0'
 kubectl delete -f ./sample-deploy.yaml
+
+kubectl patch svc nginx-service -p '{"spec": {"type": "LoadBalancer"}}'
 ```
 
 ### Gitlab

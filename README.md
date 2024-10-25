@@ -116,8 +116,18 @@ command:
 - --kubelet-preferred-address-types=InternalIP
 ```
 
+### MetalLB
+```bash
+helm repo add metallb https://metallb.github.io/metallb
+helm repo update
+helm install metallb metallb/metallb --create-namespace --namespace metallb-system --set crds.create=true
+
+kubectl apply -f ./metallb/addresspool.yaml
+```
+
 ### istio-ingressgatewayがpending
 - 最適解ではない...?
+    - MetalLBが使える環境であれば、LoadBalancerを使う
 ```bash
 kubectl get svc -n istio-system
 
