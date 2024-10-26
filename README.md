@@ -1,3 +1,18 @@
+# lab setup
+```bash
+mv /root/kubeconfig /home/tier940/.kube/config
+mkdir -p /home/tier940/.kube
+chown tier940:tier940 /home/tier940/.kube/ -R
+kubectl config use-context default
+kubectl get node -o wide
+
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+echo "source <(helm completion bash)" >> ~/.bashrc
+echo "source <(istioctl completion bash)" >> ~/.bashrc
+echo "source <(kustomize completion bash)" >> ~/.bashrc
+source ~/.bashrc
+```
+
 # k8s install on vm
 ## カーネルパラメータの追加
 ```bash
