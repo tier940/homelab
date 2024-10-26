@@ -82,15 +82,7 @@ helm upgrade --install argocd argo/argo-cd --create-namespace -n argocd
 kubectl get svc -n argocd
 
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
-
-## Prometheus
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-helm upgrade --install prometheus prometheus-community/prometheus --create-namespace -n prometheus -f ./apps/values-prometheus-local.yaml
-kubectl get svc -n prometheus
+kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
 ```
 
 ## kube-prometheus-stack
@@ -100,9 +92,7 @@ helm repo update
 helmfile sync -f ./apps/kube-prometheus-stack/helmfile.yaml
 
 kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "LoadBalancer"}}'
-
-username: admin
-password: prom-operator
+#初期パス: prom-operator
 
 helm uninstall -n prometheus prometheus-grafana
 kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
