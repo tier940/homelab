@@ -32,6 +32,11 @@ EOF
 sysctl --system
 ```
 
+## 日本時間に変更
+```bash
+timedatectl set-timezone Asia/Tokyo
+```
+
 ## hostsファイルの編集
 ```bash
 cat <<EOF | sudo tee -a /etc/hosts
