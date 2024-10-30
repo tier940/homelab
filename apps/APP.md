@@ -1,5 +1,5 @@
 # k8s install apps
-### Nginx Ingress Controller
+## Nginx Ingress Controller
 ```bash
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update

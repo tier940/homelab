@@ -10,6 +10,7 @@ echo "source <(kubectl completion bash)" >> ~/.bashrc
 echo "source <(helm completion bash)" >> ~/.bashrc
 echo "source <(istioctl completion bash)" >> ~/.bashrc
 echo "source <(kustomize completion bash)" >> ~/.bashrc
+echo "source <(cilium completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -112,11 +113,19 @@ openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outfor
 ```
 
 ## CNIプラグインのインストール
-- Calicoを使用
-    - 2024/10/25現在は v3.28.2 だった
+### Calicoを使用する場合
+- 2024/10/25現在は v3.28.2 だった
 ```bash
-wget https://raw.githubusercontent.com/projectcalico/calico/calico/v3.28.2/manifests/calico.yaml
-kubectl apply -f calico.yaml
+wget -O ./cni-calico.yaml https://raw.githubusercontent.com/projectcalico/calico/refs/tags/v3.28.2/manifests/calico.yaml
+kubectl apply -f ./cni-calico.yaml
+```
+
+### Ciliumを使用する場合
+```bash
+helm repo add cilium https://helm.cilium.io/
+helm repo update
+helmfile sync -f ./cni-helmfile-cilium.yaml
+kubectl get svc -n kube-system
 ```
 
 ## MetricsServerのインストール
@@ -146,8 +155,7 @@ kubectl apply -f ./metallb/addresspool.yaml
 ```
 
 ### istio-ingressgatewayがpending
-- 最適解ではない...?
-    - MetalLBが使える環境であれば、LoadBalancerを使う
+- MetalLBが使える環境であればLoadBalancerが使えるのでむしろ問題ない
 ```bash
 kubectl get svc -n istio-system
 
