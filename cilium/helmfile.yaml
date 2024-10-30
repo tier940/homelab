@@ -1,0 +1,21 @@
+repositories:
+- name: cilium
+  url: https://helm.cilium.io
+
+releases:
+- name: cilium
+  namespace: kube-system
+  chart: cilium/cilium
+  values:
+  - kubeProxyReplacement: true
+  - l2announcements.enabled: true
+  - k8sServiceHost: "172.16.8.0"
+  - k8sServicePort: "6443"
+  - hubble:
+      relay:
+        enabled: true
+      ui:
+        enabled: true
+  - ipam:
+      operator:
+        clusterPoolIPv4PodCIDRList: ["10.1.0.0/16"]
