@@ -17,14 +17,14 @@ source ~/.bashrc
 # k8s install on vm
 ## カーネルパラメータの追加
 ```bash
-tee /etc/modules-load.d/containerd.conf << EOF
+cat <<EOF | tee -a /etc/modules-load.d/containerd.conf << EOF
 overlay
 br_netfilter
 EOF
 modprobe overlay
 modprobe br_netfilter
 
-tee /etc/sysctl.d/kubernetes.conf << EOF 
+cat <<EOF | tee -a /etc/sysctl.d/kubernetes.conf << EOF 
 net.bridge.bridge-nf-call-ip6tables = 1 
 net.bridge.bridge-nf-call-iptables = 1 
 net.ipv4.ip_forward = 1 
@@ -40,11 +40,11 @@ timedatectl set-timezone Asia/Tokyo
 
 ## hostsファイルの編集
 ```bash
-cat <<EOF | sudo tee -a /etc/hosts
+cat <<EOF | tee -a /etc/hosts
 # k8s host address
-172.16.8.0 k8s-master
-172.16.8.10 k8s-node1
-172.16.8.11 k8s-node2
+172.16.8.0 k8s-controller-1
+172.16.8.10 k8s-worker-1
+172.16.8.11 k8s-worker-2
 EOF
 ```
 
@@ -57,7 +57,7 @@ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(
 
 apt update && apt install -y containerd.io
 
-containerd config default | tee /etc/containerd/config.toml >/dev/null 2>&1 
+containerd config default | tee /etc/containerd/config.toml > /dev/null 2>&1 
 sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
 ```
 
@@ -73,8 +73,8 @@ systemctl enable containerd
 
 ## Kubernetes用のAptリポジトリを追加
 ```bash
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
 ```
 
 ## Kubectl / Kubeadm / Kubeletをインストール
@@ -85,17 +85,17 @@ apt-mark hold kubelet kubeadm kubectl
 ```
 
 ## コントロールプレーンの作成
-- ひとまずデフォルトの設定で初期化
 ```bash
 kubeadm init --control-plane-endpoint 172.16.8.0 \
-    --pod-network-cidr=10.1.0.0/16
+    --pod-network-cidr=10.1.0.0/16 \
+    --skip-phases=addon/kube-proxy
 ```
 
 ### コントロールプレーン作成後
 ```bash
 mkdir -p $HOME /.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME /.kube/config
-sudo chown $( id -u):$( id -g) $HOME /.kube/config
+cp -i /etc/kubernetes/admin.conf $HOME /.kube/config
+chown $( id -u):$( id -g) $HOME /.kube/config
 ```
 
 ## ワーカーノードの追加
@@ -113,18 +113,11 @@ openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outfor
 ```
 
 ## CNIプラグインのインストール
-### Calicoを使用する場合
-- 2024/10/25現在は v3.28.2 だった
-```bash
-wget -O ./cni-calico.yaml https://raw.githubusercontent.com/projectcalico/calico/refs/tags/v3.28.2/manifests/calico.yaml
-kubectl apply -f ./cni-calico.yaml
-```
-
 ### Ciliumを使用する場合
 ```bash
 helm repo add cilium https://helm.cilium.io/
 helm repo update
-helmfile sync -f ./cni-helmfile-cilium.yaml
+helmfile sync -f ./cilium/helmfile.yaml
 kubectl get svc -n kube-system
 
 cilium status
@@ -133,23 +126,23 @@ cilium connectivity test
 kubectl delete ns cilium-test-1
 ```
 
+### Calicoを使用する場合
+- 2024/10/25現在は v3.28.2 だった
+- kube-proxyをスキップしている場合は利用できない
+```bash
+wget -O ./calico/calico.yaml https://raw.githubusercontent.com/projectcalico/calico/refs/tags/v3.28.2/manifests/calico.yaml
+kubectl apply -f ./calico/calico.yaml
+```
+
 ## MetricsServerのインストール
 - 2024/10/25現在は v0.7.2 だった
 ```bash
-wget -O metrics-server-components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
-kubectl apply -f metrics-server-components.yaml
+wget -O ./metrics-server/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
+kubectl apply -f ./metrics-server/components.yaml
 kubectl get deployment metrics-server -n kube-system
 ```
 
-### metrics-serverが起動しない
-- deployment.appsに以下を追加すると起動する
-```bash
-command:
-- /metrics-server
-- --kubelet-insecure-tls
-- --kubelet-preferred-address-types=InternalIP
-```
-
+## LoadBalancerの設定
 ### MetalLB
 ```bash
 helm repo add metallb https://metallb.github.io/metallb
@@ -159,14 +152,31 @@ helm install metallb metallb/metallb --create-namespace --namespace metallb-syst
 kubectl apply -f ./metallb/addresspool.yaml
 ```
 
-### istio-ingressgatewayがpending
-- MetalLBが使える環境であればLoadBalancerが使えるのでむしろ問題ない
+#### めも metrics-serverが起動しない
+- 以下を追加すると起動する
+```yaml
+command:
+- /metrics-server
+- --kubelet-insecure-tls
+- --kubelet-preferred-address-types=InternalIP
+```
+
+### Cilium
+- 外からうまくつながらないため利用停止中
 ```bash
-kubectl get svc -n istio-system
+kubectl apply -f ./cilium/addresspool.yaml
+kubectl get svc -n kube-system
+```
 
-# 以下の方法で解決
-kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec": {"type": "NodePort"}}'
+## Nginx Ingress Controller
+```bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --create-namespace -n ingress-nginx --values ./ingress-nginx/values.yaml
+kubectl get svc -n ingress-nginx
+```
 
-# 戻す場合
-kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec": {"type": "LoadBalancer"}}'
+## 動作確認用の使い捨てPodを作成
+```bash
+kubectl run -it --rm --restart=Never --image=ubuntu:22.04 test-pod -- bash
 ```

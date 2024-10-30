@@ -1,12 +1,4 @@
 # k8s install apps
-## Nginx Ingress Controller
-```bash
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo update
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --create-namespace -n ingress-nginx --values ./ingress-nginx/values.yaml
-kubectl get svc -n ingress-nginx
-```
-
 ## k8s-dashboard
 ```bash
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
@@ -112,6 +104,18 @@ helm install istio-ingress istio/gateway -n istio-ingress --wait
 
 helm delete istio-ingress -n istio-ingress
 kubectl delete namespace istio-ingress
+```
+
+#### istio-ingressgatewayがpending
+- MetalLBが使える環境であればLoadBalancerが使えるのでむしろ問題ない
+```bash
+kubectl get svc -n istio-system
+
+# 以下の方法で解決
+kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec": {"type": "NodePort"}}'
+
+# 戻す場合
+kubectl patch svc istio-ingressgateway -n istio-system -p '{"spec": {"type": "LoadBalancer"}}'
 ```
 
 ### Kiali
