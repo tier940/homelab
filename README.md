@@ -126,6 +126,11 @@ helm repo add cilium https://helm.cilium.io/
 helm repo update
 helmfile sync -f ./cni-helmfile-cilium.yaml
 kubectl get svc -n kube-system
+
+cilium status
+cilium connectivity test
+
+kubectl delete ns cilium-test-1
 ```
 
 ## MetricsServerのインストール
