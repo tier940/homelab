@@ -5,7 +5,9 @@ helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 helm repo update
 helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace -n kubernetes-dashboard
 kubectl get svc -n kubernetes-dashboard
-kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+
+#kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+kubectl apply -f ./ingress-nginx/kubernetes-dashboard-ingress.yaml
 
 kubectl apply -f k8s-dashboard/dashboard-adminuser.yaml
 kubectl apply -f k8s-dashboard/dashboard-rbac.yaml
@@ -39,7 +41,7 @@ kubectl get svc -n prometheus
 kubectl apply -f ./ingress-nginx/grafana-ingress.yaml
 #初期パス: prom-operator
 
-helm uninstall -n prometheus prometheus-grafana
+helm uninstall -n prometheus kube-prometheus-stack
 kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
 kubectl delete crd alertmanagers.monitoring.coreos.com
 kubectl delete crd podmonitors.monitoring.coreos.com
