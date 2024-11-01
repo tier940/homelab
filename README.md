@@ -18,16 +18,24 @@ source ~/.bashrc
 ## カーネルパラメータの追加
 ```bash
 cat <<EOF | tee -a /etc/modules-load.d/containerd.conf << EOF
-overlay
 br_netfilter
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+overlay
 EOF
-modprobe overlay
 modprobe br_netfilter
+modprobe ip_vs
+modprobe ip_vs_rr
+modprobe ip_vs_wrr
+modprobe ip_vs_sh
+modprobe overlay
 
 cat <<EOF | tee -a /etc/sysctl.d/kubernetes.conf << EOF 
-net.bridge.bridge-nf-call-ip6tables = 1 
-net.bridge.bridge-nf-call-iptables = 1 
-net.ipv4.ip_forward = 1 
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
 EOF
 
 sysctl --system
@@ -147,7 +155,7 @@ kubectl get deployment metrics-server -n kube-system
 ```bash
 helm repo add metallb https://metallb.github.io/metallb
 helm repo update
-helm install metallb metallb/metallb --create-namespace --namespace metallb-system --set crds.create=true
+helm upgrade --install metallb metallb/metallb --create-namespace --namespace metallb-system --set crds.create=true
 
 kubectl apply -f ./metallb/addresspool.yaml
 ```
