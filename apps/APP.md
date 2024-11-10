@@ -7,7 +7,7 @@ helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dash
 kubectl get svc -n kubernetes-dashboard
 
 #kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-kubectl apply -f ./ingress-nginx/kubernetes-dashboard-ingress.yaml
+kubectl apply -f ./ingress/kubernetes-dashboard-ingress.yaml
 
 kubectl apply -f k8s-dashboard/dashboard-adminuser.yaml
 kubectl apply -f k8s-dashboard/dashboard-rbac.yaml
@@ -26,7 +26,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 #kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
 #kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./ingress-nginx/argocd-ingress.yaml
+kubectl apply -f ./ingress/argocd-ingress.yaml
 ```
 
 ## kube-prometheus-stack
@@ -38,7 +38,7 @@ kubectl get svc -n prometheus
 
 #kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "LoadBalancer"}}'
 #kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./ingress-nginx/grafana-ingress.yaml
+kubectl apply -f ./ingress/grafana-ingress.yaml
 #初期パス: prom-operator
 
 helm uninstall -n prometheus kube-prometheus-stack
@@ -61,7 +61,7 @@ kubectl apply -f ./apps/sample/nginx-deploy.yaml
 
 #kubectl patch svc nginx-service -p '{"spec": {"type": "LoadBalancer"}}'
 #kubectl patch svc nginx-service -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./ingress-nginx/nginx-ingress.yaml
+kubectl apply -f ./ingress/nginx-ingress.yaml
 
 kubectl delete -f ./apps/sample/nginx-deploy.yaml
 ```
