@@ -11,13 +11,14 @@ echo "source <(helm completion bash)" >> ~/.bashrc
 echo "source <(istioctl completion bash)" >> ~/.bashrc
 echo "source <(kustomize completion bash)" >> ~/.bashrc
 echo "source <(cilium completion bash)" >> ~/.bashrc
+echo "source <(hubble completion bash)" >> ~/.bashrc
 source ~/.bashrc
 ```
 
 # k8s install on vm
 ## カーネルパラメータの追加
 ```bash
-cat <<EOF | tee -a /etc/modules-load.d/containerd.conf << EOF
+cat <<EOF | tee -a /etc/modules-load.d/containerd.conf
 br_netfilter
 ip_vs
 ip_vs_rr
@@ -32,7 +33,7 @@ modprobe ip_vs_wrr
 modprobe ip_vs_sh
 modprobe overlay
 
-cat <<EOF | tee -a /etc/sysctl.d/kubernetes.conf << EOF 
+cat <<EOF | tee -a /etc/sysctl.d/kubernetes.conf
 net.ipv4.ip_forward = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -87,8 +88,8 @@ echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 
 ## Kubectl / Kubeadm / Kubeletをインストール
 ```bash
-apt update 
-apt install -y kubelet kubeadm kubectl 
+apt update
+apt install -y kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 ```
 
@@ -128,6 +129,9 @@ helm repo update
 helmfile sync -f ./cilium/helmfile.yaml
 kubectl get svc -n kube-system
 
+kubectl -n kube-system rollout restart deployment/cilium-operator
+kubectl -n kube-system rollout restart ds/cilium
+
 cilium status
 cilium connectivity test
 
@@ -150,17 +154,7 @@ kubectl apply -f ./metrics-server/components.yaml
 kubectl get deployment metrics-server -n kube-system
 ```
 
-## LoadBalancerの設定
-### MetalLB
-```bash
-helm repo add metallb https://metallb.github.io/metallb
-helm repo update
-helm upgrade --install metallb metallb/metallb --create-namespace --namespace metallb-system --set crds.create=true
-
-kubectl apply -f ./metallb/addresspool.yaml
-```
-
-#### めも metrics-serverが起動しない
+### metrics-serverが起動しない
 - 以下を追加すると起動する
 ```yaml
 command:
@@ -169,19 +163,23 @@ command:
 - --kubelet-preferred-address-types=InternalIP
 ```
 
-### Cilium
-- 外からうまくつながらないため利用停止中
+## LoadBalancerの設定
+### MetalLB
 ```bash
-kubectl apply -f ./cilium/addresspool.yaml
-kubectl get svc -n kube-system
+helm repo add metallb https://metallb.github.io/metallb
+helm repo update
+helm upgrade --install metallb metallb/metallb --create-namespace -n metallb-system
+kubectl get svc -n metallb-system
+
+kubectl apply -f ./metallb/addresspool.yaml
 ```
 
 ## Nginx Ingress Controller
 ```bash
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add ingress https://kubernetes.github.io/ingress
 helm repo update
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --create-namespace -n ingress-nginx --values ./ingress-nginx/values.yaml
-kubectl get svc -n ingress-nginx
+helm upgrade --install ingress ingress/ingress --create-namespace -n ingress
+kubectl get svc -n ingress
 ```
 
 ## 動作確認用の使い捨てPodを作成

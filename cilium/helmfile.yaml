@@ -6,24 +6,25 @@ releases:
 - name: cilium
   namespace: kube-system
   chart: cilium/cilium
+  version: 1.16.3
   values:
-  - l2announcements.enabled: true
+  - k8sServiceHost: 172.16.8.0
+  - k8sServicePort: 6443
   - kubeProxyReplacement: true
-  - hostLegacyRouting: false
-  - k8sServiceHost: "172.16.8.0"
-  - k8sServicePort: "6443"
+  - ingressController:
+      enabled: true
+      loadbalancerMode: shared
+  - rollOutCiliumPods: true
   - k8sClientRateLimit:
-      qps: 10
-      burst: 20
-  - encryption:
-      enabled: false
-      nodeEncryption: false
+      qps: 50
+      burst: 100
+  - l2announcements:
+      enabled: true
+  - externalIPs:
+      enabled: true
   - hubble:
       enabled: true
-      tls.enabled: false
       ui:
         enabled: true
-        service.type: "NodePort"
       relay:
         enabled: true
-        service.type: "NodePort"
