@@ -24,9 +24,14 @@ releases:
       enabled: true
   - gatewayAPI:
       enabled: true
+  - envoyConfig:
+      enabled: true
   - hubble:
       enabled: true
       ui:
         enabled: true
       relay:
         enabled: true
+  # - debug:
+  #     enabled: true
+  #     verbose: flow
