@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: kubernetes-dashboard-ingress
   namespace: kubernetes-dashboard
+  annotations:
+    ingress.cilium.io/tls-passthrough: enabled
+    ingress.cilium.io/force-https: enabled
 spec:
   ingressClassName: cilium
   rules:
