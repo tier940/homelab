@@ -22,6 +22,8 @@ releases:
       enabled: true
   - externalIPs:
       enabled: true
+  - gatewayAPI:
+      enabled: true
   - hubble:
       enabled: true
       ui:

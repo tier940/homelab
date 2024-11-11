@@ -1,0 +1,6 @@
+resources:
+  - all/gatewayclass.yaml
+  - all/gateway.yaml
+  - all/httproute-argocd.yaml
+  - all/httproute-hubble.yaml
+  - all/httproute-k8s-dashboard.yaml
