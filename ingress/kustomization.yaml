@@ -1,0 +1,6 @@
+resources:
+  - all/hubble-ui-ingress.yaml
+  - all/kubernetes-dashboard-ingress.yaml
+  - all/argocd-ingress.yaml
+  #- all/grafana-ingress.yaml
+  #- all/nginx-ingress.yaml
