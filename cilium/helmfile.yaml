@@ -15,6 +15,13 @@ releases:
       enabled: true
       loadbalancerMode: shared
   - rollOutCiliumPods: true
+  - resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
   - k8sClientRateLimit:
       qps: 50
       burst: 100
@@ -24,14 +31,23 @@ releases:
       enabled: true
   - gatewayAPI:
       enabled: true
-  - envoyConfig:
-      enabled: true
+  - operator:
+      rollOutPods: true
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
   - hubble:
       enabled: true
       ui:
         enabled: true
+        rollOutPods: true
       relay:
         enabled: true
+        rollOutPods: true
   # - debug:
   #     enabled: true
   #     verbose: flow
