@@ -1,0 +1,48 @@
+name: Publish
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Chart Name'
+        required: true
+      version:
+        description: 'Chart Version'
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-charts:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch entire history. Required for chart-releaser; see https://github.com/helm/chart-releaser-action/issues/13#issuecomment-602063896
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Chart releaser
+        run: |
+          # Download chart releaser
+          cd temp/application
+          curl -sSLo cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/v1.4.0/chart-releaser_1.4.0_linux_amd64.tar.gz"
+          tar -xzf cr.tar.gz
+          rm -f cr.tar.gz
+
+          echo "Creating release..."
+          ./cr package bases/${{ github.event.inputs.name }} }}
+          # upload chart to github releases
+          ./cr upload \
+            --release-name-template "${{ github.event.inputs.name }} }}-chart-${{ github.event.inputs.version }}" \
+            --token "${{ secrets.GITHUB_TOKEN }}"
+          # Update index and push to github pages
+          ./cr index \
+            --index-path index.yaml \
+            --release-name-template "${{ github.event.inputs.name }} }}-chart-${{ github.event.inputs.version }}" \
+            --push

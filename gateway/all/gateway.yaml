@@ -8,8 +8,8 @@ spec:
   - name: http
     port: 80
     protocol: HTTP
-    hostname: "*.k8s.lan"
+    hostname: "*.k8s.internal"
   - name: https
     port: 443
     protocol: HTTPS
-    hostname: "*.k8s.lan"
+    hostname: "*.k8s.internal"

@@ -1,0 +1,4 @@
+owner: tier940
+git-repo: homelab-helm-repo
+git-base-url: https://api.github.com/
+git-upload-url: https://uploads.github.com/

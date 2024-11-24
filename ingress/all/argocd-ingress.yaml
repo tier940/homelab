@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: argocd.k8s.lan
+  - host: argocd.k8s.internal
     http:
       paths:
       - path: /

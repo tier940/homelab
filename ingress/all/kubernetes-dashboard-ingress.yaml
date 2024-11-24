@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: kubernetes-dashboard.k8s.lan
+  - host: kubernetes-dashboard.k8s.internal
     http:
       paths:
       - path: /
