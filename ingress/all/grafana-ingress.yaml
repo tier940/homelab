@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: grafana.k8s.lan
+  - host: grafana.k8s.internal
     http:
       paths:
       - path: /

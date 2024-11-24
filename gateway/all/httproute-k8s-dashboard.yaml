@@ -7,7 +7,7 @@ spec:
   parentRefs:
   - name: gateway
   hostnames:
-  - "kubernetes-dashboard.k8s.lan"
+  - "kubernetes-dashboard.k8s.internal"
   rules:
   - matches:
     - path:

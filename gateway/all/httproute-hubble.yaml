@@ -6,7 +6,7 @@ spec:
   parentRefs:
   - name: gateway
   hostnames:
-  - "hubble-ui.k8s.lan"
+  - "hubble-ui.k8s.internal"
   rules:
   - matches:
     - path:
