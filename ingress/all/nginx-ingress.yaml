@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: nginx.k8s.lan
+  - host: nginx.k8s.internal
     http:
       paths:
       - path: /

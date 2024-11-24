@@ -7,7 +7,7 @@ spec:
   parentRefs:
   - name: gateway
   hostnames:
-  - "argocd.k8s.lan"
+  - "argocd.k8s.internal"
   rules:
   - matches:
     - path:
