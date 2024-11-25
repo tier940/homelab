@@ -7,6 +7,9 @@ on:
         description: "Name of the Helm Chart"
         required: true
 
+permissions:
+  contents: write
+
 jobs:
   package-and-publish:
     runs-on: ubuntu-latest
@@ -16,40 +19,33 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup Helm
-      uses: azure/setup-helm@v3
+      uses: azure/setup-helm@v4
       with:
         version: v3.12.3
 
     - name: Package Helm Chart
       id: package_chart
       run: |
-        cd temp/application/bases
-        helm package "${{ github.event.inputs.chart_name }}"
-        mkdir -p charts
-        mv "${{ github.event.inputs.chart_name }}"-*.tgz charts/
+        mkdir -p temp/charts
+        helm package "temp/application/bases/${{ github.event.inputs.chart_name }}" -d temp/charts
 
     - name: Update Helm Repo Index
       run: |
-        helm repo index charts --url https://tier940.github.io/homelab-helm-repo/
-        mv charts/index.yaml charts/
+        if [ -f temp/charts/index.yaml ]; then
+          echo "Updating existing Helm repo index."
+          helm repo index temp/charts --merge temp/charts/index.yaml --url https://tier940.github.io/homelab/temp/charts
+        else
+          echo "Creating new Helm repo index."
+          helm repo index temp/charts --url https://tier940.github.io/homelab/temp/charts
+        fi
 
-    - name: Checkout target repository
-      uses: actions/checkout@v4
-      with:
-        repository: tier940/homelab-helm-repo
-        ref: gh-pages
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Copy Charts to Target Repo
+    - name: Publish Helm Chart
+      env:
+        GITHUB_TOKEN: ${{ secrets.GHA_TOKEN }}
       run: |
-        cp -r charts/* .
-
-    - name: Publish Helm Chart to GitHub Pages
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: .
-
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        cd temp/charts
+        git config --global user.email "tier940@protonmail.com"
+        git config --global user.name "tier940"
+        git add .
+        git commit -m "Update Helm repo index with new chart: ${{ github.event.inputs.chart_name }}"
+        git push origin gh-pages
