@@ -23,9 +23,10 @@ jobs:
     - name: Package Helm Chart
       id: package_chart
       run: |
-        helm package "${{ inputs.chart_name }}"
+        cd temp/application/bases
+        helm package "${{ github.event.inputs.chart_name }}"
         mkdir -p charts
-        mv "${{ inputs.chart_name }}"-*.tgz charts/
+        mv "${{ github.event.inputs.chart_name }}"-*.tgz charts/
 
     - name: Update Helm Repo Index
       run: |
