@@ -1,0 +1,54 @@
+name: Release Helm Charts
+
+on:
+  workflow_dispatch:
+    inputs:
+      chart_name:
+        description: "Name of the Helm Chart"
+        required: true
+
+jobs:
+  package-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.12.3
+
+    - name: Package Helm Chart
+      id: package_chart
+      run: |
+        helm package "${{ inputs.chart_name }}"
+        mkdir -p charts
+        mv "${{ inputs.chart_name }}"-*.tgz charts/
+
+    - name: Update Helm Repo Index
+      run: |
+        helm repo index charts --url https://tier940.github.io/homelab-helm-repo/
+        mv charts/index.yaml charts/
+
+    - name: Checkout target repository
+      uses: actions/checkout@v3
+      with:
+        repository: tier940/homelab-helm-repo
+        ref: gh-pages
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Copy Charts to Target Repo
+      run: |
+        cp -r charts/* .
+
+    - name: Publish Helm Chart to GitHub Pages
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: .
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
