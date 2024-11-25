@@ -28,28 +28,29 @@ jobs:
         mkdir -p charts
         mv "${{ github.event.inputs.chart_name }}"-*.tgz charts/
 
+    - name: Clone Target Repo
+      run: |
+        # Clone the gh-pages branch of the target repository
+        git clone --branch gh-pages https://github.com/tier940/homelab-helm-repo.git target-repo
+
     - name: Update Helm Repo Index
       run: |
-        helm repo index charts --url https://tier940.github.io/homelab-helm-repo/
-        mv charts/index.yaml charts/
+        # Check if index.yaml exists in the target repo
+        if [ -f target-repo/index.yaml ]; then
+          echo "Updating existing Helm repo index."
+          helm repo index charts --merge target-repo/index.yaml --url https://tier940.github.io/homelab-helm-repo/
+        else
+          echo "Creating new Helm repo index."
+          helm repo index charts --url https://tier940.github.io/homelab-helm-repo/
+        fi
+        mv charts/index.yaml target-repo/
 
-    - name: Checkout target repository
-      uses: actions/checkout@v4
-      with:
-        repository: tier940/homelab-helm-repo
-        ref: gh-pages
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Copy Charts to Target Repo
+    - name: Publish Helm Chart
       run: |
-        cp -r charts/* .
-
-    - name: Publish Helm Chart to GitHub Pages
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: .
-
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        cd target-repo
+        cp -r ../charts/* .
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Update Helm charts for ${{ github.event.inputs.chart_name }}"
+        git push origin gh-pages
