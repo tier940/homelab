@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout source code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup Helm
       uses: azure/setup-helm@v3
@@ -33,7 +33,7 @@ jobs:
         mv charts/index.yaml charts/
 
     - name: Checkout target repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: tier940/homelab-helm-repo
         ref: gh-pages
