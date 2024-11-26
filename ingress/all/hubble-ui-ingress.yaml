@@ -6,13 +6,13 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: hubble-ui.k8s.internal
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: hubble-ui
-            port:
-              number: 80
+    - host: hubble-ui.k8s.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hubble-ui
+                port:
+                  number: 80

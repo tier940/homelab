@@ -2,10 +2,9 @@ apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: default
-  namespace: kube-system
 spec:
   blocks:
-  - cidr: 172.16.8.128/25
+    - cidr: 172.16.8.128/25
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
@@ -13,7 +12,5 @@ metadata:
   name: default
   namespace: kube-system
 spec:
-  interfaces:
-  - ^eth[0-9]+
   externalIPs: true
   loadBalancerIPs: true

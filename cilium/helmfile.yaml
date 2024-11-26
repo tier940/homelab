@@ -1,53 +1,51 @@
 repositories:
-- name: cilium
-  url: https://helm.cilium.io
+  - name: cilium
+    url: https://helm.cilium.io
 
 releases:
-- name: cilium
-  namespace: kube-system
-  chart: cilium/cilium
-  version: 1.16.4
-  values:
-  - k8sServiceHost: 172.16.8.0
-  - k8sServicePort: 6443
-  - kubeProxyReplacement: true
-  - ingressController:
-      enabled: true
-      loadbalancerMode: shared
-  - rollOutCiliumPods: true
-  - resources:
-    limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
-      cpu: 200m
-      memory: 512Mi
-  - k8sClientRateLimit:
-      qps: 50
-      burst: 100
-  - l2announcements:
-      enabled: true
-  - externalIPs:
-      enabled: true
-  - gatewayAPI:
-      enabled: true
-  - operator:
-      rollOutPods: true
-      resources:
+  - name: cilium
+    namespace: kube-system
+    chart: cilium/cilium
+    version: 1.16.4
+    values:
+      - k8sServiceHost: 172.16.8.0
+      - k8sServicePort: 6443
+      - kubeProxyReplacement: true
+      - ingressController:
+          enabled: true
+          loadbalancerMode: shared
+      - rollOutCiliumPods: true
+      - resources:
         limits:
-          cpu: 500m
-          memory: 256Mi
+          cpu: 1000m
+          memory: 1Gi
         requests:
-          cpu: 50m
-          memory: 128Mi
-  - hubble:
-      enabled: true
-      ui:
-        enabled: true
-        rollOutPods: true
-      relay:
-        enabled: true
-        rollOutPods: true
-  # - debug:
-  #     enabled: true
-  #     verbose: flow
+          cpu: 200m
+          memory: 512Mi
+      - k8sClientRateLimit:
+          qps: 50
+          burst: 100
+      - l2announcements:
+          enabled: true
+      - externalIPs:
+          enabled: true
+      - operator:
+          rollOutPods: true
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+      - hubble:
+          enabled: true
+          ui:
+            enabled: true
+            rollOutPods: true
+          relay:
+            enabled: true
+            rollOutPods: true
+    # - debug:
+    #     enabled: true
+    #     verbose: flow

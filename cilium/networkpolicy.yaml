@@ -5,12 +5,12 @@ metadata:
 spec:
   endpointSelector: {}
   egress:
-  - toFQDNs:
-    - matchPattern: '*'
-  - toPorts:
-    - ports:
-      - port: '53'
-        protocol: ANY
-      rules:
-        dns:
-        - matchPattern: '*'
+    - toFQDNs:
+        - matchPattern: "*"
+    - toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
