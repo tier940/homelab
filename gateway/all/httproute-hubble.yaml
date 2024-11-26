@@ -4,14 +4,15 @@ metadata:
   name: hubble-ui
 spec:
   parentRefs:
-  - name: gateway
+    - name: cilium-gateway
+      namespace: gateway
   hostnames:
-  - "hubble-ui.k8s.internal"
+    - "hubble-ui.k8s.internal"
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: "/"
-    backendRefs:
-    - name: hubble-ui
-      port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: hubble-ui
+          port: 80

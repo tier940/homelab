@@ -9,13 +9,13 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: kubernetes-dashboard.k8s.internal
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: kubernetes-dashboard-kong-proxy
-            port:
-              number: 443
+    - host: kubernetes-dashboard.k8s.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kubernetes-dashboard-kong-proxy
+                port:
+                  number: 443

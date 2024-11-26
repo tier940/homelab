@@ -6,13 +6,13 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-  - host: nginx.k8s.internal
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-service
-            port:
-              number: 80
+    - host: nginx.k8s.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80

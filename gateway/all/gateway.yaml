@@ -1,15 +1,16 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: gateway
+  name: cilium-gateway
+  namespace: gateway
 spec:
   gatewayClassName: cilium
   listeners:
-  - name: http
-    port: 80
-    protocol: HTTP
-    hostname: "*.k8s.internal"
-  - name: https
-    port: 443
-    protocol: HTTPS
-    hostname: "*.k8s.internal"
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "*.k8s.internal"
+    - name: https
+      port: 443
+      protocol: HTTPS
+      hostname: "*.k8s.internal"
