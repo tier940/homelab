@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: kubernetes-dashboard-ingress
+  name: kubernetes-dashboard
   namespace: kubernetes-dashboard
   annotations:
     ingress.cilium.io/tls-passthrough: enabled
