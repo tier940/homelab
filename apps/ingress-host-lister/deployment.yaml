@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-host-lister
+  labels:
+    app: ingress-host-lister
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-host-lister
+  template:
+    metadata:
+      labels:
+        app: ingress-host-lister
+    spec:
+      containers:
+        - name: ingress-host-lister
+          image: ghcr.io/tier940/ingress-host-lister:v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SELF_HOSTNAME
+              value: ingresshostlister.example.com
+            - name: PORT
+              value: "8080"

@@ -8,8 +8,6 @@ kubectl get node -o wide
 
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 echo "source <(helm completion bash)" >> ~/.bashrc
-echo "source <(istioctl completion bash)" >> ~/.bashrc
-echo "source <(kustomize completion bash)" >> ~/.bashrc
 echo "source <(cilium completion bash)" >> ~/.bashrc
 echo "source <(hubble completion bash)" >> ~/.bashrc
 source ~/.bashrc
