@@ -16,12 +16,14 @@ spec:
     spec:
       containers:
         - name: ingress-host-lister
-          image: ghcr.io/tier940/ingress-host-lister:v1.0.2
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/tier940/ingress-host-lister:v1.0.0
+          workingDir: /app
+          command: ["go", "run", "main.go"]
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
-            - name: SELF_HOSTNAME
+            - name: KUBERNETES_SERVICE_HOST
               value: hosts.k8s.internal
-            - name: PORT
+            - name: KUBERNETES_SERVICE_PORT
               value: "8080"
