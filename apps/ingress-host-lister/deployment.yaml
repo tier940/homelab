@@ -23,7 +23,7 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: KUBERNETES_SERVICE_HOST
+            - name: SELF_HOSTNAME
               value: hosts.k8s.internal
-            - name: KUBERNETES_SERVICE_PORT
+            - name: PORT
               value: "8080"
