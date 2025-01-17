@@ -9,8 +9,8 @@ kubectl get svc -n kubernetes-dashboard
 #kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 kubectl apply -f ./systems/network/ingress/all/kubernetes-dashboard-ingress.yaml
 
-kubectl apply -f ./apps/k8s-dashboard/dashboard-adminuser.yaml
-kubectl apply -f ./apps/k8s-dashboard/dashboard-rbac.yaml
+kubectl apply -f ./systems/monitor/k8s-dashboard/dashboard-adminuser.yaml
+kubectl apply -f ./systems/monitor/k8s-dashboard/dashboard-rbac.yaml
 kubectl -n kubernetes-dashboard create token admin-user
 ```
 
