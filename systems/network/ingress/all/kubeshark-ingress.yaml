@@ -1,18 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: host-lister
-  namespace: default
+  name: kubeshark
+  namespace: kubeshark
 spec:
   ingressClassName: cilium
   rules:
-    - host: hosts.k8s.internal
+    - host: kubeshark.k8s.internal
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: ingress-host-lister
+                name: kubeshark-front
                 port:
                   number: 80

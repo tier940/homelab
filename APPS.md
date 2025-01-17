@@ -7,7 +7,7 @@ helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dash
 kubectl get svc -n kubernetes-dashboard
 
 #kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-kubectl apply -f ./ingress/all/kubernetes-dashboard-ingress.yaml
+kubectl apply -f ./systems/network/ingress/all/kubernetes-dashboard-ingress.yaml
 
 kubectl apply -f ./apps/k8s-dashboard/dashboard-adminuser.yaml
 kubectl apply -f ./apps/k8s-dashboard/dashboard-rbac.yaml
@@ -26,7 +26,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 #kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
 #kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./ingress/all/argocd-ingress.yaml
+kubectl apply -f ./systems/network/ingress/all/argocd-ingress.yaml
 ```
 
 ## kube-prometheus-stack
@@ -38,7 +38,7 @@ kubectl get svc -n prometheus
 
 #kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "LoadBalancer"}}'
 #kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./ingress/all/grafana-ingress.yaml
+kubectl apply -f ./systems/network/ingress/all/grafana-ingress.yaml
 #初期パス: prom-operator
 
 helm uninstall -n prometheus kube-prometheus-stack
@@ -54,6 +54,24 @@ kubectl delete crd servicemonitors.monitoring.coreos.com
 kubectl delete crd thanosrulers.monitoring.coreos.com
 ```
 
+## Cert-Manager
+```bash
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+helm install cert-manager jetstack/cert-manager --create-namespace -n cert-manager --set installCRDs=true
+```
+
+## Kubeshark
+```bash
+helm repo add kubeshark https://helm.kubeshark.co
+helm repo update
+helm upgrade --install kubeshark kubeshark/kubeshark --create-namespace -n kubeshark
+kubectl get svc -n kubeshark
+
+kubectl apply -f ./systems/network/ingress/all/kubeshark-ingress.yaml
+```
+
 ## サンプルアプリケーション
 ### Nginx
 ```bash
@@ -61,7 +79,7 @@ kubectl apply -f ./apps/sample/nginx-deploy.yaml
 
 #kubectl patch svc nginx-service -p '{"spec": {"type": "LoadBalancer"}}'
 #kubectl patch svc nginx-service -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./ingress/all/nginx-ingress.yaml
+kubectl apply -f ./systems/network/ingress/all/nginx-ingress.yaml
 
 kubectl delete -f ./apps/sample/nginx-deploy.yaml
 ```

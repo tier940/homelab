@@ -126,7 +126,7 @@ kubectl apply -k ./crds
 ## CNIプラグインのインストール
 ### Ciliumを使用する場合
 ```bash
-helmfile sync -f ./cilium/helmfile.yaml
+helmfile sync -f ./systems/network/cilium/helmfile.yaml
 kubectl get svc -n kube-system
 
 kubectl -n kube-system rollout restart deployment/cilium-operator
@@ -142,20 +142,20 @@ kubectl delete ns cilium-test-1
 - 2024/10/25現在は v3.28.2 だった
 - kube-proxyをスキップしている場合は利用できない
 ```bash
-wget -O ./calico/calico.yaml https://raw.githubusercontent.com/projectcalico/calico/refs/tags/v3.28.2/manifests/calico.yaml
-kubectl apply -f ./calico/calico.yaml
+wget -O ./systems/network/calico/calico.yaml https://raw.githubusercontent.com/projectcalico/calico/refs/tags/v3.28.2/manifests/calico.yaml
+kubectl apply -f ./systems/network/calico/calico.yaml
 ```
 
 ## MetricsServerのインストール
 ```bash
-helmfile sync -f ./metrics-server/helmfile.yaml
+helmfile sync -f ./systems/network/metrics-server/helmfile.yaml
 kubectl get svc -n metrics-server
 ```
 
 ### 旧手法
 ```bash
-wget -O ./metrics-server/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
-kubectl apply -f ./metrics-server/components.yaml
+wget -O ./systems/network/metrics-server/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
+kubectl apply -f ./systems/network/metrics-server/components.yaml
 kubectl get deployment metrics-server -n kube-system
 ```
 
@@ -183,7 +183,7 @@ helm repo update
 helm upgrade --install metallb metallb/metallb --create-namespace -n metallb-system
 kubectl get svc -n metallb-system
 
-kubectl apply -f ./metallb/addresspool.yaml
+kubectl apply -f ./systems/network/metallb/addresspool.yaml
 ```
 
 ## Nginx Ingress Controller
