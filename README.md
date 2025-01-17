@@ -80,8 +80,8 @@ systemctl enable containerd
 
 ## Kubernetes用のAptリポジトリを追加
 ```bash
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
 ```
 
 ## Kubectl / Kubeadm / Kubeletをインストール
@@ -94,7 +94,7 @@ apt-mark hold kubelet kubeadm kubectl
 ## コントロールプレーンの作成
 ```bash
 kubeadm init --control-plane-endpoint 172.16.8.0 \
-    --pod-network-cidr=10.1.0.0/16 \
+    --pod-network-cidr=10.0.0.0/8 \
     --skip-phases=addon/kube-proxy
 ```
 
