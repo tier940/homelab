@@ -38,14 +38,14 @@ releases:
             requests:
               cpu: 50m
               memory: 128Mi
-      - hubble:
-          enabled: true
-          ui:
-            enabled: true
-            rollOutPods: true
-          relay:
-            enabled: true
-            rollOutPods: true
+      # - hubble:
+      #     enabled: true
+      #     ui:
+      #       enabled: true
+      #       rollOutPods: true
+      #     relay:
+      #       enabled: true
+      #       rollOutPods: true
     # - debug:
     #     enabled: true
     #     verbose: flow
