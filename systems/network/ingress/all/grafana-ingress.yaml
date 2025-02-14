@@ -2,17 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafana
-  namespace: prometheus
+  namespace: cilium-monitoring
 spec:
   ingressClassName: cilium
   rules:
-    - host: grafana.k8s.internal
+    - host: grafana.k8s.local
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: kube-prometheus-stack-grafana
+                name: grafana
                 port:
-                  number: 80
+                  number: 3000

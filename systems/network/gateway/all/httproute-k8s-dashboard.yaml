@@ -7,7 +7,7 @@ spec:
     - name: cilium-gateway
       namespace: gateway
   hostnames:
-    - "kubernetes-dashboard.k8s.internal"
+    - "kubernetes-dashboard.k8s.local"
   rules:
     - matches:
         - path:

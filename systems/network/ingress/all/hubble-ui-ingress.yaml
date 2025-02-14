@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: cilium
   rules:
-    - host: hubble-ui.k8s.internal
+    - host: hubble-ui.k8s.local
       http:
         paths:
           - path: /

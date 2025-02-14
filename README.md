@@ -8,6 +8,7 @@ kubectl get node -o wide
 
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 echo "source <(helm completion bash)" >> ~/.bashrc
+echo "source <(helmfile completion bash)" >> ~/.bashrc
 echo "source <(cilium completion bash)" >> ~/.bashrc
 echo "source <(hubble completion bash)" >> ~/.bashrc
 source ~/.bashrc
@@ -126,8 +127,10 @@ kubectl apply -k ./crds
 ## CNIプラグインのインストール
 ### Ciliumを使用する場合
 ```bash
-helmfile sync -f ./systems/network/cilium/helmfile.yaml
+helmfile apply -f ./systems/network/cilium/helmfile.yaml
 kubectl get svc -n kube-system
+kubectl apply -f ./systems/network/cilium/addresspool.yaml
+kubectl apply -f ./systems/network/cilium/networkpolicy.yaml
 
 kubectl -n kube-system rollout restart deployment/cilium-operator
 kubectl -n kube-system rollout restart ds/cilium
@@ -148,7 +151,7 @@ kubectl apply -f ./systems/network/calico/calico.yaml
 
 ## MetricsServerのインストール
 ```bash
-helmfile sync -f ./systems/network/metrics-server/helmfile.yaml
+helmfile apply -f ./systems/network/metrics-server/helmfile.yaml
 kubectl get svc -n metrics-server
 ```
 
@@ -184,14 +187,6 @@ helm upgrade --install metallb metallb/metallb --create-namespace -n metallb-sys
 kubectl get svc -n metallb-system
 
 kubectl apply -f ./systems/network/metallb/addresspool.yaml
-```
-
-## Nginx Ingress Controller
-```bash
-helm repo add ingress https://kubernetes.github.io/ingress
-helm repo update
-helm upgrade --install ingress ingress/ingress --create-namespace -n ingress
-kubectl get svc -n ingress
 ```
 
 </details>
