@@ -7,7 +7,7 @@ spec:
     - name: cilium-gateway
       namespace: gateway
   hostnames:
-    - "hubble-ui.k8s.internal"
+    - "hubble-ui.k8s.local"
   rules:
     - matches:
         - path:

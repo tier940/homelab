@@ -7,7 +7,7 @@ spec:
     - name: cilium-gateway
       namespace: gateway
   hostnames:
-    - "argocd.k8s.internal"
+    - "argocd.k8s.local"
   rules:
     - matches:
         - path:

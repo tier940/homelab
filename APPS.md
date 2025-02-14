@@ -31,27 +31,10 @@ kubectl apply -f ./systems/network/ingress/all/argocd-ingress.yaml
 
 ## kube-prometheus-stack
 ```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-helmfile sync -f ./apps/kube-prometheus-stack/helmfile.yaml
-kubectl get svc -n prometheus
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.17.1/examples/kubernetes/addons/prometheus/monitoring-example.yaml
+kubectl get svc -n cilium-monitoring
 
-#kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "LoadBalancer"}}'
-#kubectl patch svc -n prometheus kube-prometheus-stack-grafana -p '{"spec": {"type": "ClusterIP"}}'
 kubectl apply -f ./systems/network/ingress/all/grafana-ingress.yaml
-#初期パス: prom-operator
-
-helm uninstall -n prometheus kube-prometheus-stack
-kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
-kubectl delete crd alertmanagers.monitoring.coreos.com
-kubectl delete crd podmonitors.monitoring.coreos.com
-kubectl delete crd probes.monitoring.coreos.com
-kubectl delete crd prometheusagents.monitoring.coreos.com
-kubectl delete crd prometheuses.monitoring.coreos.com
-kubectl delete crd prometheusrules.monitoring.coreos.com
-kubectl delete crd scrapeconfigs.monitoring.coreos.com
-kubectl delete crd servicemonitors.monitoring.coreos.com
-kubectl delete crd thanosrulers.monitoring.coreos.com
 ```
 
 ## Cert-Manager

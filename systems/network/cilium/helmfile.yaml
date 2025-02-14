@@ -8,12 +8,17 @@ releases:
     chart: cilium/cilium
     version: 1.17.1
     values:
+      - debug:
+          enabled: false
+          verbose: flow
       - k8sServiceHost: 172.16.8.0
       - k8sServicePort: 6443
       - kubeProxyReplacement: true
       - ingressController:
           enabled: true
           loadbalancerMode: shared
+      - prometheus:
+          enabled: true
       - rollOutCiliumPods: true
       - resources:
         limits:
@@ -31,6 +36,8 @@ releases:
           enabled: true
       - operator:
           rollOutPods: true
+          prometheus:
+            enabled: true
           resources:
             limits:
               cpu: 500m
@@ -38,14 +45,11 @@ releases:
             requests:
               cpu: 50m
               memory: 128Mi
-      # - hubble:
-      #     enabled: true
-      #     ui:
-      #       enabled: true
-      #       rollOutPods: true
-      #     relay:
-      #       enabled: true
-      #       rollOutPods: true
-    # - debug:
-    #     enabled: true
-    #     verbose: flow
+      - hubble:
+          enabled: false
+          ui:
+            enabled: false
+            rollOutPods: false
+          relay:
+            enabled: false
+            rollOutPods: false
