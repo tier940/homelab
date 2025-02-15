@@ -1,0 +1,17 @@
+[Unit]
+Description=etcd key-value store
+Documentation=https://etcd.io/
+After=network.target
+
+[Service]
+Type=notify
+Environment=ETCD_DATA_DIR=/var/lib/etcd
+Environment=ETCD_NAME=%m
+#ExecStart=/usr/local/bin/etcd
+ExecStart=/usr/local/bin/etcd --listen-peer-urls 'http://0.0.0.0:2380' --listen-client-urls 'http://0.0.0.0:2379' --advertise-client-urls 'http://0.0.0.0:2379'
+Restart=on-failure
+StandardOutput=append:/var/log/etcd/etcd.log
+StandardError=append:/var/log/etcd/etcd.err.log
+
+[Install]
+WantedBy=multi-user.target
