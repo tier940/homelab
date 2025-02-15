@@ -164,9 +164,9 @@ kubectl apply -k ./systems/network/external-dns/
 
 ## 動作確認用の使い捨てPodを作成
 ```bash
-kubectl run -it --rm --restart=Never --image=ubuntu:22.04 test-pod -- bash
+kubectl run -it --rm --restart=Never --image=ubuntu:24.04 ubuntu
 
-kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools -- bash
+kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 ```
 
 <details>
