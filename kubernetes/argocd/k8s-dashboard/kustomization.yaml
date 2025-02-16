@@ -6,8 +6,8 @@ helmCharts:
   - name: kubernetes-dashboard
     repo: https://kubernetes.github.io/dashboard/
     version: 7.10.4
+    valuesFile: values.yaml
 
 resources:
   - manifests/service-account.yaml
   - manifests/cluster-role-binding.yaml
-  - manifests/ingress.yaml
