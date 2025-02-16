@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "Telmate/proxmox"
-      version = "3.0.1-rc6"
-    }
-  }
-}
-
 provider "proxmox" {
   pm_user         = "terraform-prov@pve"
   pm_password     = "ZZZZZZ"
