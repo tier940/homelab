@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: controllers
+  namespace: argocd
+  labels:
+    dev.stonegarden: controllers
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/tier940/homelab
+        revision: HEAD
+        directories:
+          - path: kubernetes/infra/controllers/*
+  template:
+    metadata:
+      name: '{{ path.basename }}'
+      labels:
+        dev.stonegarden: controllers
+    spec:
+      project: controllers
+      source:
+        repoURL: https://github.com/tier940/homelab
+        targetRevision: HEAD
+        path: '{{ path }}'
+      destination:
+        name: in-cluster
+        namespace: argocd
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true

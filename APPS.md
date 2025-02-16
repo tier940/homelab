@@ -1,72 +1,17 @@
 # k8s install apps
 ## k8s-dashboard
 ```bash
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-helm repo update
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace -n kubernetes-dashboard
-kubectl get svc -n kubernetes-dashboard
-
-#kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-kubectl apply -f ./systems/network/ingress/all/kubernetes-dashboard-ingress.yaml
-
-kubectl apply -f ./systems/monitor/k8s-dashboard/dashboard-adminuser.yaml
-kubectl apply -f ./systems/monitor/k8s-dashboard/dashboard-rbac.yaml
 kubectl -n kubernetes-dashboard create token admin-user
 ```
 
-## ArgoCD
-- 2024/10/25現在は 2.12.6 だった
-```bash
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-helm upgrade --install argocd argo/argo-cd --create-namespace -n argocd
-kubectl get svc -n argocd
-
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-#kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
-#kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./systems/network/ingress/all/argocd-ingress.yaml
-```
-
 ## kube-prometheus-stack
+- デフォルト値なので変えること
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.17.1/examples/kubernetes/addons/prometheus/monitoring-example.yaml
-kubectl get svc -n cilium-monitoring
-
-kubectl apply -f ./systems/network/ingress/all/grafana-ingress.yaml
-```
-
-## Cert-Manager
-```bash
-helm repo add jetstack https://charts.jetstack.io
-helm repo update
-
-helm install cert-manager jetstack/cert-manager --create-namespace -n cert-manager --set installCRDs=true
-```
-
-## Kubeshark
-```bash
-helm repo add kubeshark https://helm.kubeshark.co
-helm repo update
-helm upgrade --install kubeshark kubeshark/kubeshark --create-namespace -n kubeshark
-kubectl get svc -n kubeshark
-
-kubectl apply -f ./systems/network/ingress/all/kubeshark-ingress.yaml
+username: admin
+password: prom-operator
 ```
 
 ## サンプルアプリケーション
-### Nginx
-```bash
-kubectl apply -f ./apps/sample/nginx-deploy.yaml
-
-#kubectl patch svc nginx-service -p '{"spec": {"type": "LoadBalancer"}}'
-#kubectl patch svc nginx-service -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./systems/network/ingress/all/nginx-ingress.yaml
-
-kubectl delete -f ./apps/sample/nginx-deploy.yaml
-```
-
 ### Gitlab
 ```bash
 helm repo add gitlab https://charts.gitlab.io/
