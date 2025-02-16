@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: kubernetes-dashboard
 
 helmCharts:
-  - name: kubernetes-dashboard
+  - name: kubernetes-dashboard/kubernetes-dashboard
     repo: https://kubernetes.github.io/dashboard/
     version: 7.10.4
 
