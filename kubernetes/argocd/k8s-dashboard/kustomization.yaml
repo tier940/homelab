@@ -1,11 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: kubernetes-dashboard
 
 helmCharts:
-  - name: k8s-dashboard
+  - name: kubernetes-dashboard
     repo: https://kubernetes.github.io/dashboard/
     version: 5.0.0
-    namespace: kubernetes-dashboard
 
 resources:
   - manifests/service-account.yaml
