@@ -113,11 +113,6 @@ kubeadm join 172.16.8.0:6443 --token XXXXX --discovery-token-ca-cert-hash sha256
 kubeadm token create --print-join-command
 ```
 
-## crdsのインストール(GatewayAPIを試す場合)
-```bash
-kubectl apply -k ./crds
-```
-
 ## MetricsServerのインストール
 ```bash
 helmfile apply -f ./systems/network/metrics-server/helmfile.yaml
@@ -141,7 +136,6 @@ kubectl get deployment metrics-server -n kube-system
 ```
 
 ## CNIプラグインのインストール
-### Ciliumを使用する場合
 ```bash
 helmfile apply -f ./systems/network/cilium/helmfile.yaml
 kubectl get svc -n kube-system
@@ -168,18 +162,3 @@ kubectl run -it --rm --restart=Never --image=ubuntu:24.04 ubuntu
 
 kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 ```
-
-<details>
-
-## LoadBalancerの設定
-### MetalLB
-```bash
-helm repo add metallb https://metallb.github.io/metallb
-helm repo update
-helm upgrade --install metallb metallb/metallb --create-namespace -n metallb-system
-kubectl get svc -n metallb-system
-
-kubectl apply -f ./systems/network/metallb/addresspool.yaml
-```
-
-</details>
