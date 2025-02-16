@@ -115,7 +115,7 @@ kubeadm token create --print-join-command
 
 ## MetricsServerのインストール
 ```bash
-helmfile apply -f ./systems/network/metrics-server/helmfile.yaml
+helmfile apply -f ./kubernetes/system/metrics-server/
 kubectl get svc -n metrics-server
 ```
 
@@ -130,17 +130,17 @@ command:
 
 ### 旧手法
 ```bash
-wget -O ./systems/network/metrics-server/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
-kubectl apply -f ./systems/network/metrics-server/components.yaml
+wget -O ./kubernetes/system/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
+kubectl apply -f ./kubernetes/system/components.yaml
 kubectl get deployment metrics-server -n kube-system
 ```
 
 ## CNIプラグインのインストール
 ```bash
-helmfile apply -f ./systems/network/cilium/helmfile.yaml
+helmfile apply -f ./kubernetes/system/cilium/
 kubectl get svc -n kube-system
-kubectl apply -f ./systems/network/cilium/addresspool.yaml
-kubectl apply -f ./systems/network/cilium/networkpolicy.yaml
+kubectl apply -f ./kubernetes/system/cilium/addresspool.yaml
+kubectl apply -f ./kubernetes/system/cilium/networkpolicy.yaml
 
 kubectl -n kube-system rollout restart deployment/cilium-operator
 kubectl -n kube-system rollout restart ds/cilium
@@ -153,7 +153,17 @@ kubectl delete ns cilium-test-1
 
 ## External DNSのインストール
 ```bash
-kubectl apply -k ./systems/network/external-dns/
+kubectl apply -k ./kubernetes/system/external-dns/
+```
+
+## ArgoCDのインストール
+```bash
+helmfile apply -f ./kubernetes/system/argo/
+kubectl get svc -n argo
+
+kubectl -n argo get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+kubectl apply -f ./kubernetes/system/argo/ingress.yaml
 ```
 
 ## 動作確認用の使い捨てPodを作成
