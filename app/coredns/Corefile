@@ -12,7 +12,7 @@
     endpoint http://localhost:2379
     fallthrough
   }
-  forward . 127.0.0.1:5301 127.0.0.1:5302 {
+  forward . 127.0.0.1:5301 127.0.0.1:5302 127.0.0.1:5303 {
     policy sequential
   }
   cache 30
@@ -25,18 +25,21 @@
   forward . tls://1.1.1.1 tls://1.0.0.1 {
     tls_servername cloudflare-dns.com
     health_check 5s
-    force_tcp
-    policy round_robin
+    policy sequential
   }
+  cache 30
 }
 .:5302 {
   forward . tls://8.8.8.8 tls://8.8.4.4 {
     tls_servername dns.google
-    health_check 5s
-    force_tcp
-    policy round_robin
+    policy sequential
   }
+  cache 30
 }
-#.:5303 {
-#    forward . ZZ.ZZ.ZZ.ZZ
-#}
+.:5303 {
+  forward . tls://9.9.9.9 {
+    tls_servername dns.quad9.net
+    health_check 5s
+  }
+  cache 30
+}
