@@ -5,11 +5,10 @@ kubectl -n kubernetes-dashboard create token admin-user
 ```
 
 ## kube-prometheus-stack
+- デフォルト値なので変えること
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.17.1/examples/kubernetes/addons/prometheus/monitoring-example.yaml
-kubectl get svc -n cilium-monitoring
-
-kubectl apply -f ./systems/network/ingress/all/grafana-ingress.yaml
+username: admin
+password: prom-operator
 ```
 
 ## Cert-Manager
