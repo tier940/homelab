@@ -158,12 +158,10 @@ kubectl apply -k ./kubernetes/system/external-dns/
 
 ## ArgoCDのインストール
 ```bash
-helmfile apply -f ./kubernetes/system/argo/
-kubectl get svc -n argo
+helmfile apply -f ./kubernetes/system/argocd/
+kubectl get svc -n argocd
 
-kubectl -n argo get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-kubectl apply -f ./kubernetes/system/argo/ingress.yaml
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
 ## 動作確認用の使い捨てPodを作成

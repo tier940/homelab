@@ -1,4 +1,0 @@
-spec:
-  source:
-    kustomize:
-      buildOptions: --enable-helm
