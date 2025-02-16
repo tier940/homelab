@@ -113,14 +113,9 @@ kubeadm join 172.16.8.0:6443 --token XXXXX --discovery-token-ca-cert-hash sha256
 kubeadm token create --print-join-command
 ```
 
-## crdsのインストール(GatewayAPIを試す場合)
-```bash
-kubectl apply -k ./crds
-```
-
 ## MetricsServerのインストール
 ```bash
-helmfile apply -f ./systems/network/metrics-server/helmfile.yaml
+helmfile apply -f ./kubernetes/system/metrics-server/
 kubectl get svc -n metrics-server
 ```
 
@@ -135,18 +130,17 @@ command:
 
 ### 旧手法
 ```bash
-wget -O ./systems/network/metrics-server/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
-kubectl apply -f ./systems/network/metrics-server/components.yaml
+wget -O ./kubernetes/system/components.yaml https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.7.2/components.yaml
+kubectl apply -f ./kubernetes/system/components.yaml
 kubectl get deployment metrics-server -n kube-system
 ```
 
 ## CNIプラグインのインストール
-### Ciliumを使用する場合
 ```bash
-helmfile apply -f ./systems/network/cilium/helmfile.yaml
+helmfile apply -f ./kubernetes/system/cilium/
 kubectl get svc -n kube-system
-kubectl apply -f ./systems/network/cilium/addresspool.yaml
-kubectl apply -f ./systems/network/cilium/networkpolicy.yaml
+kubectl apply -f ./kubernetes/system/cilium/addresspool.yaml
+kubectl apply -f ./kubernetes/system/cilium/networkpolicy.yaml
 
 kubectl -n kube-system rollout restart deployment/cilium-operator
 kubectl -n kube-system rollout restart ds/cilium
@@ -159,7 +153,15 @@ kubectl delete ns cilium-test-1
 
 ## External DNSのインストール
 ```bash
-kubectl apply -k ./systems/network/external-dns/
+kubectl apply -k ./kubernetes/system/external-dns/
+```
+
+## ArgoCDのインストール
+```bash
+helmfile apply -f ./kubernetes/system/argocd/
+kubectl get svc -n argocd
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
 ## 動作確認用の使い捨てPodを作成
@@ -168,18 +170,3 @@ kubectl run -it --rm --restart=Never --image=ubuntu:24.04 ubuntu
 
 kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 ```
-
-<details>
-
-## LoadBalancerの設定
-### MetalLB
-```bash
-helm repo add metallb https://metallb.github.io/metallb
-helm repo update
-helm upgrade --install metallb metallb/metallb --create-namespace -n metallb-system
-kubectl get svc -n metallb-system
-
-kubectl apply -f ./systems/network/metallb/addresspool.yaml
-```
-
-</details>

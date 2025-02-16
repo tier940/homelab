@@ -1,32 +1,7 @@
 # k8s install apps
 ## k8s-dashboard
 ```bash
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-helm repo update
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace -n kubernetes-dashboard
-kubectl get svc -n kubernetes-dashboard
-
-#kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-kubectl apply -f ./systems/network/ingress/all/kubernetes-dashboard-ingress.yaml
-
-kubectl apply -f ./systems/monitor/k8s-dashboard/dashboard-adminuser.yaml
-kubectl apply -f ./systems/monitor/k8s-dashboard/dashboard-rbac.yaml
 kubectl -n kubernetes-dashboard create token admin-user
-```
-
-## ArgoCD
-- 2024/10/25現在は 2.12.6 だった
-```bash
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-helm upgrade --install argocd argo/argo-cd --create-namespace -n argocd
-kubectl get svc -n argocd
-
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-#kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "LoadBalancer"}}'
-#kubectl patch svc -n argocd argocd-server -p '{"spec": {"type": "ClusterIP"}}'
-kubectl apply -f ./systems/network/ingress/all/argocd-ingress.yaml
 ```
 
 ## kube-prometheus-stack
