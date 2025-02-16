@@ -5,7 +5,7 @@ namespace: kubernetes-dashboard
 helmCharts:
   - name: kubernetes-dashboard
     repo: https://kubernetes.github.io/dashboard/
-    version: 5.0.0
+    version: 7.10.4
 
 resources:
   - manifests/service-account.yaml
