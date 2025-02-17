@@ -19,9 +19,6 @@ kubectl delete ns cilium-test-1
 ```bash
 kubectl kustomize --enable-helm infra/controllers/argocd | kubectl apply -f -
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-kubectl apply -k infra
-kubectl apply -k sets
 ```
 
 ## Tips
