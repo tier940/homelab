@@ -1712,7 +1712,7 @@ hubble:
         # @schema
         override: ~
         repository: "quay.io/cilium/hubble-ui-backend"
-        tag: "v0.13.1"
+        tag: "v0.13.2"
         digest: "sha256:0e0eed917653441fded4e7cdb096b7be6a3bddded5a2dd10812a27b1fc6ed95b"
         useDigest: true
         pullPolicy: "Always"
@@ -1746,7 +1746,7 @@ hubble:
         # @schema
         override: ~
         repository: "quay.io/cilium/hubble-ui"
-        tag: "v0.13.1"
+        tag: "v0.13.2"
         digest: "sha256:e2e9313eb7caf64b0061d9da0efbdad59c6c461f6ca1752768942bfeda0796c6"
         useDigest: true
         pullPolicy: "Always"
@@ -3693,7 +3693,7 @@ authentication:
             # @schema
             override: ~
             repository: "ghcr.io/spiffe/spire-agent"
-            tag: "1.9.6"
+            tag: "1.11.2"
             digest: "sha256:5106ac601272a88684db14daf7f54b9a45f31f77bb16a906bd5e87756ee7b97c"
             useDigest: true
             pullPolicy: "Always"
@@ -3748,7 +3748,7 @@ authentication:
             # @schema
             override: ~
             repository: "ghcr.io/spiffe/spire-server"
-            tag: "1.9.6"
+            tag: "1.11.2"
             digest: "sha256:59a0b92b39773515e25e68a46c40d3b931b9c1860bc445a79ceb45a805cab8b4"
             useDigest: true
             pullPolicy: "Always"
