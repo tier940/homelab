@@ -1,0 +1,14 @@
+[Unit]
+Description=rclone gdrive mount
+AssertPathIsDirectory=/mnt/gdrive
+After=networking.service
+
+[Service]
+Type=simple
+ExecStart=rclone mount --config=/root/.config/rclone/rclone.conf gdrive: /mnt/gdrive --drive-use-trash=false --allow-other --cache-db-purge --poll-interval 10m --allow-non-empty --fast-list --no-check-dest --ignore-size
+ExecStop=fusermount -u /mnt/gdrive
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
