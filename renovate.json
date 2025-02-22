@@ -27,7 +27,20 @@
     {
       "groupName": "Cilium",
       "matchPackageNames": [
-        "/cilium/"
+        "/cilium/",
+        "/spiffe/"
+      ]
+    },
+    {
+      "groupName": "MetricsServer",
+      "matchPackageNames": [
+        "/autoscaling/"
+      ]
+    },
+    {
+      "groupName": "ArgoCD",
+      "matchPackageNames": [
+        "/dexidp/"
       ]
     },
     {
