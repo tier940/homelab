@@ -7,7 +7,7 @@
   ready
   log
   prometheus :9253
-  etcd . tier.f5.si k8s.local {
+  etcd . tier.f5.si tier.k8s.local {
     path /skydns
     endpoint http://localhost:2379
     fallthrough

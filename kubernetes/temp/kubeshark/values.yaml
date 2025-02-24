@@ -123,7 +123,7 @@ tap:
   ingress:
     enabled: true
     className: "cilium"
-    host: kubeshark.k8s.local
+    host: kubeshark.tier.k8s.local
     tls: []
     annotations: {}
   ipv6: true

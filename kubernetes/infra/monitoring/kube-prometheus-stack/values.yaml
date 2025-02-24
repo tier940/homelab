@@ -535,7 +535,7 @@ alertmanager:
     ## Hosts must be provided if Ingress is enabled.
     ##
     hosts:
-      - alertmanager.k8s.local
+      - alertmanager.tier.k8s.local
       # - alertmanager.domain.com
 
     ## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix
@@ -1186,7 +1186,7 @@ grafana:
     # hosts:
     #   - grafana.domain.com
     hosts:
-      - grafana.k8s.local
+      - grafana.tier.k8s.local
 
     ## Path for grafana ingress
     path: /
@@ -3546,7 +3546,7 @@ prometheus:
     # hosts:
     #   - prometheus.domain.com
     hosts: 
-      - prometheus.k8s.local
+      - prometheus.tier.k8s.local
 
     ## Paths to use for ingress rules - one path should match the prometheusSpec.routePrefix
     ##
