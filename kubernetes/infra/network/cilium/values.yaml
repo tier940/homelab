@@ -1846,7 +1846,7 @@ hubble:
       # kubernetes.io/tls-acme: "true"
       className: "cilium"
       hosts:
-        - hubble-ui.k8s.local
+        - hubble-ui.tier.k8s.local
       labels: {}
       tls: []
       #  - secretName: chart-example-tls

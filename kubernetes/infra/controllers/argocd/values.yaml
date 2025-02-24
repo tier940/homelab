@@ -42,7 +42,7 @@ crds:
 global:
   # -- Default domain used by all components
   ## Used for ingresses, certificates, SSO, notifications, etc.
-  domain: argocd.k8s.local
+  domain: argocd.tier.k8s.local
 
   # -- Runtime class name for all components
   runtimeClassName: ""
@@ -2241,7 +2241,7 @@ server:
 
     # -- Argo CD server hostname
     # @default -- `""` (defaults to global.domain)
-    hostname: "argocd.k8s.local"
+    hostname: "argocd.tier.k8s.local"
 
     # -- The path to Argo CD server
     path: /
