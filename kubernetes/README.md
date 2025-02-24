@@ -1,6 +1,7 @@
 ## Cilium
 ```bash
 helmfile apply -f ./infra/network/cilium/
+kubectl kustomize --enable-helm ./infra/network/cilium/manifest/
 ```
 
 ### Trouble Shooting
