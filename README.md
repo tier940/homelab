@@ -104,7 +104,7 @@ systemctl status kubelet.service
 
 ## コントロールプレーンの作成
 ```bash
-kubeadm init --control-plane-endpoint k8s-ctrl-001.tier.k8s.local \
+kubeadm init --control-plane-endpoint 172.16.8.1 \
     --pod-network-cidr=10.0.0.0/8 \
     --skip-phases=addon/kube-proxy
 ```
@@ -119,7 +119,7 @@ chown $( id -u):$( id -g) $HOME /.kube/config
 ## ワーカーノードの追加
 - コントロールプレーン作成時に表示されたコマンドを実行
 ```bash
-kubeadm join k8s-ctrl-001.tier.k8s.local:6443 --token XXXXX --discovery-token-ca-cert-hash sha256:YYYY
+kubeadm join 172.16.8.1:6443 --token XXXXX --discovery-token-ca-cert-hash sha256:YYYY
 ```
 
 ### トークンの再作成
