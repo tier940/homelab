@@ -1,6 +1,6 @@
 ## Cilium
 ```bash
-kubectl kustomize --enable-helm infra/network/cilium | kubectl apply -f -
+helmfile apply -f ./infra/network/cilium/
 ```
 
 ### Trouble Shooting
@@ -17,7 +17,7 @@ kubectl delete ns cilium-test-1
 
 ## ArgoCD
 ```bash
-kubectl kustomize --enable-helm infra/controllers/argocd | kubectl apply -f -
+helmfile apply -f ./infra/controllers/argocd/
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
