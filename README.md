@@ -56,39 +56,55 @@ sysctl --system
 timedatectl set-timezone Asia/Tokyo
 ```
 
-## hostsファイルの編集
-```bash
-cat <<EOF | tee -a /etc/hosts
-# k8s host address
-172.16.8.0 k8s-controller-1
-172.16.8.10 k8s-worker-1
-172.16.8.11 k8s-worker-2
-EOF
-```
-
-## Containerd Runtimeをインストール
-- 公式の[URL](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)を参照
-
-### sandboxのバージョンを更新
-- registry.k8s.io/pauseで検索して最新のバージョンに更新する
-> 2024/10/25現在は 3.10 だった
-```bash
-containerd config default | tee /etc/containerd/config.toml > /dev/null 2>&1 
-sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-
-cat /etc/containerd/config.toml | grep 'registry.k8s.io/pause'
-```
-
-## Kubectl / Kubeadm / Kubeletをインストール
-- 公式の[URL](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)を参照
-
-### swapが無効化できない
+## swapの無効化
 - zramなら以下方法で無効化できる。やってることは `zram-generator-defaults` を削除しているだけ
 > https://www.reddit.com/r/Fedora/comments/wgetj1/cant_disable_swap_in_fedora_server_36/
 
+## SELinuxの無効化
+```bash
+setenforce 0
+sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+```
+
+## CRI-O / Kubectl / Kubeadm / Kubeletをインストール
+- 公式の[URL](https://github.com/cri-o/packaging/blob/main/)を参照
+
+### sandboxのバージョンを更新
+- 最新のバージョンを記載する
+> 2024/10/25現在は 3.10 だった
+`/etc/crio/crio.conf.d/10-crio.conf`
+
+```conf
+[crio.image]
+pause_image="registry.k8s.io/pause:3.10"
+```
+
+### cgroup driverの変更
+- cgroupfsを指定する
+`/etc/crio/crio.conf.d/10-crio.conf`
+```conf
+[crio.runtime]
+conmon_cgroup = "pod"
+cgroup_manager = "cgroupfs"
+```
+
+## tcのインストール
+```bash
+dnf install -y iproute-tc
+```
+
+### サービスの起動
+```bash
+systemctl enable --now crio.service
+systemctl enable --now kubelet.service
+
+systemctl status crio.service
+systemctl status kubelet.service
+```
+
 ## コントロールプレーンの作成
 ```bash
-kubeadm init --control-plane-endpoint 172.16.8.0 \
+kubeadm init --control-plane-endpoint k8s-ctrl-001.tier.k8s.local \
     --pod-network-cidr=10.0.0.0/8 \
     --skip-phases=addon/kube-proxy
 ```
@@ -103,12 +119,12 @@ chown $( id -u):$( id -g) $HOME /.kube/config
 ## ワーカーノードの追加
 - コントロールプレーン作成時に表示されたコマンドを実行
 ```bash
-kubeadm join 172.16.8.0:6443 --token XXXXX --discovery-token-ca-cert-hash sha256:YYYY
+kubeadm join k8s-ctrl-001.tier.k8s.local:6443 --token XXXXX --discovery-token-ca-cert-hash sha256:YYYY
 ```
 
 ### トークンの再作成
 - どうやらトークンは有効期限があるらしい
-    - コントロールプレーンがあるVM(172.16.8.0)で実行する
+    - コントロールプレーンがあるVMで実行する
 ```bash
 kubeadm token create --print-join-command
 ```
