@@ -1,0 +1,16 @@
+repositories:
+  - name: kubernetes-dashboard
+    url: https://kubernetes.github.io/dashboard/
+
+helmDefaults:
+  createNamespace: true
+
+---
+namespace: kubernetes-dashboard
+
+releases:
+  - name: kubernetes-dashboard
+    chart: kubernetes-dashboard/kubernetes-dashboard
+    version: 7.10.4
+    values:
+      - values.yaml
