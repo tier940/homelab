@@ -1,19 +1,50 @@
-resource "proxmox_lxc" "basic" {
-  target_node  = "pve01"
-  hostname     = "lxc-basic"
-  cores        = 4
-  ostemplate   = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-  password     = "BasicLXCContainer"
-  unprivileged = true
-
-  rootfs {
-    storage = "local-zfs"
-    size    = "8G"
+locals {
+  controllers_ips = {
+    for k, v in var.controllers.instances :
+    "${var.controllers.base_name}${k}" => {
+      ipv4 = v.initialization.ip_config.ipv4.address
+      ipv6 = try(v.initialization.ip_config.ipv6.address, null)
+    }
   }
 
-  network {
-    name   = "eth0"
-    bridge = "lan0"
-    ip     = "dhcp"
+  workers_ips = {
+    for k, v in var.worker.instances :
+    "${var.worker.base_name}${k}" => {
+      ipv4 = v.initialization.ip_config.ipv4.address
+      ipv6 = try(v.initialization.ip_config.ipv6.address, null)
+    }
   }
+}
+
+module "controllers" {
+  source        = "./modules/qemu"
+  instances     = var.controllers.instances
+  base_name     = var.controllers.base_name
+  base_clone_id = var.controllers.base_clone_id
+  base_domain   = var.controllers.base_domain
+  ciuser        = var.controllers.ciuser
+  cipassword    = var.controllers.cipassword
+  tags          = var.tags
+}
+
+module "workers" {
+  source        = "./modules/qemu"
+  instances     = var.worker.instances
+  base_name     = var.worker.base_name
+  base_clone_id = var.worker.base_clone_id
+  base_domain   = var.worker.base_domain
+  ciuser        = var.worker.ciuser
+  cipassword    = var.worker.cipassword
+  tags          = var.tags
+}
+
+resource "local_file" "hosts" {
+  directory_permission = "0755"
+  file_permission      = "0644"
+  filename             = "${path.module}/hosts/hosts.${var.tags.stage}"
+  content = templatefile("${path.module}/templates/hosts.tpl", {
+    base_domain = "${var.tags.env}.${var.tags.stage}.${var.controllers.base_domain}"
+    controllers = local.controllers_ips
+    workers     = local.workers_ips
+  })
 }
