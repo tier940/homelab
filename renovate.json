@@ -44,6 +44,12 @@
       ]
     },
     {
+      "groupName": "kubernetes-dashboard",
+      "matchPackageNames": [
+        "/kubernetesui/"
+      ]
+    },
+    {
       "matchManagers": [
         "terraform"
       ],
