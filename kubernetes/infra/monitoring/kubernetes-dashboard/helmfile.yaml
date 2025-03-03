@@ -11,6 +11,6 @@ namespace: kubernetes-dashboard
 releases:
   - name: kubernetes-dashboard
     chart: kubernetes-dashboard/kubernetes-dashboard
-    version: 7.10.4
+    version: 7.10.5
     values:
       - values.yaml
