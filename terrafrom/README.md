@@ -25,7 +25,7 @@ pveum aclmod / -user terraform-prov@pve -role TerraformProv
 
 - インストール後に以下のコマンドを実行する
 ```bash
-cd ./proxmox/terraform/
+cd ./terraform/
 
 tfversion install --required
 terraform version
