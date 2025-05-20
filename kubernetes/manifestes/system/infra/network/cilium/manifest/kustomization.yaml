@@ -4,4 +4,3 @@ namespace: kube-system
 
 resources:
   - addresspool.yaml
-  - networkpolicy.yaml

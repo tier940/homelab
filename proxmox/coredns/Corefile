@@ -7,14 +7,21 @@
   ready
   log
   prometheus :9253
-  etcd . tier.f5.si tier.k8s.local {
+
+  etcd k8s.local {
+    path /skydns
+    endpoint http://10.0.8.1:2379
+  }
+
+  etcd tier.f5.si {
     path /skydns
     endpoint http://localhost:2379
-    fallthrough
   }
+
   forward . 127.0.0.1:5301 127.0.0.1:5302 127.0.0.1:5303 {
     policy sequential
   }
+
   cache 30
   loop
   reload
@@ -27,19 +34,18 @@
     health_check 5s
     policy sequential
   }
-  cache 30
 }
+
 .:5302 {
   forward . tls://8.8.8.8 tls://8.8.4.4 {
     tls_servername dns.google
     policy sequential
   }
-  cache 30
 }
+
 .:5303 {
   forward . tls://9.9.9.9 {
     tls_servername dns.quad9.net
     health_check 5s
   }
-  cache 30
 }

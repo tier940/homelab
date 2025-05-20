@@ -2,10 +2,16 @@ repositories:
   - name: cilium
     url: https://helm.cilium.io
 
+helmDefaults:
+  createNamespace: false
+
+## Document separator to satisfy Helmfile:
+---
+namespace: kube-system
+
 releases:
   - name: cilium
-    namespace: kube-system
     chart: cilium/cilium
-    version: 1.17.2
+    version: 1.17.4
     values:
-      - values.yaml
+      - values/values.yaml
