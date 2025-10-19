@@ -1,0 +1,15 @@
+[Unit]
+Description=CoreDNS DNS Server
+Documentation=https://coredns.io/
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/coredns -conf /etc/coredns/Corefile
+ExecReload=/bin/kill -SIGUSR1 $MAINPID
+Restart=on-failure
+StandardOutput=append:/var/log/coredns/coredns.log
+StandardError=append:/var/log/coredns/coredns.err.log
+
+[Install]
+WantedBy=multi-user.target

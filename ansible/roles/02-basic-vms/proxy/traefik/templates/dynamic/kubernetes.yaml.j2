@@ -1,0 +1,13 @@
+tcp:
+  routers:
+    kubeapi:
+      rule: HostSNI(`*`)
+      entryPoints: kubeapi
+      service: kubeapi
+  services:
+    kubeapi:
+      loadBalancer:
+        servers:
+{% for host in groups['cluster'] %}
+          - address: "{{ hostvars[host]['ansible_host'] }}:6443"
+{% endfor %}

@@ -1,0 +1,13 @@
+/var/log/etcd/etcd.log {
+  rotate 5
+  size 10M
+  compress
+  notifempty
+}
+
+/var/log/etcd/etcd.err.log {
+  rotate 5
+  size 10M
+  compress
+  notifempty
+}

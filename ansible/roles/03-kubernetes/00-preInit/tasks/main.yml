@@ -1,0 +1,70 @@
+---
+- name: Add Kubernetes repository
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/repodata/repomd.xml.key"
+
+- name: Add CRI-O repository
+  yum_repository:
+    name: cri-o
+    description: CRI-O
+    baseurl: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/repodata/repomd.xml.key"
+
+- name: Update repository cache
+  dnf:
+    update_cache: yes
+
+- name: Install packages
+  dnf:
+    name:
+      - iproute-tc
+      - container-selinux
+      - cri-o
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+
+- name: Exclude packages
+  dnf:
+    exclude:
+      - cri-o
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Check if CRI-O bridge network config is disabled
+  stat:
+    path: /etc/cni/net.d/10-crio-bridge.conflist.disabled
+  register: crio_bridge_disabled
+
+- name: Enable CRI-O bridge network
+  when: crio_bridge_disabled.stat.exists
+  command: mv /etc/cni/net.d/10-crio-bridge.conflist.disabled /etc/cni/net.d/10-crio-bridge.conflist
+  args:
+    creates: /etc/cni/net.d/10-crio-bridge.conflist
+
+- name: Start CRI-O service
+  systemd:
+    name: crio
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Start kubelet service
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Wait for server to restart
+  reboot:
+    reboot_timeout: 3600

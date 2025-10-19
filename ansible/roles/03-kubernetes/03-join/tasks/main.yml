@@ -1,0 +1,8 @@
+---
+- name: Copy join command to worker-node
+  copy:
+    src: ./output/kubernetes/join_command.txt
+    dest: /tmp/
+
+- name: Join cluster
+  shell: "cat /tmp/join_command.txt | bash"

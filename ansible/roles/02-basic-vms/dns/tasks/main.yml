@@ -1,0 +1,4 @@
+---
+- name: Include tasks based on DNS
+  when: genv.dns is defined
+  include_tasks: "coredns/tasks/main.yml"

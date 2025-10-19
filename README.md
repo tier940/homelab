@@ -1,130 +1,121 @@
-# lab setup
-```bash
-mv /root/kubeconfig /home/tier940/.kube/config
-mkdir -p /home/tier940/.kube
-chown tier940:tier940 /home/tier940/.kube/ -R
-kubectl config use-context default
-kubectl get node -o wide
+# clusters
+k8sをもぐもぐたべよう
 
+## 当レポジトリで必要なセットアップ方法
+### Proxmox
+#### ユーザとロール作成
+- 以下のように叩けば認証情報を作成できる。
+```bash
+pveum role add Terraform -privs "Datastore.Allocate Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify SDN.Use VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt User.Modify"
+pveum user add terraform@pve
+pveum aclmod / -user terraform@pve -role Terraform
+```
+
+#### 認証方法
+- 環境変数で設定する。トークン作成コマンドで生成されたトークン(value)を設定する。
+- `export` コマンドの内容はterraformの実行時に必要なため各自メモを取ること。
+```bash
+pveum user token add terraform@pve provider --privsep=0
+
+export PROXMOX_VE_ENDPOINT='https://XXX.XXX.XXX.XXX:8006/api2/json'
+export PROXMOX_VE_API_TOKEN='terraform@pve!provider=生成されたトークン'
+```
+
+#### 鍵の配置
+- Discordのチャンネルにて鍵を入手し、以下のディレクトリに配置する。
+    - `./ansible/roles/01-os-init/files/keys/`
+        - `k8s_homelab_ed25519`
+        - `k8s_homelab_ed25519.pub`
+
+### Terraform
+#### インストール
+下記からterraformのバージョン管理を行うツールをインストールする。
+> https://github.com/tfversion/tfversion
+
+- インストール後に以下のコマンドを実行する
+```bash
+cd ./terraform/
+
+echo "export PATH=/home/${USER}/.tfversion/bin:$PATH" >> ~/.bashrc
+tfversion install --required
+tfversion use --required
+terraform version
+```
+
+### Ansible
+#### インストール
+- 以下のコマンドを実行する
+```bash
+cd ./ansible/
+
+pip install -r requirements.txt
+```
+
+### kubenetes
+#### インストール(kubectl)
+- 以下のコマンドを実行する
+```bash
+KUBE_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+mkdir -pv /home/${USER}/bin/kubectl_${KUBE_VERSION}
+curl -L "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl" -o /home/${USER}/bin/kubectl_${KUBE_VERSION}/kubectl
+chmod +x /home/${USER}/bin/kubectl_${KUBE_VERSION}/kubectl
+ln -s /home/${USER}/bin/kubectl_${KUBE_VERSION}/kubectl /home/${USER}/bin/kubectl
+```
+
+#### インストール(helm)
+- 以下サイトからhelmのバイナリをダウンロードする
+> https://github.com/helm/helm/releases
+```bash
+HELM_VERSION=v3.19.0
+mkdir -pv /home/${USER}/bin/helm_${HELM_VERSION}
+curl -L "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" | tar -xz -C /home/${USER}/bin/helm_${HELM_VERSION}
+chmod +x /home/${USER}/bin/helm_${HELM_VERSION}/linux-amd64/helm
+ln -s /home/${USER}/bin/helm_${HELM_VERSION}/linux-amd64/helm /home/${USER}/bin/helm
+helm plugin install https://github.com/databus23/helm-diff
+```
+
+#### インストール(helmfile)
+- 以下サイトからhelmfileのバイナリをダウンロードする
+> https://github.com/helmfile/helmfile/releases
+```bash
+HELMDILE_VERSION=1.1.7
+mkdir -pv /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}
+curl -L "https://github.com/helmfile/helmfile/releases/download/v${HELMDILE_VERSION}/helmfile_${HELMDILE_VERSION}_linux_amd64.tar.gz" | tar -xz -C /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}
+chmod +x /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}/helmfile
+ln -s /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}/helmfile /home/${USER}/bin/helmfile
+```
+
+#### インストール(cilium-cli)
+- 以下サイトからcilium-cliのバイナリをダウンロードする
+> https://github.com/cilium/cilium-cli/releases
+```bash
+CILIUM_CLI_VERSION=v0.18.7
+mkdir -pv /home/${USER}/bin/cilium-cli_${CILIUM_CLI_VERSION}
+curl -L "https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-amd64.tar.gz" | tar -xz -C /home/${USER}/bin/cilium-cli_${CILIUM_CLI_VERSION}
+chmod +x /home/${USER}/bin/cilium-cli_${CILIUM_CLI_VERSION}/cilium
+ln -s /home/${USER}/bin/cilium-cli_${CILIUM_CLI_VERSION}/cilium /home/${USER}/bin/cilium
+```
+
+#### インストール(hubble)
+- 以下サイトからhubbleのバイナリをダウンロードする
+> https://github.com/cilium/hubble/releases
+```bash
+HUBBLE_VERSION=v1.18.0
+mkdir -pv /home/${USER}/bin/hubble_${HUBBLE_VERSION}
+curl -L "https://github.com/cilium/hubble/releases/download/${HUBBLE_VERSION}/hubble-linux-amd64.tar.gz" | tar -xz -C /home/${USER}/bin/hubble_${HUBBLE_VERSION}
+chmod +x /home/${USER}/bin/hubble_${HUBBLE_VERSION}/hubble
+ln -s /home/${USER}/bin/hubble_${HUBBLE_VERSION}/hubble /home/${USER}/bin/hubble
+```
+
+### PATHや補完の設定
+- 以下のコマンドを実行する
+```bash
+echo "export PATH=/home/${USER}/bin:$PATH" >> ~/.bashrc
 echo "source <(kubectl completion bash)" >> ~/.bashrc
 echo "source <(helm completion bash)" >> ~/.bashrc
 echo "source <(helmfile completion bash)" >> ~/.bashrc
 echo "source <(cilium completion bash)" >> ~/.bashrc
 echo "source <(hubble completion bash)" >> ~/.bashrc
+
 source ~/.bashrc
-```
-
-# k8s install on vm
-## カーネルパラメータの追加
-```bash
-cat <<EOF | tee -a /etc/modules-load.d/containerd.conf
-br_netfilter
-ip_vs
-ip_vs_rr
-ip_vs_wrr
-ip_vs_sh
-tcp_bbr
-sch_fq
-overlay
-EOF
-modprobe br_netfilter
-modprobe ip_vs
-modprobe ip_vs_rr
-modprobe ip_vs_wrr
-modprobe ip_vs_sh
-modprobe tcp_bbr
-modprobe sch_fq
-modprobe overlay
-
-cat <<EOF | tee -a /etc/sysctl.d/kubernetes.conf
-net.core.default_qdisc=fq
-net.ipv4.tcp_congestion_control=bbr
-net.ipv6.tcp_congestion_control=bbr
-net.ipv4.ip_forward = 1
-net.ipv6.ip_forward = 1
-net.ipv4.conf.all.forwarding = 1
-net.ipv6.conf.all.forwarding = 1
-net.ipv4.conf.dfault.forwarding = 1
-net.ipv6.conf.dfault.forwarding = 1
-EOF
-
-sysctl --system
-```
-
-## 日本時間に変更
-```bash
-timedatectl set-timezone Asia/Tokyo
-```
-
-## swapの無効化
-- zramなら以下方法で無効化できる。やってることは `zram-generator-defaults` を削除しているだけ
-> https://www.reddit.com/r/Fedora/comments/wgetj1/cant_disable_swap_in_fedora_server_36/
-
-## SELinuxの無効化
-```bash
-setenforce 0
-sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
-```
-
-## CRI-O / Kubectl / Kubeadm / Kubeletをインストール
-- 公式の[URL](https://github.com/cri-o/packaging/blob/main/)を参照
-
-### sandboxのバージョンを更新
-- 最新のバージョンを記載する
-> 2024/10/25現在は 3.10 だった
-`/etc/crio/crio.conf.d/10-crio.conf`
-
-```conf
-[crio.image]
-pause_image="registry.k8s.io/pause:3.10"
-```
-
-### cgroup driverの変更
-- cgroupfsを指定する
-`/etc/crio/crio.conf.d/10-crio.conf`
-```conf
-[crio.runtime]
-conmon_cgroup = "pod"
-cgroup_manager = "cgroupfs"
-```
-
-## tcのインストール
-```bash
-dnf install -y iproute-tc
-```
-
-### サービスの起動
-```bash
-systemctl enable --now crio.service
-systemctl enable --now kubelet.service
-
-systemctl status crio.service
-systemctl status kubelet.service
-```
-
-## コントロールプレーンの作成
-```bash
-kubeadm init --control-plane-endpoint 172.16.8.1 \
-    --pod-network-cidr=10.0.0.0/8 \
-    --skip-phases=addon/kube-proxy
-```
-
-### コントロールプレーン作成後
-```bash
-mkdir -p $HOME /.kube
-cp -i /etc/kubernetes/admin.conf $HOME /.kube/config
-chown $( id -u):$( id -g) $HOME /.kube/config
-```
-
-## ワーカーノードの追加
-- コントロールプレーン作成時に表示されたコマンドを実行
-```bash
-kubeadm join 172.16.8.1:6443 --token XXXXX --discovery-token-ca-cert-hash sha256:YYYY
-```
-
-### トークンの再作成
-- どうやらトークンは有効期限があるらしい
-    - コントロールプレーンがあるVMで実行する
-```bash
-kubeadm token create --print-join-command
 ```

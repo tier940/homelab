@@ -1,0 +1,13 @@
+/var/log/coredns/coredns.log {
+  rotate 5
+  size 10M
+  compress
+  notifempty
+}
+
+/var/log/coredns/coredns.err.log {
+  rotate 5
+  size 10M
+  compress
+  notifempty
+}
