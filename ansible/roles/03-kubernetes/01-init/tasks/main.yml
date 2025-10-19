@@ -1,0 +1,88 @@
+---
+- name: Create kubeadm config file
+  template:
+    src: kubeadm-config.yaml.j2
+    dest: /etc/kubernetes/kubeadm-config.yaml
+
+- name: Execute kubeadm init
+  shell: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml
+  register: kubeadm_init_result
+
+- name: Save join command to file
+  when: kubeadm_init_result.rc == 0
+  shell: kubeadm token create --print-join-command > /tmp/join_command.txt
+
+- name: Fetch kube config to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ./output/kubernetes/admin.conf
+    flat: yes
+
+- name: Fetch join command to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /tmp/join_command.txt
+    dest: ./output/kubernetes/join_command.txt
+    flat: yes
+
+- name: Fetch CA certificate to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/ca.crt
+    dest: ./output/kubernetes/pki/ca.crt
+    flat: yes
+
+- name: Fetch CA key to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/ca.key
+    dest: ./output/kubernetes/pki/ca.key
+    flat: yes
+
+- name: Fetch service account public key to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/sa.pub
+    dest: ./output/kubernetes/pki/sa.pub
+    flat: yes
+
+- name: Fetch service account key to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/sa.key
+    dest: ./output/kubernetes/pki/sa.key
+    flat: yes
+
+- name: Fetch front-proxy CA certificate to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/front-proxy-ca.crt
+    dest: ./output/kubernetes/pki/front-proxy-ca.crt
+    flat: yes
+
+- name: Create front-proxy CA key to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/front-proxy-ca.key
+    dest: ./output/kubernetes/pki/front-proxy-ca.key
+    flat: yes
+
+- name: Fetch etcd CA certificate to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/etcd/ca.crt
+    dest: ./output/kubernetes/pki/etcd/ca.crt
+    flat: yes
+
+- name: Fetch etcd CA key to local
+  when: kubeadm_init_result.rc == 0
+  fetch:
+    src: /etc/kubernetes/pki/etcd/ca.key
+    dest: ./output/kubernetes/pki/etcd/ca.key
+    flat: yes
+
+- name: Wait for server to restart
+  when: kubeadm_init_result.rc == 0
+  reboot:
+    reboot_timeout: 3600

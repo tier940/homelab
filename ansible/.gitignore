@@ -4,4 +4,17 @@
 ### Ansible ###
 *.retry
 
+# Ignore inventory file
+/group_vars/*
+/inventory/**/*.yml
+/output/*
+/roles/01-os-init/files/hosts/dev/*
+/roles/01-os-init/files/hosts/prod/*
+/roles/01-os-init/files/keys/*
+!/group_vars/all.yml
+!/group_vars/dev.yml
+!/group_vars/prod.yml
+!/roles/01-os-init/files/hosts/**/.gitkeep
+!/roles/01-os-init/files/keys/**/.gitkeep
+
 # End of https://www.toptal.com/developers/gitignore/api/ansible

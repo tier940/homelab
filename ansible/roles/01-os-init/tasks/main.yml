@@ -1,0 +1,149 @@
+---
+# - name: Debug genv variable
+#   debug:
+#     var: genv
+
+- name: copy files
+  copy:
+    src: hosts/{{ genv.stage }}/{{ genv.env }}
+    dest: /etc/hosts
+    mode: 0644
+    owner: root
+    group: root
+
+- name: SELinux disabled
+  selinux:
+    policy: targeted
+    state: disabled
+
+- name: Set timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo
+
+- name: Disable update_etc_hosts in cloud.cfg
+  replace:
+    path: /etc/cloud/cloud.cfg
+    regexp: '^\s*- update_etc_hosts$'
+    replace: "# - update_etc_hosts"
+
+- name: Load kernel modules
+  modprobe:
+    name: "{{ item }}"
+  with_items:
+    - br_netfilter
+    - ip_vs
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - tcp_bbr
+    - sch_fq
+    - overlay
+
+- name: Ensure kernel modules are loaded at boot
+  lineinfile:
+    path: /etc/modules-load.d/common.conf
+    create: yes
+    line: "{{ item }}"
+  with_items:
+    - br_netfilter
+    - ip_vs
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - tcp_bbr
+    - sch_fq
+    - overlay
+
+- name: Set kernel parameters for ipv4
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { name: net.core.default_qdisc, value: fq }
+    - { name: net.ipv4.tcp_congestion_control, value: bbr }
+    - { name: net.ipv4.ip_forward, value: 1 }
+    - { name: net.ipv4.conf.all.forwarding, value: 1 }
+    - { name: net.ipv4.conf.default.forwarding, value: 1 }
+
+- name: Set kernel parameters for ipv6
+  when: genv.use_ipv6
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { name: net.ipv6.tcp_congestion_control, value: bbr }
+    - { name: net.ipv6.ip_forward, value: 1 }
+    - { name: net.ipv6.conf.all.forwarding, value: 1 }
+    - { name: net.ipv6.conf.default.forwarding, value: 1 }
+
+- name: Gather installed package facts
+  package_facts:
+    manager: auto
+
+- name: Update all packages
+  command: "dnf update -y"
+
+- name: Install python3-pip
+  when: "'python3-pip' not in ansible_facts.packages"
+  command: "dnf install -y python3-pip"
+
+- name: Install packages
+  dnf:
+    name:
+      - bind-utils
+      - yq
+    state: present
+
+- name: Remove zram-generator-defaults
+  when: "'zram-generator-defaults' in ansible_facts.packages"
+  dnf:
+    name: zram-generator-defaults
+    state: absent
+
+- name: Check if swap is enabled
+  command: swapon --show
+  register: swap_status
+  changed_when: false
+
+- name: Disable swap
+  when: swap_status.stdout != ""
+  command: swapoff -a
+
+- name: Drop caches
+  command: sysctl -w vm.drop_caches=3
+  args:
+    creates: /proc/sys/vm/drop_caches
+
+- name: Check if zram0 exists
+  stat:
+    path: /dev/zram0
+  register: zram0_device
+
+- name: Reset zram
+  when: zram0_device.stat.exists
+  command: zramctl /dev/zram0 --reset
+
+- name: Disable zram
+  when: zram0_device.stat.exists
+  replace:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
+    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 zram.enabled=0"'
+
+- name: Update GRUB configuration
+  when: zram0_device.stat.exists
+  command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+- name: Wait for server to restart
+  when: zram0_device.stat.exists
+  reboot:
+    reboot_timeout: 3600
+
+- name: Start serial-getty service
+  systemd:
+    name: serial-getty@ttyS0.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

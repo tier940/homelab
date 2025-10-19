@@ -1,0 +1,29 @@
+---
+- name: Install Kubernetes
+  hosts:
+    - cluster
+    - worker
+  become: yes
+  roles:
+    - 03-kubernetes/00-preInit
+
+- name: Initialize Kubernetes cluster
+  hosts:
+    - cluster[0]
+  become: yes
+  roles:
+    - 03-kubernetes/01-init
+
+- name: Join Kubernetes HA cluster
+  hosts:
+    - cluster[1:]
+  become: yes
+  roles:
+    - 03-kubernetes/02-clusterHA
+
+- name: Join Kubernetes worker nodes
+  hosts:
+    - worker
+  become: yes
+  roles:
+    - 03-kubernetes/03-join

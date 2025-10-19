@@ -1,0 +1,24 @@
+[Unit]
+Description=etcd key-value store
+Documentation=https://etcd.io/
+After=network.target
+
+[Service]
+Type=notify
+#ExecStart=/usr/local/bin/etcd
+ExecStart=/usr/local/bin/etcd \
+  --data-dir /var/lib/etcd \
+  --name "{{ genv.stage }}-{{ genv.env }}-etcd" \
+  --advertise-client-urls "http://{{ ansible_default_ipv4.address }}:2379" \
+  --listen-client-urls "http://0.0.0.0:2379" \
+  --listen-peer-urls "http://{{ ansible_default_ipv4.address }}:2380" \
+  --initial-advertise-peer-urls "http://{{ ansible_default_ipv4.address }}:2380" \
+  --initial-cluster "{{ genv.stage }}-{{ genv.env }}-etcd=http://{{ ansible_default_ipv4.address }}:2380" \
+  --initial-cluster-token "{{ genv.stage }}-{{ genv.env }}" \
+  --initial-cluster-state "new"
+Restart=on-failure
+StandardOutput=append:/var/log/etcd/etcd.log
+StandardError=append:/var/log/etcd/etcd.err.log
+
+[Install]
+WantedBy=multi-user.target

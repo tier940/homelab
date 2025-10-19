@@ -1,0 +1,65 @@
+---
+- name: "[{{ genv.proxy.name }}] Download binary"
+  get_url:
+    url: https://github.com/traefik/traefik/releases/download/v{{ genv.proxy.traefik.version }}/traefik_v{{ genv.proxy.traefik.version }}_linux_amd64.tar.gz
+    dest: /tmp/traefik.tar.gz
+
+- name: "[{{ genv.proxy.name }}] Extract binary to /tmp"
+  unarchive:
+    src: /tmp/traefik.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: "[{{ genv.proxy.name }}] Move binary to /usr/local/bin"
+  copy:
+    src: /tmp/traefik
+    dest: /usr/local/bin/traefik
+    remote_src: yes
+
+- name: "[{{ genv.proxy.name }}] Ensure binary is executable"
+  file:
+    path: /usr/local/bin/traefik
+    mode: "0755"
+    state: file
+
+- name: "[{{ genv.proxy.name }}] Create directory"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    - "/etc/traefik"
+    - "/etc/traefik/dynamic"
+
+- name: "[{{ genv.proxy.name }}] Copy traefik.yaml"
+  copy:
+    src: "{{ genv.proxy.name }}/files/traefik.yaml"
+    dest: /etc/traefik/traefik.yaml
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "[{{ genv.proxy.name }}] Copy dynamic configuration"
+  template:
+    src: "{{ genv.proxy.name }}/templates/{{ item.src }}"
+    dest: "/etc/traefik/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: "dynamic/kubernetes.yaml.j2", dest: "dynamic/kubernetes.yaml" }
+
+- name: "[{{ genv.proxy.name }}] Copy traefik.service"
+  copy:
+    src: "{{ genv.proxy.name }}/files/systemd/traefik.service"
+    dest: /usr/lib/systemd/system/traefik.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "[{{ genv.proxy.name }}] Start traefik service"
+  systemd:
+    name: traefik
+    state: started
+    enabled: yes
+    daemon_reload: yes
