@@ -1,0 +1,17 @@
+repositories:
+  - name: external-dns
+    url: https://kubernetes-sigs.github.io/external-dns
+
+helmDefaults:
+  createNamespace: false
+
+## Document separator to satisfy Helmfile:
+---
+namespace: kube-system
+
+releases:
+  - name: external-dns
+    chart: external-dns/external-dns
+    version: 1.19.0
+    values:
+      - values/values.yaml

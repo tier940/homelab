@@ -1,0 +1,10 @@
+---
+- name: OS Initialization
+  hosts:
+    - dns.*
+    - proxy.*
+    - cluster
+    - worker
+  become: yes
+  roles:
+    - 01-os-init

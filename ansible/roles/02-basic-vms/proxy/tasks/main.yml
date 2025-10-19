@@ -1,0 +1,4 @@
+---
+- name: Include tasks based on Proxy
+  when: genv.proxy is defined
+  include_tasks: "{{ genv.proxy.name }}/tasks/main.yml"

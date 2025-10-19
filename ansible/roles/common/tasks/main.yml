@@ -1,8 +1,0 @@
----
-- name: copy files
-  copy:
-    src: "hosts.{{ genv.stage }}"
-    dest: /etc/hosts
-    mode: 0644
-    owner: root
-    group: root

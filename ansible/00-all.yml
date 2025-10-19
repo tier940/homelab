@@ -1,0 +1,9 @@
+---
+- name: Include OS initialization tasks
+  import_playbook: 01-os-init.yml
+
+- name: Include basic VMs setup tasks
+  import_playbook: 02-basic-vms.yml
+
+- name: Include Kubernetes tasks
+  import_playbook: 03-kubernetes.yml

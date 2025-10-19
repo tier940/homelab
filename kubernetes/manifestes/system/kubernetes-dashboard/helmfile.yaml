@@ -1,0 +1,17 @@
+repositories:
+  - name: kubernetes-dashboard
+    url: https://kubernetes.github.io/dashboard
+
+helmDefaults:
+  createNamespace: true
+
+## Document separator to satisfy Helmfile:
+---
+namespace: kubernetes-dashboard
+
+releases:
+  - name: kubernetes-dashboard
+    chart: kubernetes-dashboard/kubernetes-dashboard
+    version: 7.13.0
+    values:
+      - values/values.yaml

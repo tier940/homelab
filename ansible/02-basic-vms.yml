@@ -1,0 +1,12 @@
+---
+- name: Setup Proxy VMs
+  hosts: proxy.*
+  become: yes
+  roles:
+    - 02-basic-vms/proxy
+
+- name: Setup DNS VMs
+  hosts: dns.*
+  become: yes
+  roles:
+    - 02-basic-vms/dns

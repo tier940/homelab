@@ -1,0 +1,61 @@
+################################################################
+# Global configuration
+################################################################
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+################################################################
+# EntryPoints configuration
+################################################################
+entryPoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: :443
+    http:
+      tls:
+        certResolver: default
+  metrics:
+    address: :8082
+  kubeapi:
+    address: :6443
+
+################################################################
+# Traefik logs configuration
+################################################################
+log:
+  level: INFO
+  filePath: os.Stdout
+
+################################################################
+# Access logs configuration
+################################################################
+accessLog:
+  filePath: os.Stdout
+
+################################################################
+# API and dashboard configuration
+################################################################
+api:
+  insecure: false
+  dashboard: true
+
+#################################################################
+# Providers configuration
+#################################################################
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+
+#################################################################
+# Metrics configuration
+#################################################################
+metrics:
+  prometheus:
+    entryPoint: metrics

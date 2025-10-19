@@ -1,0 +1,15 @@
+[Unit]
+Description=Traefik
+Documentation=https://doc.traefik.io/traefik/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Environment="CONFIG=/etc/traefik/traefik.yaml"
+ExecStart=/usr/local/bin/traefik --configFile=$CONFIG
+Restart=always
+WatchdogSec=1s
+Type=notify
+
+[Install]
+WantedBy=multi-user.target

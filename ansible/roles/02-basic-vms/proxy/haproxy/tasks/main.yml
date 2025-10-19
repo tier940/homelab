@@ -1,0 +1,26 @@
+---
+- name: "[{{ genv.proxy.name }}] Install packages"
+  dnf:
+    name: "haproxy-0:{{ genv.proxy.haproxy.version }}"
+    state: present
+
+- name: "[{{ genv.proxy.name }}] Copy haproxy.cfg"
+  template:
+    src: "{{ genv.proxy.name }}/templates/haproxy.cfg.j2"
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "[{{ genv.proxy.name }}] Fix haproxy.service"
+  replace:
+    path: /usr/lib/systemd/system/haproxy.service
+    regexp: 'PIDFILE=[^"]*'
+    replace: "PIDFILE=/var/run/haproxy.pid"
+
+- name: "[{{ genv.proxy.name }}] Enable haproxy service"
+  systemd:
+    name: haproxy
+    enabled: yes
+    state: started
+    daemon_reload: yes
