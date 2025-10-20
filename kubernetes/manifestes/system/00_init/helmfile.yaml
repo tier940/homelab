@@ -37,7 +37,7 @@ releases:
   - name: local-path-provisioner
     namespace: local-path-provisioner
     chart: localpath/local-path-provisioner
-    version: 0.0.32
+    version: 0.0.33
     values:
       - values/localpath.yaml
     wait: true
