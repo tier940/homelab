@@ -1853,13 +1853,13 @@ hubble:
     baseUrl: "/"
     # -- hubble-ui ingress configuration.
     ingress:
-      enabled: false
+      enabled: true
       annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-      className: ""
+      className: "traefik"
       hosts:
-        - chart-example.local
+        - hubble.k8s.local
       labels: {}
       tls: []
       #  - secretName: chart-example-tls

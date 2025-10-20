@@ -1,0 +1,22 @@
+image:
+  repository: docker.io/rancher/local-path-provisioner
+  tag: v0.0.32
+  pullPolicy: IfNotPresent
+
+storageClass:
+  name: local-path
+  defaultClass: true
+  reclaimPolicy: Delete
+
+nodePathMap:
+  - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+    paths:
+      - /opt/local-path-provisioner
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

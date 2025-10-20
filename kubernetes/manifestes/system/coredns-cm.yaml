@@ -33,3 +33,17 @@ data:
         reload
         loadbalance
     }
+
+    k8s.local:53 {
+        errors
+        hosts {
+           10.0.0.201 dns.k8s.local
+           fallthrough
+        }
+        cache 30
+        etcd {
+            path /skydns
+            endpoint http://10.0.0.201:2379
+        }
+        loadbalance
+    }

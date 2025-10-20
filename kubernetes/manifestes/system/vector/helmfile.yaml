@@ -1,0 +1,15 @@
+---
+# Vector Log Aggregation Helmfile Configuration
+repositories:
+  - name: vector
+    url: https://helm.vector.dev
+
+releases:
+  - name: vector
+    namespace: kube-system
+    chart: vector/vector
+    version: 0.46.0
+    values:
+      - values/vector.yaml
+    wait: true
+    timeout: 600
