@@ -1,0 +1,355 @@
+# Vector Development Environment Configuration
+# Based on AWS FluentBit container insights configuration
+role: Agent
+
+# Vector image
+# Using debian variant to include systemd tools (journalctl) for journald source
+image:
+  repository: docker.io/timberio/vector
+  tag: 0.43.1-debian
+  pullPolicy: IfNotPresent
+
+# Pod labels
+podLabels:
+  vector.dev/exclude: "true"
+
+# Vector configuration
+customConfig:
+  data_dir: /var/lib/vector
+
+  # API for health checks
+  api:
+    enabled: true
+    address: 0.0.0.0:8686
+    playground: false
+
+  sources:
+    # Application logs - Kubernetes container logs
+    kubernetes_logs:
+      type: kubernetes_logs
+      # Exclude vector's own logs to avoid recursion
+      exclude_paths_glob_patterns:
+        - "**/vector-*.log"
+      extra_label_selector: "vector.dev/exclude!=true"
+
+    # Data plane logs - systemd journal for core services
+    dataplane_docker:
+      type: journald
+      journal_directory: /var/log/journal
+      current_boot_only: true
+      include_units:
+        - docker.service
+        - containerd.service
+        - kubelet.service
+
+    # Host logs - system logs
+    host_dmesg:
+      type: file
+      include:
+        - /var/log/dmesg
+      read_from: beginning
+
+    host_secure:
+      type: file
+      include:
+        - /var/log/secure
+      read_from: end
+      ignore_older_secs: 86400 # 1 day
+
+    host_messages:
+      type: file
+      include:
+        - /var/log/messages
+      read_from: end
+      ignore_older_secs: 86400 # 1 day
+
+    # Vector internal metrics
+    internal_metrics:
+      type: internal_metrics
+
+  transforms:
+    # Parse and enrich Kubernetes application logs
+    parse_application_logs:
+      type: remap
+      inputs: ["kubernetes_logs"]
+      source: |
+        # Parse JSON logs if possible
+        if is_string(.message) {
+          parsed, err = parse_json(.message)
+          if err == null {
+            ., err = merge(., parsed)
+          }
+        }
+
+        # Add standard fields
+        .log_type = "application"
+        .cluster = "dev-cluster"
+        .environment = "dev"
+
+        # Extract log level
+        if exists(.level) {
+          .log_level = downcase(string!(.level))
+        } else if exists(.severity) {
+          .log_level = downcase(string!(.severity))
+        } else {
+          .log_level = "info"
+        }
+
+        # Ensure Kubernetes labels exist
+        .namespace = .kubernetes.pod_namespace || "unknown"
+        .pod_name = .kubernetes.pod_name || "unknown"
+        .container_name = .kubernetes.container_name || "unknown"
+        .node_name = .kubernetes.pod_node_name || "unknown"
+
+        # Get node IP from pod IP or node name
+        .node_ip = replace(string!(.node_name), "-", ".")
+
+    # Parse dataplane logs (systemd journal)
+    parse_dataplane_logs:
+      type: remap
+      inputs:
+        - "dataplane_docker"
+      source: |
+        .log_type = "dataplane"
+        .cluster = "dev-cluster"
+        .environment = "dev"
+
+        # Extract systemd unit name
+        if exists(._SYSTEMD_UNIT) {
+          .systemd_unit = string!(._SYSTEMD_UNIT)
+        } else {
+          .systemd_unit = "unknown"
+        }
+
+        # Rename message field
+        if exists(.MESSAGE) {
+          .message = string!(.MESSAGE)
+        }
+
+        # Extract hostname - prefer journald _HOSTNAME, fallback to env var
+        if exists(._HOSTNAME) {
+          .hostname = string!(._HOSTNAME)
+        } else {
+          .hostname = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
+        }
+
+        # Get host IP from hostname (assuming hostname format like worker-001)
+        .host_ip = replace(.hostname, "-", ".")
+
+    # Parse host logs
+    parse_host_logs:
+      type: remap
+      inputs:
+        - "host_dmesg"
+        - "host_secure"
+        - "host_messages"
+      source: |
+        .log_type = "host"
+        .cluster = "dev-cluster"
+        .environment = "dev"
+
+        # Determine log source from file path
+        if exists(.file) {
+          if contains(string!(.file), "dmesg") {
+            .log_source = "dmesg"
+          } else if contains(string!(.file), "secure") {
+            .log_source = "secure"
+          } else if contains(string!(.file), "messages") {
+            .log_source = "messages"
+          }
+        }
+
+        # Get hostname from environment variable or default
+        .hostname = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
+        .host_ip = replace(.hostname, "-", ".")
+
+    # Add labels for metrics
+    add_metrics_labels:
+      type: remap
+      inputs: ["internal_metrics"]
+      source: |
+        .tags.environment = "dev"
+        .tags.cluster = "dev-cluster"
+
+  sinks:
+    # MinIO S3 for application logs
+    minio_application_logs:
+      type: aws_s3
+      inputs: ["parse_application_logs"]
+      bucket: loki
+      region: us-east-1
+      endpoint: "http://minio.minio-tenant.svc.cluster.local"
+      auth:
+        access_key_id: "${MINIO_ACCESS_KEY_ID}"
+        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
+      compression: none
+      key_prefix: 'application/ip-{{ "{{" }} node_ip {{ "}}" }}-{{ "{{" }} node_name {{ "}}" }}-{{ "{{" }} pod_name {{ "}}" }}-'
+      batch:
+        max_bytes: 10485760 # 10MB
+        timeout_secs: 60 # 1 minute
+      encoding:
+        codec: json
+        timestamp_format: rfc3339
+      healthcheck:
+        enabled: true
+
+    # MinIO S3 for dataplane logs
+    minio_dataplane_logs:
+      type: aws_s3
+      inputs: ["parse_dataplane_logs"]
+      bucket: loki
+      region: us-east-1
+      endpoint: "http://minio.minio-tenant.svc.cluster.local"
+      auth:
+        access_key_id: "${MINIO_ACCESS_KEY_ID}"
+        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
+      compression: none
+      key_prefix: 'dataplane/ip-{{ "{{" }} host_ip {{ "}}" }}-{{ "{{" }} hostname {{ "}}" }}-{{ "{{" }} systemd_unit {{ "}}" }}-'
+      batch:
+        max_bytes: 10485760
+        timeout_secs: 60
+      encoding:
+        codec: json
+        timestamp_format: rfc3339
+      healthcheck:
+        enabled: true
+
+    # MinIO S3 for host logs
+    minio_host_logs:
+      type: aws_s3
+      inputs: ["parse_host_logs"]
+      bucket: loki
+      region: us-east-1
+      endpoint: "http://minio.minio-tenant.svc.cluster.local"
+      auth:
+        access_key_id: "${MINIO_ACCESS_KEY_ID}"
+        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
+      compression: none
+      key_prefix: 'host/ip-{{ "{{" }} host_ip {{ "}}" }}-{{ "{{" }} hostname {{ "}}" }}-{{ "{{" }} log_source {{ "}}" }}-'
+      batch:
+        max_bytes: 10485760
+        timeout_secs: 60
+      encoding:
+        codec: json
+        timestamp_format: rfc3339
+      healthcheck:
+        enabled: true
+
+    # Loki sink for all logs
+    loki:
+      type: loki
+      inputs:
+        - parse_application_logs
+        - parse_dataplane_logs
+        - parse_host_logs
+      endpoint: "http://loki-gateway.kube-prometheus-stack.svc.cluster.local"
+      encoding:
+        codec: json
+      labels:
+        job: vector
+        cluster: '{{ "{{" }} cluster {{ "}}" }}'
+        environment: '{{ "{{" }} environment {{ "}}" }}'
+        log_type: '{{ "{{" }} log_type {{ "}}" }}'
+      healthcheck:
+        enabled: true
+
+    # Prometheus Remote Write for metrics (optional - currently failing)
+    # prometheus:
+    #   type: prometheus_remote_write
+    #   inputs: ["add_metrics_labels"]
+    #   endpoint: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090/api/v1/write"
+    #   compression: snappy
+    #   healthcheck:
+    #     enabled: true
+
+# Additional volume mounts for systemd journal and host logs
+extraVolumeMounts:
+  - name: journal
+    mountPath: /var/log/journal
+    readOnly: true
+  - name: dmesg
+    mountPath: /var/log/dmesg
+    readOnly: true
+
+extraVolumes:
+  - name: journal
+    hostPath:
+      path: /var/log/journal
+  - name: dmesg
+    hostPath:
+      path: /var/log/dmesg
+
+# Resources
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# Service for API
+service:
+  enabled: true
+  type: ClusterIP
+
+# Liveness probe
+livenessProbe:
+  httpGet:
+    path: /health
+    port: api
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Readiness probe
+readinessProbe:
+  httpGet:
+    path: /health
+    port: api
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Tolerations for DaemonSet - run on all nodes
+tolerations:
+  - operator: Exists
+
+# Update strategy
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+
+# Termination grace period
+terminationGracePeriodSeconds: 60
+
+# DNS policy
+dnsPolicy: ClusterFirst
+
+# Environment variables from secrets
+env:
+  - name: MINIO_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: minio-credentials
+        key: access_key_id
+  - name: MINIO_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: minio-credentials
+        key: secret_access_key
+  - name: VECTOR_LOG
+    value: "info"
+
+# PodMonitor for Prometheus metrics collection
+podMonitor:
+  enabled: true
+  jobLabel: app.kubernetes.io/name
+  port: prom-exporter
+  path: /metrics
+  interval: 30s
+  honorLabels: false
+  honorTimestamps: true

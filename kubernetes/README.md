@@ -5,7 +5,6 @@ kubectl apply -f ./manifestes/system/homelab-admin.yaml
 kubectl apply -f ./manifestes/system/minio-secret.yaml
 kubectl apply -f ./manifestes/system/coredns-cm.yaml
 
-
 helmfile apply -f ./manifestes/system/00_init/
 kubectl apply -k ./manifestes/system/cilium/manifest/
 
@@ -53,6 +52,5 @@ kubectl run -it --rm --restart=Never --image=ubuntu:24.04 ubuntu
 
 kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 
-kubectl run -it --rm --restart=Never --image=ghcr.io/tier940/desktop-lxde:v1.1.0 lxde
-kubectl port-forward pod/lxde 5901:5901
+kubectl apply -k ./manifestes/application/lxde/
 ```

@@ -1,0 +1,15 @@
+---
+# Wildcard Certificate for *.k8s.local
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-k8s-local-tls
+  namespace: cert-manager
+spec:
+  secretName: wildcard-k8s-local-tls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.k8s.local"
+    - "k8s.local"

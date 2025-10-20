@@ -2,11 +2,9 @@
 tenant:
   name: dev-storage
 
-  # Root credentials
-  secrets:
-    name: storage-secret
-    accessKey: admin
-    secretKey: Password123
+  # Root credentials - match with minio-secret.yaml
+  configSecret:
+    name: minio-credentials
 
   # Pools configuration
   pools:
@@ -30,24 +28,32 @@ tenant:
     - name: grafana
     - name: backup
 
-  # Disable auto-cert for development
-  requestAutoCert: false
+  # TLS certificate configuration
+  certificate:
+    # Disable auto-cert for development
+    requestAutoCert: false
 
   # Environment variables
   env:
     - name: MINIO_BROWSER
       value: "on"
+    - name: MINIO_BROWSER_REDIRECT_URL
+      value: "http://minio-console.k8s.local"
 
 # Ingress for MinIO Console
 ingress:
   api:
     enabled: true
     ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web
     host: minio-api.k8s.local
     tls: []
 
   console:
     enabled: true
     ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web
     host: minio-console.k8s.local
     tls: []

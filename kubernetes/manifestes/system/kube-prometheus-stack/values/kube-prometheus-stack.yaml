@@ -67,16 +67,13 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 30s
-    - name: MinIO Logs
-      type: yesoreyeram-infinity-datasource
-      uid: minio-logs
+    - name: Loki
+      type: loki
+      uid: loki
       access: proxy
+      url: http://loki-gateway.kube-prometheus-stack.svc.cluster.local
       jsonData:
-        auth_method: "basicAuth"
-        tlsSkipVerify: true
-      secureJsonData:
-        basicAuthUser: "admin"
-        basicAuthPassword: "Password123"
+        maxLines: 1000
 
   # Dashboards
   dashboardProviders:

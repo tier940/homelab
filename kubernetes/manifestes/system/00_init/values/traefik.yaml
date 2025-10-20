@@ -20,6 +20,10 @@ ports:
       default: true
     exposedPort: 80
     protocol: TCP
+    # Redirect HTTP to HTTPS
+    redirectTo:
+      port: websecure
+      priority: 10
 
   websecure:
     port: 8443
@@ -29,6 +33,9 @@ ports:
     protocol: TCP
     tls:
       enabled: true
+      # Use cert-manager generated certificate as default
+      certResolver: ""
+      domains: []
 
   # TCP/UDP ports for services (CoreDNS, Vector, etc.)
   dns-tcp:

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lxde
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lxde
+  template:
+    metadata:
+      labels:
+        app: lxde
+    spec:
+      containers:
+        - name: lxde
+          image: ghcr.io/tier940/desktop-lxde:v1.1.0
+          ports:
+            - containerPort: 5901
+              protocol: TCP

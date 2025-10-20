@@ -43,7 +43,7 @@ data:
         cache 30
         etcd {
             path /skydns
-            endpoint http://dns.k8s.local:2379
+            endpoint http://10.0.0.201:2379
         }
         loadbalance
     }

@@ -10,6 +10,6 @@ releases:
     chart: vector/vector
     version: 0.46.0
     values:
-      - values/values.yaml
+      - values/vector.yaml
     wait: true
     timeout: 600
