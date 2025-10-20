@@ -1,10 +1,13 @@
+# Cilium LoadBalancer IP Pool Configuration
+# This configures IP address pool for LoadBalancer type services
+---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: default
 spec:
   blocks:
-    - cidr: 10.0.0.230/28
+    - cidr: "10.0.0.230/28"
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
@@ -12,9 +15,13 @@ metadata:
   name: default
   namespace: kube-system
 spec:
+  interfaces:
+    - ^ens[0-9]+
+    - ^eth[0-9]+
+    - ^enp[0-9]+s[0-9]+
+  loadBalancerIPs: true
+  externalIPs: true
   nodeSelector:
     matchExpressions:
       - key: node-role.kubernetes.io/control-plane
         operator: DoesNotExist
-  externalIPs: true
-  loadBalancerIPs: true

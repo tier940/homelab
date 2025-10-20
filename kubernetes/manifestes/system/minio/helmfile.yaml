@@ -1,0 +1,19 @@
+repositories:
+  - name: minio-operator
+    url: https://operator.min.io/
+
+helmDefaults:
+  createNamespace: true
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: minio-tenant
+    namespace: minio-tenant
+    createNamespace: true
+    chart: minio-operator/tenant
+    version: 7.1.1
+    values:
+      - values/minio-tenant.yaml
+    wait: true
+    timeout: 600

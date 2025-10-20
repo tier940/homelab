@@ -1,0 +1,39 @@
+# MinIO Operator Development Environment Configuration
+# Console UI
+console:
+  enabled: true
+  replicas: 1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    host: minio-console.k8s.local
+    path: /
+    tls: []
+
+# Operator configuration
+operator:
+  image:
+    repository: docker.io/minio/operator
+    tag: v7.1.1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  replicaCount: 1
+
+# Tenant configuration (will be created separately)
+tenants: []

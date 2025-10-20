@@ -1,0 +1,163 @@
+# kube-prometheus-stack Development Environment Configuration
+
+# Prometheus
+prometheus:
+  enabled: true
+  prometheusSpec:
+    replicas: 1
+    retention: 7d
+    retentionSize: "15GB"
+
+    # Storage configuration
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+    # ServiceMonitor auto-discovery
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+    # Resources for development
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+
+# Grafana
+grafana:
+  enabled: true
+  replicas: 1
+  adminPassword: "admin" # Development environment
+
+  # Timezone and locale settings
+  grafana.ini:
+    server:
+      root_url: "http://grafana.k8s.local"
+    users:
+      default_theme: dark
+      default_timezone: Asia/Tokyo
+    date_formats:
+      default_timezone: Asia/Tokyo
+
+  # Install plugins for S3/MinIO log access
+  plugins:
+    - yesoreyeram-infinity-datasource
+
+  # Data sources - disable default and configure manually
+  sidecar:
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: false
+
+  additionalDataSources:
+    - name: Prometheus
+      type: prometheus
+      uid: prometheus
+      access: proxy
+      url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc:9090
+      isDefault: true
+      jsonData:
+        httpMethod: POST
+        timeInterval: 30s
+    - name: Loki
+      type: loki
+      uid: loki
+      access: proxy
+      url: http://loki-gateway.kube-prometheus-stack.svc.cluster.local
+      jsonData:
+        maxLines: 1000
+
+  # Dashboards
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  dashboards:
+    default:
+      node-exporter:
+        gnetId: 1860
+        revision: 31
+        datasource: Prometheus
+      kubernetes-cluster:
+        gnetId: 7249
+        revision: 1
+        datasource: Prometheus
+      kubernetes-pods:
+        gnetId: 6417
+        revision: 1
+        datasource: Prometheus
+      cilium-metrics:
+        gnetId: 16611
+        revision: 1
+        datasource: Prometheus
+
+  # Ingress
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - grafana.k8s.local
+
+  # Resources
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# AlertManager
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    replicas: 1
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+# node-exporter
+nodeExporter:
+  enabled: true
+
+# kube-state-metrics
+kubeStateMetrics:
+  enabled: true
+
+# kubelet
+kubelet:
+  enabled: true
+  serviceMonitor:
+    interval: 30s
+
+# Prometheus Operator
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

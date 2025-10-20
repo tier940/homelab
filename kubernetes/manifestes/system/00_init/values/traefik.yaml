@@ -1,0 +1,103 @@
+# Traefik Development Environment Configuration
+deployment:
+  replicas: 1
+
+# Providers
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+  kubernetesIngress:
+    enabled: true
+    publishedService:
+      enabled: true
+
+# Entry Points
+ports:
+  web:
+    port: 8000
+    expose:
+      default: true
+    exposedPort: 80
+    protocol: TCP
+    # Redirect HTTP to HTTPS
+    redirectTo:
+      port: websecure
+      priority: 10
+
+  websecure:
+    port: 8443
+    expose:
+      default: true
+    exposedPort: 443
+    protocol: TCP
+    tls:
+      enabled: true
+      # Use cert-manager generated certificate as default
+      certResolver: ""
+      domains: []
+
+  # TCP/UDP ports for services (CoreDNS, Vector, etc.)
+  dns-tcp:
+    port: 5353
+    expose:
+      default: true
+    protocol: TCP
+
+  dns-udp:
+    port: 5353
+    expose:
+      default: true
+    protocol: UDP
+
+  vector-tcp:
+    port: 6000
+    expose:
+      default: true
+    protocol: TCP
+
+# Service Configuration
+service:
+  enabled: true
+  type: LoadBalancer
+  annotations:
+    io.cilium/lb-ipam-ips: "10.0.0.230"
+  spec: {}
+
+# Resources for development environment
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# Metrics for Prometheus integration
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+
+# Logging
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+    format: json
+
+# Install CRDs
+installCRDs: true
+
+# Dashboard
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.k8s.local`)
+    entryPoints: ["web"]

@@ -15,11 +15,11 @@ genv:
     etcd:
       version: "3.6.5"
   kubernetes:
-    kube_version: 1.34
-    crio_version: 1.34
+    kube_version: 1.33
+    crio_version: 1.33
     high_availability: true
     kubeadm:
-      kube_version: 1.34.1
+      kube_version: 1.33.5
       skip_phases: ["addon/kube-proxy"]
       networking:
         serviceSubnet: 100.96.0.0/16

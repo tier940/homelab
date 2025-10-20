@@ -1,0 +1,17 @@
+repositories:
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+helmDefaults:
+  createNamespace: true
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: cert-manager
+    namespace: cert-manager
+    chart: jetstack/cert-manager
+    version: v1.19.1
+    values:
+      - values/cert-manager.yaml
+    timeout: 600
