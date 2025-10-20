@@ -1,6 +1,9 @@
 # Vector Development Environment Configuration
 role: Agent
 
+image:
+  repository: docker.io/timberio/vector
+
 # ConfigMap
 customConfig:
   data_dir: /var/lib/vector
@@ -22,7 +25,7 @@ customConfig:
       type: internal_metrics
 
   transforms:
-    # Add labels
+    # Add labels for metrics
     add_labels:
       type: remap
       inputs: ["host_metrics", "internal_metrics"]
@@ -30,22 +33,82 @@ customConfig:
         .tags.environment = "dev"
         .tags.cluster = "dev-cluster"
 
+    # Parse and structure Kubernetes logs
+    parse_logs:
+      type: remap
+      inputs: ["kubernetes_logs"]
+      source: |
+        # Parse JSON logs if possible
+        if is_string(.message) {
+          parsed, err = parse_json(.message)
+          if err == null {
+            ., err = merge(., parsed)
+          }
+        }
+
+        # Add standard fields for Grafana
+        .cluster = "dev-cluster"
+        .environment = "dev"
+
+        # Extract log level if present
+        if exists(.level) {
+          .log_level = downcase(string!(.level))
+        } else if exists(.severity) {
+          .log_level = downcase(string!(.severity))
+        } else {
+          .log_level = "info"
+        }
+
+        # Ensure namespace and pod labels exist
+        .namespace = .kubernetes.pod_namespace || "unknown"
+        .pod = .kubernetes.pod_name || "unknown"
+        .container = .kubernetes.container_name || "unknown"
+
   sinks:
-    # Prometheus Remote Write
+    # Prometheus Remote Write for metrics
     prometheus:
       type: prometheus_remote_write
       inputs: ["add_labels"]
-      endpoint: "http://kube-prometheus-stack-prometheus.monitoring:9090/api/v1/write"
+      endpoint: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090/api/v1/write"
       compression: snappy
       healthcheck:
         enabled: true
 
-    # Console output (development)
-    console:
-      type: console
-      inputs: ["kubernetes_logs"]
+    # MinIO S3 for logs (replacing Loki)
+    minio_logs:
+      type: aws_s3
+      inputs: ["parse_logs"]
+      bucket: loki
+      region: us-east-1
+      endpoint: "https://minio.minio-tenant.svc.cluster.local"
+      auth:
+        access_key_id: "${MINIO_ACCESS_KEY_ID}"
+        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
+
+      # TLS settings for self-signed certificates (development)
+      tls:
+        verify_certificate: false
+        verify_hostname: false
+
+      # Compression for storage efficiency
+      compression: gzip
+
+      # Organize logs by date
+      # Note: namespace and pod info are included in the log content itself
+      key_prefix: "logs/dt=%F/"
+
+      # Batch settings for performance
+      batch:
+        max_bytes: 10485760 # 10MB
+        timeout_secs: 300 # 5 minutes
+
+      # Encoding
       encoding:
         codec: json
+        timestamp_format: rfc3339
+
+      healthcheck:
+        enabled: true
 
 # Resources
 resources:
@@ -75,3 +138,16 @@ updateStrategy:
   type: RollingUpdate
   rollingUpdate:
     maxUnavailable: 1
+
+# Environment variables from secrets
+env:
+  - name: MINIO_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: vector-minio-credentials
+        key: access_key_id
+  - name: MINIO_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: vector-minio-credentials
+        key: secret_access_key

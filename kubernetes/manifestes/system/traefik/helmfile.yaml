@@ -1,17 +1,18 @@
----
-# Traefik Ingress Controller Helmfile Configuration
-# TCP/UDP routing support for services that Cilium Gateway API doesn't cover
 repositories:
   - name: traefik
     url: https://traefik.github.io/charts
 
+helmDefaults:
+  createNamespace: true
+
+## Document separator to satisfy Helmfile:
+---
 releases:
   - name: traefik
     namespace: traefik
-    createNamespace: true
     chart: traefik/traefik
     version: 37.1.2
     values:
-      - values/values.yaml
+      - values/traefik.yaml
     wait: true
     timeout: 600

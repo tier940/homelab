@@ -6,8 +6,7 @@ repositories:
 
 releases:
   - name: vector
-    namespace: monitoring
-    createNamespace: true
+    namespace: kube-system
     chart: vector/vector
     version: 0.46.0
     values:

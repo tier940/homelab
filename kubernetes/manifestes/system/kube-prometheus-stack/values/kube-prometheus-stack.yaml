@@ -37,6 +37,20 @@ grafana:
   replicas: 1
   adminPassword: "admin" # Development environment
 
+  # Timezone and locale settings
+  grafana.ini:
+    server:
+      root_url: "http://grafana.k8s.local"
+    users:
+      default_theme: dark
+      default_timezone: Asia/Tokyo
+    date_formats:
+      default_timezone: Asia/Tokyo
+
+  # Install plugins for S3/MinIO log access
+  plugins:
+    - yesoreyeram-infinity-datasource
+
   # Data sources - disable default and configure manually
   sidecar:
     datasources:
@@ -53,12 +67,16 @@ grafana:
       jsonData:
         httpMethod: POST
         timeInterval: 30s
-    - name: Jaeger
-      type: jaeger
-      uid: jaeger
+    - name: MinIO Logs
+      type: yesoreyeram-infinity-datasource
+      uid: minio-logs
       access: proxy
-      url: http://jaeger-query.observability.svc:16686
-      isDefault: false
+      jsonData:
+        auth_method: "basicAuth"
+        tlsSkipVerify: true
+      secureJsonData:
+        basicAuthUser: "admin"
+        basicAuthPassword: "Password123"
 
   # Dashboards
   dashboardProviders:

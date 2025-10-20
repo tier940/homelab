@@ -1,0 +1,74 @@
+repositories:
+  - name: cilium
+    url: https://helm.cilium.io
+  - name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
+  - name: localpath
+    url: https://charts.containeroo.ch
+  - name: external-dns
+    url: https://kubernetes-sigs.github.io/external-dns
+  - name: minio-operator
+    url: https://operator.min.io/
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+
+helmDefaults:
+  createNamespace: true
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: cilium
+    chart: cilium/cilium
+    namespace: kube-system
+    version: 1.18.2
+    values:
+      - values/cilium.yaml
+
+  - name: metrics-server
+    namespace: metrics-server
+    chart: metrics-server/metrics-server
+    version: 3.13.0
+    values:
+      - values/metrics-server.yaml
+
+  - name: local-path-provisioner
+    namespace: local-path-provisioner
+    chart: localpath/local-path-provisioner
+    version: 0.0.32
+    values:
+      - values/localpath.yaml
+    wait: true
+    timeout: 300
+
+  - name: external-dns
+    namespace: external-dns
+    chart: external-dns/external-dns
+    version: 1.19.0
+    values:
+      - values/external-dns.yaml
+
+  - name: minio-operator
+    namespace: minio-operator
+    chart: minio-operator/operator
+    version: 7.1.1
+    values:
+      - values/minio-operator.yaml
+    wait: true
+    timeout: 600
+
+  - name: prometheus-operator-crds
+    namespace: kube-prometheus-stack
+    chart: prometheus-community/prometheus-operator-crds
+    version: 24.0.1
+    wait: true
+    timeout: 600
+
+  - name: traefik
+    namespace: traefik
+    chart: traefik/traefik-crds
+    version: 1.11.1
+    wait: true
+    timeout: 600

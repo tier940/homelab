@@ -6,7 +6,7 @@ tenant:
   secrets:
     name: storage-secret
     accessKey: admin
-    secretKey: DevPassword123
+    secretKey: Password123
 
   # Pools configuration
   pools:
@@ -32,6 +32,11 @@ tenant:
 
   # Disable auto-cert for development
   requestAutoCert: false
+
+  # Environment variables
+  env:
+    - name: MINIO_BROWSER
+      value: "on"
 
 # Ingress for MinIO Console
 ingress:
