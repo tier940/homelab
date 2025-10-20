@@ -15,7 +15,7 @@ operator:
     image:
       registry: docker.io
       repository: docker
-      tag: "20.10"
+      tag: "28.5"
 
     resources:
       limits:
