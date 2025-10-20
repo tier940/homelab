@@ -1,0 +1,62 @@
+# Jaeger Operator Development Environment Configuration
+jaeger:
+  create: true
+  spec:
+    strategy: allInOne
+    allInOne:
+      image: jaegertracing/all-in-one:1.65.0
+      options:
+        memory:
+          max-traces: 10000
+
+    storage:
+      type: memory
+
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - jaeger.k8s.local
+
+    agent:
+      strategy: DaemonSet
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+    query:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+
+# Operator configuration
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# RBAC configuration
+rbac:
+  create: true
+  clusterRole: true
+
+# Service Account
+serviceAccount:
+  create: true
+  name: jaeger-operator
+
+# Webhook configuration
+webhook:
+  service:
+    create: true

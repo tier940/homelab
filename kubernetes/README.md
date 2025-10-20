@@ -9,8 +9,6 @@ kubectl apply -k ./manifestes/system/cilium/manifest/
 
 helmfile apply -f ./manifestes/system/external-dns/
 helmfile apply -f ./manifestes/system/kubernetes-dashboard/
-
-helmfile apply -f ./manifestes/fluent-operator/
 ```
 
 ### kubernetes-dashboard

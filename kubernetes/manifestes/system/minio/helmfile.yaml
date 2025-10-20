@@ -1,0 +1,28 @@
+---
+# MinIO S3-Compatible Storage Helmfile Configuration
+repositories:
+  - name: minio-operator
+    url: https://operator.min.io/
+
+releases:
+  - name: minio-operator
+    namespace: minio-operator
+    createNamespace: true
+    chart: minio-operator/operator
+    version: 7.1.1
+    values:
+      - values/operator-values.yaml
+    wait: true
+    timeout: 600
+
+  - name: minio-tenant
+    namespace: minio-tenant
+    createNamespace: true
+    chart: minio-operator/tenant
+    version: 7.1.1
+    values:
+      - values/tenant-values.yaml
+    wait: true
+    timeout: 600
+    needs:
+      - minio-operator/minio-operator

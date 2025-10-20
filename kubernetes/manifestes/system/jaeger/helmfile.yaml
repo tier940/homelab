@@ -1,0 +1,16 @@
+---
+# Jaeger Distributed Tracing Helmfile Configuration
+repositories:
+- name: jaegertracing
+  url: https://jaegertracing.github.io/helm-charts
+
+releases:
+- name: jaeger-operator
+  namespace: observability
+  createNamespace: true
+  chart: jaegertracing/jaeger-operator
+  version: 2.57.0
+  values:
+  - values/values.yaml
+  wait: true
+  timeout: 600

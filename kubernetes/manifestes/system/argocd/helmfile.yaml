@@ -1,0 +1,16 @@
+---
+# ArgoCD GitOps Helmfile Configuration
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+  - name: argocd
+    namespace: argocd
+    createNamespace: true
+    chart: argo/argo-cd
+    version: 7.7.15
+    values:
+      - values/values.yaml
+    wait: true
+    timeout: 600

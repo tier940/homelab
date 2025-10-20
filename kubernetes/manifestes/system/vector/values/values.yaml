@@ -1,0 +1,77 @@
+# Vector Development Environment Configuration
+role: Agent
+
+# ConfigMap
+customConfig:
+  data_dir: /var/lib/vector
+
+  sources:
+    # Kubernetes logs
+    kubernetes_logs:
+      type: kubernetes_logs
+
+    # Host metrics
+    host_metrics:
+      type: host_metrics
+      filesystem:
+        devices:
+          excludes: ["binfmt_misc"]
+
+    # Vector internal metrics
+    internal_metrics:
+      type: internal_metrics
+
+  transforms:
+    # Add labels
+    add_labels:
+      type: remap
+      inputs: ["host_metrics", "internal_metrics"]
+      source: |
+        .tags.environment = "dev"
+        .tags.cluster = "dev-cluster"
+
+  sinks:
+    # Prometheus Remote Write
+    prometheus:
+      type: prometheus_remote_write
+      inputs: ["add_labels"]
+      endpoint: "http://kube-prometheus-stack-prometheus.monitoring:9090/api/v1/write"
+      compression: snappy
+      healthcheck:
+        enabled: true
+
+    # Console output (development)
+    console:
+      type: console
+      inputs: ["kubernetes_logs"]
+      encoding:
+        codec: json
+
+# Resources
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# Service for metrics
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+
+# Tolerations for DaemonSet
+tolerations:
+  - operator: Exists
+
+# Update strategy
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1

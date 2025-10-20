@@ -1,0 +1,48 @@
+# MinIO Tenant Development Environment Configuration
+tenant:
+  name: dev-storage
+
+  # Root credentials
+  secrets:
+    name: storage-secret
+    accessKey: admin
+    secretKey: DevPassword123
+
+  # Pools configuration
+  pools:
+    - servers: 1
+      name: pool-0
+      volumesPerServer: 1
+      size: 10Gi
+      storageClassName: local-path
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
+  # Buckets to create
+  buckets:
+    - name: prometheus
+    - name: loki
+    - name: grafana
+    - name: backup
+
+  # Disable auto-cert for development
+  requestAutoCert: false
+
+# Ingress for MinIO Console
+ingress:
+  api:
+    enabled: true
+    ingressClassName: traefik
+    host: minio-api.k8s.local
+    tls: []
+
+  console:
+    enabled: true
+    ingressClassName: traefik
+    host: minio-console.k8s.local
+    tls: []

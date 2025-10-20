@@ -1,0 +1,91 @@
+# ArgoCD GitOps Development Environment Configuration
+global:
+  image:
+    tag: v2.13.4
+
+# Server configuration
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - argocd.k8s.local
+    paths:
+      - /
+    pathType: Prefix
+    tls: []
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Repository server
+repoServer:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Application controller
+controller:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# Redis
+redis:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# Dex (disabled for dev environment)
+dex:
+  enabled: false
+
+# Application Set Controller
+applicationSet:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# Notifications Controller
+notifications:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+# Config management
+configs:
+  params:
+    # Enable insecure mode for dev environment
+    server.insecure: true
+    # Disable TLS for simplicity in dev
+    reposerver.disable.tls: true
+  repositories: {}
+  secret:
+    createSecret: true

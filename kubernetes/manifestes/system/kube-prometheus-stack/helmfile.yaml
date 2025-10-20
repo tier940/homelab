@@ -1,0 +1,25 @@
+---
+# kube-prometheus-stack Helmfile Configuration
+# Complete monitoring stack with Prometheus, Grafana, AlertManager
+repositories:
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+
+releases:
+  # - name: prometheus-operator-crds
+  #   namespace: kube-prometheus-stack
+  #   createNamespace: true
+  #   chart: prometheus-community/prometheus-operator-crds
+  #   version: 24.0.1
+  #   wait: true
+  #   timeout: 600
+
+  - name: kube-prometheus-stack
+    namespace: kube-prometheus-stack
+    createNamespace: true
+    chart: prometheus-community/kube-prometheus-stack
+    version: 78.3.2
+    values:
+      - values/values.yaml
+    wait: true
+    timeout: 600
