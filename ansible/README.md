@@ -4,7 +4,7 @@
 ```bash
 export ANSIBLE_HOST_KEY_CHECKING=false
 export APPLY_STAGE=dev
-ansible all -m ping -i ./inventory/${APPLY_STAGE}/${USER}.yml
+ansible all -m ping -i ./inventories/${APPLY_STAGE}/${USER}.yml
 unset ANSIBLE_HOST_KEY_CHECKING
 ```
 
@@ -15,32 +15,32 @@ unset ANSIBLE_HOST_KEY_CHECKING
 cp ./group_vars/${APPLY_STAGE}.yml ./group_vars/${USER}.yml
 
 # plan(dry-run)
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./00-all.yml --check --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./00-all.yml --check --diff
 
 # apply
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./00-all.yml --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./00-all.yml --diff
 ```
 
 #### 個別に実行する場合
 ```bash
 # plan(dry-run)
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./01-os-init.yml --check --diff
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./02-basic-vms.yml --check --diff
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./03-kubernetes.yml --check --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./01-os-init.yml --check --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./02-basic-vms.yml --check --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./03-kubernetes.yml --check --diff
 
 # apply
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./01-os-init.yml --diff
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./02-basic-vms.yml --diff
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./03-kubernetes.yml --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./01-os-init.yml --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./02-basic-vms.yml --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./03-kubernetes.yml --diff
 ```
 
 ### 特殊な操作
 ```bash
 # plan(dry-run)
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --check --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --check --diff
 
 # apply
-ansible-playbook -i ./inventory/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --diff
 ```
 
 ### Tips
