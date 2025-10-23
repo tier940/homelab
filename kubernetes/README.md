@@ -6,7 +6,11 @@ kubectl apply -f ./manifestes/system/minio-secret.yaml
 kubectl apply -f ./manifestes/system/coredns-cm.yaml
 
 helmfile apply -f ./manifestes/system/00_init/
+helmfile apply -f ./manifestes/system/cilium/
 kubectl apply -k ./manifestes/system/cilium/manifest/
+
+helmfile apply -f ./manifestes/system/cert-manager/
+kubectl apply -k ./manifestes/system/cert-manager/manifest/
 
 helmfile apply -f ./manifestes/system/minio/
 helmfile apply -f ./manifestes/system/vector/

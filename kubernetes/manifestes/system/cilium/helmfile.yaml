@@ -1,0 +1,18 @@
+repositories:
+  - name: cilium
+    url: https://helm.cilium.io
+
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: cilium
+    chart: cilium/cilium
+    namespace: kube-system
+    version: 1.18.2
+    values:
+      - values/cilium.yaml

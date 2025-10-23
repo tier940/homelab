@@ -85,9 +85,6 @@ logs:
     enabled: true
     format: json
 
-# Install CRDs
-installCRDs: true
-
 # Dashboard
 ingressRoute:
   dashboard:

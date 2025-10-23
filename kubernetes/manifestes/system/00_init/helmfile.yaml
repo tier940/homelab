@@ -1,6 +1,4 @@
 repositories:
-  - name: cilium
-    url: https://helm.cilium.io
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
   - name: localpath
@@ -16,16 +14,21 @@ repositories:
 
 helmDefaults:
   createNamespace: true
+  wait: false
+  timeout: 600
 
 ## Document separator to satisfy Helmfile:
 ---
 releases:
-  - name: cilium
-    chart: cilium/cilium
-    namespace: kube-system
-    version: 1.18.2
-    values:
-      - values/cilium.yaml
+  - name: prometheus-operator-crds
+    namespace: kube-prometheus-stack
+    chart: prometheus-community/prometheus-operator-crds
+    version: 24.0.1
+
+  - name: traefik
+    namespace: traefik
+    chart: traefik/traefik-crds
+    version: 1.11.1
 
   - name: metrics-server
     namespace: metrics-server
@@ -40,8 +43,6 @@ releases:
     version: 0.0.33
     values:
       - values/localpath.yaml
-    wait: true
-    timeout: 300
 
   - name: external-dns
     namespace: external-dns
@@ -56,19 +57,3 @@ releases:
     version: 7.1.1
     values:
       - values/minio-operator.yaml
-    wait: true
-    timeout: 600
-
-  - name: prometheus-operator-crds
-    namespace: kube-prometheus-stack
-    chart: prometheus-community/prometheus-operator-crds
-    version: 24.0.1
-    wait: true
-    timeout: 600
-
-  - name: traefik
-    namespace: traefik
-    chart: traefik/traefik-crds
-    version: 1.11.1
-    wait: true
-    timeout: 600

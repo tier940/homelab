@@ -15,7 +15,6 @@ genv:
     etcd:
       version: "3.6.5"
   kubernetes:
-    kubernetes:
     kube_version: 1.33
     crio_version: 1.33
     high_availability: true

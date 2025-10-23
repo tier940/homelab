@@ -105,7 +105,7 @@ resource "local_file" "inventory" {
 
   directory_permission = "0755"
   file_permission      = "0644"
-  filename             = "../ansible/inventory/${var.tags.stage}/${var.tags.env}.yml"
+  filename             = "../ansible/inventories/${var.tags.stage}/${var.tags.env}.yml"
   content = templatefile("${path.module}/template/ansible/inventory.tpl", {
     base_domain = var.clusters.base_domain
     k8s_domain  = "${local.dns_prefix}.${var.clusters.base_domain}"

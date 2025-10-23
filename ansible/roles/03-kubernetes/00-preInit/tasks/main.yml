@@ -51,12 +51,44 @@
   args:
     creates: /etc/cni/net.d/10-crio-bridge.conflist
 
+- name: Create CRI-O config drop-in directory
+  file:
+    path: /etc/crio/crio.conf.d
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Copy CRI-O short name mode configuration
+  copy:
+    src: 01-shortname.conf
+    dest: /etc/crio/crio.conf.d/01-shortname.conf
+    mode: 0644
+    owner: root
+    group: root
+  register: crio_shortname_changed
+
+- name: Copy registries.conf for CRI-O
+  copy:
+    src: registries.conf
+    dest: /etc/containers/registries.conf
+    mode: 0644
+    owner: root
+    group: root
+  register: registries_conf_changed
+
 - name: Start CRI-O service
   systemd:
     name: crio
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: Restart CRI-O if configuration changed
+  when: crio_shortname_changed.changed or registries_conf_changed.changed
+  systemd:
+    name: crio
+    state: restarted
 
 - name: Start kubelet service
   systemd:
