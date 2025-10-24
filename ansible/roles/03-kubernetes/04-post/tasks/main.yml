@@ -1,0 +1,59 @@
+---
+- name: Generate CoreDNS ConfigMap on local
+  delegate_to: localhost
+  become: false
+  template:
+    src: coredns-cm.yaml.j2
+    dest: output/kubernetes/coredns-cm.yaml
+    mode: "0644"
+
+- name: Generate CoreDNS Deployment patch on local
+  delegate_to: localhost
+  become: false
+  template:
+    src: coredns-deployment-patch.yaml.j2
+    dest: output/kubernetes/coredns-deployment-patch.yaml
+    mode: "0644"
+
+- name: Wait for Kubernetes API server to be ready
+  delegate_to: localhost
+  become: false
+  command: kubectl --kubeconfig=output/kubernetes/admin.conf get nodes
+  register: kubectl_result
+  retries: 30
+  delay: 10
+  until: kubectl_result.rc == 0
+  changed_when: false
+
+- name: Apply CoreDNS ConfigMap
+  delegate_to: localhost
+  become: false
+  command: kubectl --kubeconfig=output/kubernetes/admin.conf apply -f output/kubernetes/coredns-cm.yaml
+  register: coredns_cm_result
+  changed_when: "'configured' in coredns_cm_result.stdout or 'created' in coredns_cm_result.stdout"
+
+- name: Patch CoreDNS Deployment with hostPath volume
+  delegate_to: localhost
+  become: false
+  command: >
+    kubectl --kubeconfig=output/kubernetes/admin.conf patch deployment coredns
+    -n kube-system
+    --patch-file output/kubernetes/coredns-deployment-patch.yaml
+  register: coredns_patch_result
+  changed_when: "'patched' in coredns_patch_result.stdout"
+
+- name: Wait for CoreDNS pods to be ready
+  delegate_to: localhost
+  become: false
+  command: >
+    kubectl --kubeconfig=output/kubernetes/admin.conf wait
+    --for=condition=ready pod
+    -l k8s-app=kube-dns
+    -n kube-system
+    --timeout=300s
+  register: coredns_ready
+  changed_when: false
+
+- name: Display CoreDNS status
+  debug:
+    msg: "CoreDNS has been configured to read /etc/hosts from nodes"

@@ -3,7 +3,6 @@
 ```bash
 kubectl apply -f ./manifestes/system/homelab-admin.yaml
 kubectl apply -f ./manifestes/system/minio-secret.yaml
-kubectl apply -f ./manifestes/system/coredns-cm.yaml
 
 helmfile apply -f ./manifestes/system/00_init/
 helmfile apply -f ./manifestes/system/cilium/

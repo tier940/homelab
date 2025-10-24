@@ -4,7 +4,8 @@ tenant:
 
   # Root credentials - match with minio-secret.yaml
   configSecret:
-    name: minio-credentials
+    name: minio-tenant
+    existingSecret: true
 
   # Pools configuration
   pools:
