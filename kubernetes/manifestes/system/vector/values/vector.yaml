@@ -30,6 +30,7 @@ customConfig:
       # Exclude vector's own logs to avoid recursion
       exclude_paths_glob_patterns:
         - "**/vector-*.log"
+        - "**/*canary*.log"
       extra_label_selector: "vector.dev/exclude!=true"
 
     # Data plane logs - systemd journal for core services
@@ -101,6 +102,40 @@ customConfig:
         .container_name = .kubernetes.container_name || "unknown"
         .node_name = .kubernetes.pod_node_name || "unknown"
 
+        # Extract service/app name from Kubernetes labels
+        .app = .kubernetes.pod_labels."app.kubernetes.io/name" || .kubernetes.pod_labels.app || .container_name
+
+        # Extract service name from pod name by removing hash/index suffix
+        # Handles patterns like:
+        # - Deployment: cert-manager-6dc64ff865-8xhx8 -> cert-manager
+        # - DaemonSet: cilium-envoy-6j474 -> cilium-envoy
+        # - StatefulSet: loki-write-0 -> loki-write
+        # - Static: kube-apiserver-cluster-001 -> kube-apiserver
+
+        # Use a more comprehensive pattern to remove various suffixes
+        .service = string!(.pod_name)
+
+        # Remove Deployment pattern: -[hash]-[hash] (e.g., -6dc64ff865-8xhx8)
+        .service = replace(.service, r'-[a-z0-9]+-[a-z0-9]+$', "")
+
+        # If unchanged, try StatefulSet pattern: -[digits] (e.g., -0, -1, -123)
+        if .service == .pod_name {
+          .service = replace(.service, r'-\d+$', "")
+        }
+
+        # If still unchanged, try DaemonSet pattern: -[5 chars] (e.g., -6j474)
+        # But be careful not to match meaningful parts like "-proxy"
+        if .service == .pod_name {
+          if match(string!(.pod_name), r'-[a-z0-9]{5}$') && !match(string!(.pod_name), r'-(proxy|cache|agent|admin)$') {
+            .service = replace(.service, r'-[a-z0-9]{5}$', "")
+          }
+        }
+
+        # Set default values for fields used in common labels (for consistency across log types)
+        .hostname = .node_name
+        .systemd_unit = "none"
+        .log_source = "kubernetes"
+
         # Get node IP from pod IP or node name
         .node_ip = replace(string!(.node_name), "-", ".")
 
@@ -136,6 +171,14 @@ customConfig:
         # Get host IP from hostname (assuming hostname format like worker-001)
         .host_ip = replace(.hostname, "-", ".")
 
+        # Set default values for fields used in labels
+        .namespace = "system"
+        .pod_name = .hostname
+        .container_name = .systemd_unit
+        .app = .systemd_unit
+        .service = .systemd_unit
+        .log_source = "journald"
+
     # Parse host logs
     parse_host_logs:
       type: remap
@@ -156,12 +199,24 @@ customConfig:
             .log_source = "secure"
           } else if contains(string!(.file), "messages") {
             .log_source = "messages"
+          } else {
+            .log_source = "unknown"
           }
+        } else {
+          .log_source = "unknown"
         }
 
         # Get hostname from environment variable or default
         .hostname = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
         .host_ip = replace(.hostname, "-", ".")
+
+        # Set default values for fields used in labels
+        .namespace = "system"
+        .pod_name = .hostname
+        .container_name = .log_source
+        .app = .log_source
+        .service = .log_source
+        .systemd_unit = "none"
 
     # Add labels for metrics
     add_metrics_labels:
@@ -250,6 +305,16 @@ customConfig:
         cluster: '{{ "{{" }} cluster {{ "}}" }}'
         environment: '{{ "{{" }} environment {{ "}}" }}'
         log_type: '{{ "{{" }} log_type {{ "}}" }}'
+        # Application log labels
+        namespace: '{{ "{{" }} namespace {{ "}}" }}'
+        pod: '{{ "{{" }} pod_name {{ "}}" }}'
+        container: '{{ "{{" }} container_name {{ "}}" }}'
+        app: '{{ "{{" }} app {{ "}}" }}'
+        service: '{{ "{{" }} service {{ "}}" }}'
+        # For dataplane/host logs
+        hostname: '{{ "{{" }} hostname {{ "}}" }}'
+        systemd_unit: '{{ "{{" }} systemd_unit {{ "}}" }}'
+        log_source: '{{ "{{" }} log_source {{ "}}" }}'
       healthcheck:
         enabled: true
 
