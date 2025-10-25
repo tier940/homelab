@@ -25,7 +25,7 @@ releases:
     chart: prometheus-community/prometheus-operator-crds
     version: 24.0.1
 
-  - name: traefik
+  - name: traefik-crds
     namespace: traefik
     chart: traefik/traefik-crds
     version: 1.11.1

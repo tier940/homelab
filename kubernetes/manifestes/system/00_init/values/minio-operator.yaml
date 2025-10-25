@@ -15,8 +15,11 @@ console:
   ingress:
     enabled: true
     ingressClassName: traefik
-    host: minio-console.k8s.local
+    host: minio-operator.k8s.local
     path: /
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
     tls: []
 
 # Operator configuration

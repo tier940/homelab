@@ -4,4 +4,3 @@ namespace: kube-system
 
 resources:
   - clusterissuer.yaml
-  - wildcard-certificate.yaml

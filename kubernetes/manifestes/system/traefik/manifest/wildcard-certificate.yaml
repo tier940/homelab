@@ -1,10 +1,11 @@
 ---
 # Wildcard Certificate for *.k8s.local
+# Managed by Traefik for TLS termination
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: wildcard-k8s-local-tls
-  namespace: cert-manager
+  namespace: traefik
 spec:
   secretName: wildcard-k8s-local-tls
   issuerRef:
