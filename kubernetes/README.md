@@ -16,6 +16,9 @@ helmfile apply -f ./manifestes/system/vector/
 helmfile apply -f ./manifestes/system/traefik/
 helmfile apply -f ./manifestes/system/kubernetes-dashboard/
 helmfile apply -f ./manifestes/system/kube-prometheus-stack/
+
+helmfile apply -f ./manifestes/system/argocd/
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
 ```
 
 ### kubernetes-dashboard

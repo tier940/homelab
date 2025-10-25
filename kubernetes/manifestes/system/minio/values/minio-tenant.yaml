@@ -39,7 +39,7 @@ tenant:
     - name: MINIO_BROWSER
       value: "on"
     - name: MINIO_BROWSER_REDIRECT_URL
-      value: "http://minio-console.k8s.local"
+      value: "https://minio-console.k8s.local"
 
 # Ingress for MinIO Console
 ingress:
@@ -47,7 +47,8 @@ ingress:
     enabled: true
     ingressClassName: traefik
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
     host: minio-api.k8s.local
     tls: []
 
@@ -55,6 +56,7 @@ ingress:
     enabled: true
     ingressClassName: traefik
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
     host: minio-console.k8s.local
     tls: []

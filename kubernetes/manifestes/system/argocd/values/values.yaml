@@ -1,19 +1,13 @@
-# ArgoCD GitOps Development Environment Configuration
-global:
-  image:
-    tag: v2.13.4
-
 # Server configuration
 server:
   ingress:
     enabled: true
     ingressClassName: traefik
-    hosts:
-      - argocd.k8s.local
-    paths:
-      - /
-    pathType: Prefix
-    tls: []
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+    hostname: argocd.k8s.local
+    tls: false
 
   resources:
     requests:
@@ -86,6 +80,11 @@ configs:
     server.insecure: true
     # Disable TLS for simplicity in dev
     reposerver.disable.tls: true
+    # Set the server URL
+    server.url: https://argocd.k8s.local
+  cm:
+    # Server URL for UI redirects
+    url: https://argocd.k8s.local
   repositories: {}
   secret:
     createSecret: true
