@@ -27,10 +27,11 @@ customConfig:
     # Application logs - Kubernetes container logs
     kubernetes_logs:
       type: kubernetes_logs
-      # Exclude vector's own logs to avoid recursion
+      # Exclude vector's own logs and test pods to avoid recursion and noise
       exclude_paths_glob_patterns:
         - "**/vector-*.log"
         - "**/*canary*.log"
+        - "**/loki-canary-*.log"
       extra_label_selector: "vector.dev/exclude!=true"
 
     # Data plane logs - systemd journal for core services
@@ -139,6 +140,27 @@ customConfig:
         # Get node IP from pod IP or node name
         .node_ip = replace(string!(.node_name), "-", ".")
 
+    # Sampling and filtering for application logs
+    sample_application_logs:
+      type: filter
+      inputs: ["parse_application_logs"]
+      condition: |
+        # Always keep ERROR/WARN logs
+        if .log_level == "error" || .log_level == "warn" || .log_level == "warning" {
+          true
+        # Sample 10% of INFO logs
+        } else if .log_level == "info" {
+          rand = random_int(0, 100);
+          rand < 10
+        # Sample 1% of DEBUG/TRACE logs
+        } else if .log_level == "debug" || .log_level == "trace" {
+          rand = random_int(0, 100);
+          rand < 1
+        # Drop everything else
+        } else {
+          false
+        }
+
     # Parse dataplane logs (systemd journal)
     parse_dataplane_logs:
       type: remap
@@ -230,7 +252,7 @@ customConfig:
     # MinIO S3 for application logs
     minio_application_logs:
       type: aws_s3
-      inputs: ["parse_application_logs"]
+      inputs: ["sample_application_logs"]
       bucket: loki
       region: us-east-1
       endpoint: "http://minio.minio-tenant.svc.cluster.local"
@@ -294,10 +316,10 @@ customConfig:
     loki:
       type: loki
       inputs:
-        - parse_application_logs
+        - sample_application_logs
         - parse_dataplane_logs
         - parse_host_logs
-      endpoint: "http://loki-gateway.kube-prometheus-stack.svc.cluster.local"
+      endpoint: "http://loki.kube-prometheus-stack.svc.cluster.local:3100"
       encoding:
         codec: json
       labels:
