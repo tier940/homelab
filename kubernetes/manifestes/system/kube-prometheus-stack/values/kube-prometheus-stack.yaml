@@ -71,7 +71,7 @@ grafana:
       type: loki
       uid: loki
       access: proxy
-      url: http://loki-gateway.kube-prometheus-stack.svc.cluster.local
+      url: http://loki.kube-prometheus-stack.svc.cluster.local:3100
       jsonData:
         maxLines: 1000
 
@@ -118,14 +118,14 @@ grafana:
       traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
 
-  # Resources
+  # Resources - increased for Loki queries
   resources:
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 200m
+      memory: 256Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 2Gi
 
 # AlertManager
 alertmanager:
