@@ -1,7 +1,8 @@
 # Loki configuration for MinIO S3 backend
+# Using SingleBinary mode for simplicity in dev environment
 
 # Deployment mode
-deploymentMode: SimpleScalable
+deploymentMode: SingleBinary
 
 loki:
   # Auth enabled
@@ -45,38 +46,39 @@ loki:
     max_query_lookback: 168h
     volume_enabled: true
 
-# Gateway
-gateway:
-  enabled: true
+# SingleBinary configuration
+singleBinary:
   replicas: 1
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
 
-# Backend (write)
+# Disable SimpleScalable components
 backend:
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: local-path
-    size: 10Gi
-
-# Read
+  replicas: 0
 read:
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: local-path
-    size: 10Gi
-
-# Write
+  replicas: 0
 write:
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: local-path
-    size: 10Gi
+  replicas: 0
 
-# Monitoring
+# Disable test components
+test:
+  enabled: false
+
+lokiCanary:
+  enabled: false
+
+# Monitoring dashboards and rules (optional)
 monitoring:
-  selfMonitoring:
+  dashboards:
     enabled: false
-    grafanaAgent:
-      installOperator: false
+  rules:
+    enabled: false
