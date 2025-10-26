@@ -30,18 +30,16 @@ customConfig:
       # Exclude vector's own logs and test pods to avoid recursion and noise
       exclude_paths_glob_patterns:
         - "**/vector-*.log"
-        - "**/*canary*.log"
-        - "**/loki-canary-*.log"
       extra_label_selector: "vector.dev/exclude!=true"
 
     # Data plane logs - systemd journal for core services
-    dataplane_docker:
+    dataplane_logs:
       type: journald
       journal_directory: /var/log/journal
       current_boot_only: true
       include_units:
-        - docker.service
-        - containerd.service
+        - sshd.service
+        - crio.service
         - kubelet.service
 
     # Host logs - system logs
@@ -165,7 +163,7 @@ customConfig:
     parse_dataplane_logs:
       type: remap
       inputs:
-        - "dataplane_docker"
+        - "dataplane_logs"
       source: |
         .log_type = "dataplane"
         .cluster = "dev-cluster"
