@@ -30,20 +30,58 @@ https://localhost:8443/
 ```
 
 ### Tips
-- 各種のvalue.yamlは以下のリポジトリから取得することができる
+- 各種のvalue.yamlはhelmコマンドで確認できる
 
-#### cilium
-- ciliumのテンプレートvalue
-> https://github.com/cilium/cilium/tree/main/install/kubernetes/cilium
+#### ネットワーク関連
+```bash
+# Cilium CNI
+helm show values cilium/cilium --version X.Y.Z
 
-#### external-dns
-- external-dnsのテンプレートvalue
-> https://github.com/kubernetes-sigs/external-dns/tree/master/charts/external-dns
+# Traefik Ingress Controller
+helm show values traefik/traefik --version X.Y.Z
+helm show values traefik/traefik-crds --version X.Y.Z
 
-#### kubernetes-dashboard
-- kubernetes-dashboardのテンプレートvalue
-> https://github.com/kubernetes/dashboard/tree/master/charts/kubernetes-dashboard
+# External DNS
+helm show values external-dns/external-dns --version X.Y.Z
+```
 
+#### 監視・ログ関連
+```bash
+# Prometheus Stack
+helm show values prometheus-community/kube-prometheus-stack --version X.Y.Z
+helm show values prometheus-community/prometheus-operator-crds --version X.Y.Z
+
+# Loki (ログ集約)
+helm show values grafana/loki --version X.Y.Z
+
+# Vector (ログルーター)
+helm show values vector/vector --version X.Y.Z
+```
+
+#### ストレージ関連
+```bash
+# Local Path Provisioner
+helm show values localpath/local-path-provisioner --version X.Y.Z
+
+# MinIO (S3互換オブジェクトストレージ)
+helm show values minio-operator/operator --version X.Y.Z
+helm show values minio-operator/tenant --version X.Y.Z
+```
+
+#### 管理ツール関連
+```bash
+# ArgoCD (GitOps)
+helm show values argo/argo-cd --version X.Y.Z
+
+# Kubernetes Dashboard
+helm show values kubernetes-dashboard/kubernetes-dashboard --version X.Y.Z
+
+# Cert Manager (証明書管理)
+helm show values jetstack/cert-manager --version X.Y.Z
+
+# Metrics Server
+helm show values metrics-server/metrics-server --version X.Y.Z
+```
 
 ##### Tips
 ```bash
