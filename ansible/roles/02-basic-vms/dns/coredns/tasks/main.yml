@@ -93,11 +93,6 @@
     group: root
     mode: 0644
 
-- name: "[DNS] Copy kubernetes admin.conf"
-  copy:
-    src: ./output/kubernetes/admin.conf
-    dest: /etc/coredns/kubeconfig
-
 - name: "[DNS] Remove resolv.conf"
   file:
     path: /etc/resolv.conf
