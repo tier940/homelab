@@ -21,7 +21,7 @@ releases:
   - name: loki
     namespace: kube-prometheus-stack
     chart: grafana/loki
-    version: 6.44.0
+    version: 6.45.2
     values:
       - values/loki.yaml
     wait: true
