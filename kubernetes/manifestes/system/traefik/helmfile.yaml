@@ -4,6 +4,8 @@ repositories:
 
 helmDefaults:
   createNamespace: true
+  wait: true
+  timeout: 600
 
 ## Document separator to satisfy Helmfile:
 ---
@@ -14,5 +16,3 @@ releases:
     version: 37.2.0
     values:
       - values/traefik.yaml
-    wait: true
-    timeout: 600

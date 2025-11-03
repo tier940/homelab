@@ -1,9 +1,14 @@
----
-# Vector Log Aggregation Helmfile Configuration
 repositories:
   - name: vector
     url: https://helm.vector.dev
 
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
 releases:
   - name: vector
     namespace: kube-system
@@ -11,5 +16,3 @@ releases:
     version: 0.46.0
     values:
       - values/vector.yaml
-    wait: true
-    timeout: 600

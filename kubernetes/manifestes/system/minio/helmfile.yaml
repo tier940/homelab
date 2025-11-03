@@ -4,6 +4,8 @@ repositories:
 
 helmDefaults:
   createNamespace: true
+  wait: true
+  timeout: 600
 
 ## Document separator to satisfy Helmfile:
 ---
@@ -15,5 +17,3 @@ releases:
     version: 7.1.1
     values:
       - values/minio-tenant.yaml
-    wait: true
-    timeout: 600

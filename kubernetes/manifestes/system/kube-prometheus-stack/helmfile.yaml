@@ -1,28 +1,28 @@
----
-# kube-prometheus-stack Helmfile Configuration
-# Complete monitoring stack with Prometheus, Grafana, AlertManager, Loki
 repositories:
   - name: prometheus-community
     url: https://prometheus-community.github.io/helm-charts
   - name: grafana
     url: https://grafana.github.io/helm-charts
 
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
 releases:
   - name: kube-prometheus-stack
     namespace: kube-prometheus-stack
     createNamespace: true
     chart: prometheus-community/kube-prometheus-stack
-    version: 78.5.0
+    version: 79.1.1
     values:
       - values/kube-prometheus-stack.yaml
-    wait: true
-    timeout: 600
 
   - name: loki
     namespace: kube-prometheus-stack
     chart: grafana/loki
-    version: 6.44.0
+    version: 6.45.2
     values:
       - values/loki.yaml
-    wait: true
-    timeout: 600

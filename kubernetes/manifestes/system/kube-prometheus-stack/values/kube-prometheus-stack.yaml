@@ -35,7 +35,12 @@ prometheus:
 grafana:
   enabled: true
   replicas: 1
-  adminPassword: "admin" # Development environment
+  adminUser: "admin"
+  admin:
+    ## Name of the secret. Can be templated.
+    existingSecret: "grafana-admin-credentials"
+    userKey: admin-user
+    passwordKey: admin-password
 
   # Timezone and locale settings
   grafana.ini:

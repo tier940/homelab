@@ -4,6 +4,8 @@ repositories:
 
 helmDefaults:
   createNamespace: true
+  wait: true
+  timeout: 600
 
 ## Document separator to satisfy Helmfile:
 ---
