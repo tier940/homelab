@@ -18,6 +18,13 @@ prometheus:
             requests:
               storage: 20Gi
 
+    # Thanos sidecar for MinIO/S3 object storage
+    thanos:
+      objectStorageConfig:
+        existingSecret:
+          name: thanos-objstore-config
+          key: objstore.yml
+
     # ServiceMonitor auto-discovery
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
@@ -41,6 +48,15 @@ grafana:
     existingSecret: "grafana-admin-credentials"
     userKey: admin-user
     passwordKey: admin-password
+
+  # Persistence configuration for dashboards and data
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: local-path
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
 
   # Timezone and locale settings
   grafana.ini:
