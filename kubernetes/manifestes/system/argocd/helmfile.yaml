@@ -1,9 +1,14 @@
----
-# ArgoCD GitOps Helmfile Configuration
 repositories:
   - name: argo
     url: https://argoproj.github.io/argo-helm
 
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
 releases:
   - name: argocd
     namespace: argocd
@@ -12,5 +17,3 @@ releases:
     version: 9.0.5
     values:
       - values/values.yaml
-    wait: true
-    timeout: 600
