@@ -1,7 +1,5 @@
 image:
   repository: docker.io/rcourtman/pulse
-  tag: "v4.25.0"
-  pullPolicy: IfNotPresent
 
 ingress:
   enabled: true
