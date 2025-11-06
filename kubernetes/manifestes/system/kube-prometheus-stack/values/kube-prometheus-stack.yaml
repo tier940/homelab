@@ -79,22 +79,28 @@ grafana:
       defaultDatasourceEnabled: false
 
   additionalDataSources:
-    - name: Prometheus
+    - name: "SelfHost Prometheus"
       type: prometheus
-      uid: prometheus
+      uid: self_prometheus
+      url: http://10.0.0.18:9090
+      isDefault: false
+      jsonData:
+        httpMethod: POST
+        timeInterval: 30s
+    - name: "K8S Prometheus"
+      type: prometheus
+      uid: k8s_prometheus
       access: proxy
       url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc:9090
       isDefault: true
       jsonData:
         httpMethod: POST
         timeInterval: 30s
-    - name: Loki
+    - name: "K8S Loki"
       type: loki
-      uid: loki
+      uid: k8s_loki
       access: proxy
       url: http://loki.kube-prometheus-stack.svc.cluster.local:3100
-      jsonData:
-        maxLines: 1000
 
   # Dashboards
   dashboardProviders:
@@ -112,22 +118,10 @@ grafana:
 
   dashboards:
     default:
-      node-exporter:
-        gnetId: 1860
-        revision: 31
-        datasource: Prometheus
-      kubernetes-cluster:
-        gnetId: 7249
-        revision: 1
-        datasource: Prometheus
-      kubernetes-pods:
-        gnetId: 6417
-        revision: 1
-        datasource: Prometheus
-      cilium-metrics:
-        gnetId: 16611
-        revision: 1
-        datasource: Prometheus
+      selfhost-coredns:
+        gnetId: 14981
+        revision: 2
+        datasource: "SelfHost Prometheus"
 
   # Ingress
   ingress:
