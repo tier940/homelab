@@ -1,0 +1,22 @@
+image:
+  repository: docker.io/rcourtman/pulse
+  tag: "v4.25.0"
+  pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+  hosts:
+    - host: pulse.k8s.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+server:
+  env:
+    - name: TZ
+      value: Asia/Tokyo

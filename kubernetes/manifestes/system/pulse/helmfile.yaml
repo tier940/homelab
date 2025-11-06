@@ -1,0 +1,19 @@
+repositories:
+  - name: pulse
+    url: ghcr.io/rcourtman/pulse-chart
+    oci: true
+
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: pulse
+    namespace: pulse
+    chart: pulse/pulse
+    version: 4.25.0
+    values:
+      - values/pulse.yaml
