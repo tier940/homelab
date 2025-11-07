@@ -5,8 +5,7 @@ After=networking.service
 
 [Service]
 Type=simple
-ExecStart=rclone mount --config=/root/.config/rclone/rclone.conf gdrive: /mnt/gdrive --drive-use-trash=false --allow-other --cache-db-purge --poll-interval 10m --allow-non-empty --fast-list --no-check-dest --ignore-size
-ExecStop=fusermount -u /mnt/gdrive
+ExecStart=rclone mount gdrive: /mnt/gdrive --config=/root/.config/rclone/rclone.conf --drive-use-trash=false --transfers 16 --checkers 8 --tpslimit 100 --allow-other --cache-db-purge --allow-non-empty
 Restart=always
 RestartSec=10
 
