@@ -9,7 +9,7 @@ ingress:
     traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
     traefik.ingress.kubernetes.io/service.serversscheme: https
   hosts:
-    - host: pulse.k8s.local
+    - host: pulse.k8s.tier.f5.si
       paths:
         - path: /
           pathType: Prefix

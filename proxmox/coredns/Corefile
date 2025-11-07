@@ -1,16 +1,16 @@
 .:53 {
   bind 0.0.0.0 ::
+  prometheus :9153
   errors
   health {
     lameduck 5s
   }
   ready
   log
-  prometheus :9253
 
-  etcd k8s.local {
+  etcd k8s.tier.f5.si {
     path /skydns
-    endpoint http://10.0.8.1:2379
+    endpoint http://10.0.0.201:2379
   }
 
   etcd tier.f5.si {

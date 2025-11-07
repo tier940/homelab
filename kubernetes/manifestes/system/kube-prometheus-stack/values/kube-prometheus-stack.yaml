@@ -61,7 +61,7 @@ grafana:
   # Timezone and locale settings
   grafana.ini:
     server:
-      root_url: "https://grafana.k8s.local"
+      root_url: "https://grafana.k8s.tier.f5.si"
     users:
       default_theme: dark
       default_timezone: Asia/Tokyo
@@ -128,7 +128,7 @@ grafana:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana.k8s.local
+      - grafana.k8s.tier.f5.si
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd

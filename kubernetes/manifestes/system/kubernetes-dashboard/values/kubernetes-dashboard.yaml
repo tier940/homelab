@@ -105,7 +105,7 @@ app:
     hosts:
       # Keep 'localhost' host only if you want to access Dashboard using 'kubectl port-forward ...' on:
       # https://localhost:8443
-      - dashboard.k8s.local
+      - dashboard.k8s.tier.f5.si
     # - kubernetes.dashboard.domain.com
     ingressClassName: traefik
     # Use only if your ingress controllers support default ingress classes.
@@ -123,7 +123,7 @@ app:
     # does not conflict with gateway route configuration.
     path: /
     issuer:
-      name: selfsigned-issuer
+      # name: selfsigned-issuer
       # Scope determines what kind of issuer annotation will be used on ingress resource
       # - default - adds 'cert-manager.io/issuer'
       # - cluster - adds 'cert-manager.io/cluster-issuer'

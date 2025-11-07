@@ -1866,7 +1866,7 @@ hubble:
       # kubernetes.io/tls-acme: "true"
       className: "traefik"
       hosts:
-        - hubble.k8s.local
+        - hubble.k8s.tier.f5.si
       labels: {}
       tls: []
       #  - secretName: chart-example-tls
