@@ -6,7 +6,7 @@ server:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
       traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
-    hostname: argocd.k8s.local
+    hostname: argocd.k8s.tier.f5.si
     tls: false
 
   resources:
@@ -81,10 +81,10 @@ configs:
     # Disable TLS for simplicity in dev
     reposerver.disable.tls: true
     # Set the server URL
-    server.url: https://argocd.k8s.local
+    server.url: https://argocd.k8s.tier.f5.si
   cm:
     # Server URL for UI redirects
-    url: https://argocd.k8s.local
+    url: https://argocd.k8s.tier.f5.si
   repositories: {}
   secret:
     createSecret: true

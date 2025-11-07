@@ -1,6 +1,6 @@
 ---
-# Wildcard Certificate for *.k8s.local
-# Managed by Traefik for TLS termination
+# Wildcard Certificate for *.k8s.tier.f5.si
+# Managed by cert-manager with Let's Encrypt (Cloudflare DNS-01)
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -9,8 +9,8 @@ metadata:
 spec:
   secretName: wildcard-k8s-local-tls
   issuerRef:
-    name: selfsigned-issuer
+    name: letsencrypt-cloudflare
     kind: ClusterIssuer
   dnsNames:
-    - "*.k8s.local"
-    - "k8s.local"
+    - "*.k8s.tier.f5.si"
+    - "k8s.tier.f5.si"
