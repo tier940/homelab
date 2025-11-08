@@ -62,7 +62,6 @@
     msg: "New kubeadm version: {{ new_kubeadm_version.stdout }}"
 
 - name: Drain control plane node
-  become: no
   delegate_to: localhost
   command: kubectl drain {{ inventory_hostname }} --ignore-daemonsets --delete-emptydir-data
 
@@ -117,17 +116,14 @@
     timeout: 60
 
 - name: Uncordon control plane node
-  become: no
   delegate_to: localhost
   command: kubectl uncordon {{ inventory_hostname }}
 
 - name: Wait for node to be ready
-  become: no
   delegate_to: localhost
   command: kubectl wait --for=condition=Ready node/{{ inventory_hostname }} --timeout=300s
 
 - name: Verify node status
-  become: no
   delegate_to: localhost
   command: kubectl get nodes
   register: nodes_status
