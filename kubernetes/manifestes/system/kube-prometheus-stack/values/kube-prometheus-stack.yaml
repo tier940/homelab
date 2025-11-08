@@ -122,6 +122,10 @@ grafana:
         gnetId: 14981
         revision: 2
         datasource: "SelfHost Prometheus"
+      k8s-traefik:
+        gnetId: 17347
+        revision: 9
+        datasource: "K8S Prometheus"
 
   # Ingress
   ingress:

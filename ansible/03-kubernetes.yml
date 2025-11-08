@@ -28,9 +28,16 @@
   roles:
     - 03-kubernetes/03-join
 
+- name: Pre post installation configuration
+  hosts:
+    - cluster
+  become: yes
+  roles:
+    - 03-kubernetes/04-prePost
+
 - name: Post-installation configuration
   hosts:
     - cluster[0]
   become: no
   roles:
-    - 03-kubernetes/04-post
+    - 03-kubernetes/05-post

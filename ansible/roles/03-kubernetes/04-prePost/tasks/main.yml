@@ -1,0 +1,33 @@
+---
+- name: Check if etcd manifest exists
+  stat:
+    path: /etc/kubernetes/manifests/etcd.yaml
+  register: etcd_manifest
+
+- name: Enable etcd metrics on all interfaces
+  become: true
+  replace:
+    path: /etc/kubernetes/manifests/etcd.yaml
+    regexp: '--listen-metrics-urls=http://127\.0\.0\.1:2381'
+    replace: "--listen-metrics-urls=http://0.0.0.0:2381"
+  when: etcd_manifest.stat.exists
+  register: etcd_metrics_result
+
+- name: Wait for etcd pod to restart with new metrics configuration
+  command: >
+    kubectl --kubeconfig=/etc/kubernetes/admin.conf wait
+    --for=condition=ready pod
+    -l component=etcd
+    -n kube-system
+    --timeout=120s
+  when:
+    - etcd_manifest.stat.exists
+    - etcd_metrics_result.changed
+  changed_when: false
+
+- name: Display etcd metrics status
+  debug:
+    msg: "etcd metrics endpoint has been configured to listen on 0.0.0.0:2381"
+  when:
+    - etcd_manifest.stat.exists
+    - etcd_metrics_result.changed
