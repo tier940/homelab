@@ -1,0 +1,148 @@
+---
+- name: Display current node information
+  debug:
+    msg: "Upgrading first control plane node: {{ inventory_hostname }}"
+
+- name: Get current kubeadm version
+  command: kubeadm version -o short
+  register: current_kubeadm_version
+  changed_when: false
+
+- name: Display current kubeadm version
+  debug:
+    msg: "Current kubeadm version: {{ current_kubeadm_version.stdout }}"
+
+- name: Update Kubernetes repository
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/repodata/repomd.xml.key"
+
+- name: Update CRI-O repository
+  yum_repository:
+    name: cri-o
+    description: CRI-O
+    baseurl: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/repodata/repomd.xml.key"
+
+- name: Update repository cache
+  dnf:
+    update_cache: yes
+
+- name: Temporarily remove package exclusions
+  command: dnf config-manager --save --setopt exclude=
+  changed_when: false
+
+- name: Upgrade kubeadm
+  dnf:
+    name: kubeadm
+    state: latest
+    disable_excludes: kubernetes
+
+- name: Re-apply package exclusions
+  dnf:
+    exclude:
+      - cri-o
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Verify kubeadm version after upgrade
+  command: kubeadm version -o short
+  register: new_kubeadm_version
+  changed_when: false
+
+- name: Display new kubeadm version
+  debug:
+    msg: "New kubeadm version: {{ new_kubeadm_version.stdout }}"
+
+- name: Check upgrade plan
+  command: kubeadm upgrade plan
+  register: upgrade_plan
+  changed_when: false
+
+- name: Display upgrade plan
+  debug:
+    msg: "{{ upgrade_plan.stdout_lines }}"
+
+- name: Drain control plane node
+  become: no
+  delegate_to: localhost
+  command: kubectl drain {{ inventory_hostname }} --ignore-daemonsets --delete-emptydir-data
+  register: drain_result
+
+- name: Apply kubeadm upgrade
+  command: kubeadm upgrade apply v{{ genv.kubernetes.kubeadm.kube_version }} --yes
+  register: upgrade_apply
+
+- name: Display upgrade result
+  debug:
+    msg: "{{ upgrade_apply.stdout_lines }}"
+
+- name: Temporarily remove package exclusions for kubelet and kubectl
+  command: dnf config-manager --save --setopt exclude=
+  changed_when: false
+
+- name: Upgrade CRI-O
+  dnf:
+    name: cri-o
+    state: latest
+    disable_excludes: kubernetes
+
+- name: Upgrade kubelet and kubectl
+  dnf:
+    name:
+      - kubelet
+      - kubectl
+    state: latest
+    disable_excludes: kubernetes
+
+- name: Re-apply package exclusions
+  dnf:
+    exclude:
+      - cri-o
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Restart CRI-O
+  systemd:
+    name: crio
+    state: restarted
+    daemon_reload: yes
+
+- name: Restart kubelet
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+
+- name: Wait for kubelet to be ready
+  wait_for:
+    timeout: 60
+
+- name: Uncordon control plane node
+  become: no
+  delegate_to: localhost
+  command: kubectl uncordon {{ inventory_hostname }}
+
+- name: Wait for node to be ready
+  become: no
+  delegate_to: localhost
+  command: kubectl wait --for=condition=Ready node/{{ inventory_hostname }} --timeout=300s
+
+- name: Verify node status
+  become: no
+  delegate_to: localhost
+  command: kubectl get nodes
+  register: nodes_status
+  changed_when: false
+
+- name: Display nodes status
+  debug:
+    msg: "{{ nodes_status.stdout_lines }}"

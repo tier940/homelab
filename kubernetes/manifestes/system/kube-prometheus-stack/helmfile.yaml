@@ -15,7 +15,7 @@ releases:
   - name: kube-prometheus-stack
     namespace: kube-prometheus-stack
     chart: prometheus-community/kube-prometheus-stack
-    version: 79.2.1
+    version: 79.4.0
     values:
       - values/kube-prometheus-stack.yaml
 
