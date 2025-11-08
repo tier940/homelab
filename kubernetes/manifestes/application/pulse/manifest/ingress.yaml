@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pulse-cf
+  namespace: pulse
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+    - host: pulse.tier.f5.si
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pulse
+                port:
+                  number: 7655

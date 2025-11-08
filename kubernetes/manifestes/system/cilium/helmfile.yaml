@@ -9,10 +9,11 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: kube-system
+
 releases:
   - name: cilium
     chart: cilium/cilium
-    namespace: kube-system
     version: 1.18.3
     values:
       - values/cilium.yaml

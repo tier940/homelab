@@ -9,11 +9,11 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: argocd
+
 releases:
   - name: argocd
-    namespace: argocd
-    createNamespace: true
     chart: argo/argo-cd
     version: 9.0.5
     values:
-      - values/values.yaml
+      - values/argocd.yaml

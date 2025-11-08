@@ -11,16 +11,16 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: kube-prometheus-stack
+
 releases:
   - name: kube-prometheus-stack
-    namespace: kube-prometheus-stack
     chart: prometheus-community/kube-prometheus-stack
     version: 79.4.0
     values:
       - values/kube-prometheus-stack.yaml
 
   - name: loki
-    namespace: kube-prometheus-stack
     chart: grafana/loki
     version: 6.46.0
     values:

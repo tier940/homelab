@@ -9,10 +9,10 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: minio-tenant
+
 releases:
   - name: minio-tenant
-    namespace: minio-tenant
-    createNamespace: true
     chart: minio-operator/tenant
     version: 7.1.1
     values:

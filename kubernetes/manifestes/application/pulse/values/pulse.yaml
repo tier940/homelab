@@ -3,7 +3,7 @@ image:
 
 ingress:
   enabled: true
-  className: "traefik"
+  className: traefik
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd

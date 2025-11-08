@@ -9,11 +9,11 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: cert-manager
+
 releases:
   - name: cert-manager
-    namespace: cert-manager
     chart: jetstack/cert-manager
     version: v1.19.1
     values:
       - values/cert-manager.yaml
-    timeout: 600
