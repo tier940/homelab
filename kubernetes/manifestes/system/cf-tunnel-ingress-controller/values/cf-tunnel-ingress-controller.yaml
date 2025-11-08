@@ -1,0 +1,4 @@
+cloudflare:
+  accountId: "e6ac0e7a12ecfdc4b4a8d7b8dcf08be1"
+  tunnelName: "k8s-ingress-controller"
+  apiToken: "PQeOkbFx0soc51IOUh06gImAz5SB-qneNFl0edII"

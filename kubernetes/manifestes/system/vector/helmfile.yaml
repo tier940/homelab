@@ -9,9 +9,10 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: kube-system
+
 releases:
   - name: vector
-    namespace: kube-system
     chart: vector/vector
     version: 0.47.0
     values:

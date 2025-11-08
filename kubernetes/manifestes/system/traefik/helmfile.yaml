@@ -9,9 +9,10 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: traefik
+
 releases:
   - name: traefik
-    namespace: traefik
     chart: traefik/traefik
     version: 37.2.0
     values:
