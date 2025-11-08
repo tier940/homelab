@@ -48,7 +48,10 @@ terraform version
 ```bash
 cd ./ansible/
 
-pip3 install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv venv ansible --python python3.13
+source ansible/bin/activate
+uv pip install -r requirements.txt
 ```
 
 ### kubenetes
