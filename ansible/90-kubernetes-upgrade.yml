@@ -1,0 +1,24 @@
+---
+- name: Upgrade Kubernetes control plane (first node)
+  hosts:
+    - cluster[0]
+  become: yes
+  serial: 1
+  roles:
+    - 03-kubernetes/05-upgrade/control-plane-first
+
+- name: Upgrade Kubernetes control plane (remaining nodes)
+  hosts:
+    - cluster[1:]
+  become: yes
+  serial: 1
+  roles:
+    - 03-kubernetes/05-upgrade/control-plane-others
+
+- name: Upgrade Kubernetes worker nodes
+  hosts:
+    - worker
+  become: yes
+  serial: 1
+  roles:
+    - 03-kubernetes/05-upgrade/worker-nodes

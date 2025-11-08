@@ -35,12 +35,25 @@ ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./03-kubernetes.yml
 ```
 
 ### 特殊な操作
+#### Workerノード追加
 ```bash
 # plan(dry-run)
 ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --check --diff
 
 # apply
 ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --diff
+```
+
+#### Kubernetesバージョンアップグレード
+- `group_vars/${USER}.yml` の `genv.kubernetes.kube_version` と `genv.kubernetes.kubeadm.kube_version` を更新してから実行する
+- Control planeノード、Workerノードの順に1台ずつアップグレードされる
+
+```bash
+# plan(dry-run) - アップグレード対象の確認
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./90-kubernetes-upgrade.yml --check --diff
+
+# apply - 実際のアップグレード実行
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./90-kubernetes-upgrade.yml --diff
 ```
 
 ### Tips
