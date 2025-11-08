@@ -5,7 +5,7 @@
   become: yes
   serial: 1
   roles:
-    - 03-kubernetes/05-upgrade/control-plane-first
+    - 03-kubernetes/90-upgrade/control-plane-first
 
 - name: Upgrade Kubernetes control plane (remaining nodes)
   hosts:
@@ -13,7 +13,7 @@
   become: yes
   serial: 1
   roles:
-    - 03-kubernetes/05-upgrade/control-plane-others
+    - 03-kubernetes/90-upgrade/control-plane-others
 
 - name: Upgrade Kubernetes worker nodes
   hosts:
@@ -21,4 +21,4 @@
   become: yes
   serial: 1
   roles:
-    - 03-kubernetes/05-upgrade/worker-nodes
+    - 03-kubernetes/90-upgrade/worker-nodes
