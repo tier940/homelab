@@ -1,8 +1,4 @@
 # Traefik Development Environment Configuration
-deployment:
-  replicas: 1
-
-# Providers
 providers:
   kubernetesCRD:
     enabled: true
@@ -91,3 +87,7 @@ ingressRoute:
     enabled: true
     matchRule: Host(`traefik.k8s.tier.f5.si`)
     entryPoints: ["web", "websecure"]
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+      traefik.ingress.kubernetes.io/service.serversscheme: https
+      external-dns.alpha.kubernetes.io/target: "10.0.0.230"

@@ -54,7 +54,10 @@ rbac: # @schema additionalProperties: true
   # -- If `true`, create a `ClusterRole` & `ClusterRoleBinding` with access to the Kubernetes API.
   create: true
   # -- Additional rules to add to the `ClusterRole`.
-  additionalPermissions: []
+  additionalPermissions:
+    - apiGroups: ["traefik.containo.us", "traefik.io"]
+      resources: ["ingressroutes", "ingressroutetcps", "ingressrouteudps"]
+      verbs: ["get", "watch", "list"]
 
 # -- Annotations to add to the `Deployment`.
 deploymentAnnotations: {}
@@ -214,6 +217,7 @@ gatewayNamespace: # @schema type:[string, null]; default: null
 sources:
   - service
   - ingress
+  - traefik-proxy
 
 # -- How DNS records are synchronized between sources and providers; available values are `create-only`, `sync`, & `upsert-only`.
 policy: upsert-only # @schema enum:[create-only, sync, upsert-only]; type:string; default: "upsert-only"
