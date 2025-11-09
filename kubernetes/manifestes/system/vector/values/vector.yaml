@@ -6,7 +6,7 @@ role: Agent
 # Using debian variant to include systemd tools (journalctl) for journald source
 image:
   repository: docker.io/timberio/vector
-  tag: 0.43.1-debian
+  tag: 0.51.0-debian
   pullPolicy: IfNotPresent
 
 # Pod labels
