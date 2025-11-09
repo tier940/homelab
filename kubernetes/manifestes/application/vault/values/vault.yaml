@@ -1,3 +1,8 @@
+# Global settings for Prometheus integration
+global:
+  serverTelemetry:
+    prometheusOperator: true
+
 server:
   # Configure HA mode
   ha:
@@ -13,6 +18,16 @@ server:
           tls_disable = 1
           address = "[::]:8200"
           cluster_address = "[::]:8201"
+          # Enable unauthenticated metrics access for Prometheus
+          telemetry {
+            unauthenticated_metrics_access = "true"
+          }
+        }
+
+        # Prometheus telemetry configuration
+        telemetry {
+          prometheus_retention_time = "30s"
+          disable_hostname = true
         }
 
         storage "raft" {
@@ -48,6 +63,30 @@ server:
     limits:
       memory: 512Mi
       cpu: 500m
+
+  # Auto-unseal on pod start
+  postStart:
+    - /bin/sh
+    - -c
+    - |
+      sleep 10
+      if ! vault status 2>/dev/null | grep -q "Sealed.*false"; then
+        vault operator unseal "$UNSEAL_KEY_1" || true
+        vault operator unseal "$UNSEAL_KEY_2" || true
+        vault operator unseal "$UNSEAL_KEY_3" || true
+      fi
+
+  # Unseal keys from secret
+  extraSecretEnvironmentVars:
+    - envName: UNSEAL_KEY_1
+      secretName: vault-unseal-keys
+      secretKey: unseal-key-1
+    - envName: UNSEAL_KEY_2
+      secretName: vault-unseal-keys
+      secretKey: unseal-key-2
+    - envName: UNSEAL_KEY_3
+      secretName: vault-unseal-keys
+      secretKey: unseal-key-3
 
   # Standalone server configuration
   standalone:

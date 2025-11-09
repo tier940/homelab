@@ -18,6 +18,7 @@ helmfile apply -f ./manifestes/system/argocd/
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
 
 kubectl apply -f ./manifestes/system/homelab-admin.yaml
+kubectl apply -f ./manifestes/system/vault-secret.yaml
 kubectl apply -f ./manifestes/system/minio-secret.yaml
 kubectl apply -f ./manifestes/system/grafana-secret.yaml
 kubectl apply -f ./manifestes/system/thanos-objstore-secret.yaml

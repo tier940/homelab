@@ -136,6 +136,10 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: K8S Prometheus
+      k8s-hashicorp-vault:
+        gnetId: 12904
+        revision: 2
+        datasource: "K8S Prometheus"
 
   # Ingress
   ingress:
