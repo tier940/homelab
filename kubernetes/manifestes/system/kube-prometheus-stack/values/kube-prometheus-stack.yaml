@@ -58,6 +58,10 @@ grafana:
       - ReadWriteOnce
     size: 10Gi
 
+  # Disable init chown container to avoid permission issues with existing PVC
+  initChownData:
+    enabled: false
+
   # Timezone and locale settings
   grafana.ini:
     server:
@@ -126,6 +130,12 @@ grafana:
         gnetId: 17347
         revision: 9
         datasource: "K8S Prometheus"
+      k8s-minio:
+        gnetId: 13502
+        revision: 26
+        datasource:
+          - name: DS_PROMETHEUS
+            value: K8S Prometheus
 
   # Ingress
   ingress:

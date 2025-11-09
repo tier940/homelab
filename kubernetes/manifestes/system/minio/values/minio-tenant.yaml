@@ -34,10 +34,10 @@ tenant:
       resources:
         requests:
           cpu: 200m
-          memory: 512Mi
+          memory: 768Mi
         limits:
           cpu: 1000m
-          memory: 2Gi
+          memory: 3Gi
 
   # Buckets to create
   buckets:
@@ -57,6 +57,22 @@ tenant:
       value: "on"
     - name: MINIO_BROWSER_REDIRECT_URL
       value: "https://minio-console.k8s.tier.f5.si"
+    - name: MINIO_PROMETHEUS_AUTH_TYPE
+      value: "public"
+
+  # Prometheus metrics configuration
+  metrics:
+    enabled: true
+    port: 9000
+    protocol: http
+
+  # Enable Prometheus Operator integration (creates ServiceMonitor)
+  prometheusOperator: true
+
+  # Add labels to MinIO services for ServiceMonitor discovery
+  serviceMetadata:
+    minioServiceLabels:
+      metrics: enabled
 
 # Ingress for MinIO Console
 ingress:
@@ -77,3 +93,27 @@ ingress:
       traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
     host: minio-console.k8s.tier.f5.si
     tls: []
+
+# Additional Kubernetes resources
+extraResources:
+  - |
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: {{ .Values.tenant.name }}-metrics
+      namespace: {{ .Release.Namespace }}
+      labels:
+        release: kube-prometheus-stack
+    spec:
+      selector:
+        matchLabels:
+          metrics: enabled
+      namespaceSelector:
+        matchNames:
+          - {{ .Release.Namespace }}
+      endpoints:
+        - port: http-minio
+          interval: 30s
+          scrapeTimeout: 10s
+          path: /minio/v2/metrics/cluster
+          scheme: http

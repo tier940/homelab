@@ -1,0 +1,18 @@
+repositories:
+  - name: hashicorp
+    url: https://helm.releases.hashicorp.com
+
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: vault
+    namespace: vault
+    chart: hashicorp/vault
+    version: 0.28.1
+    values:
+      - values/vault.yaml

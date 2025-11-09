@@ -1,0 +1,91 @@
+server:
+  # Configure HA mode
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+
+          # Automatic snapshots
+          autopilot {
+            cleanup_dead_servers = true
+            last_contact_threshold = "10s"
+            min_quorum = 2
+            server_stabilization_time = "10s"
+          }
+        }
+
+        service_registration "kubernetes" {}
+
+  # Enable Raft storage backend for HA
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    storageClass: local-path
+
+  auditStorage:
+    enabled: true
+    size: 10Gi
+    storageClass: local-path
+
+  # Resource limits
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Standalone server configuration
+  standalone:
+    enabled: false
+
+  # Service configuration
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8200
+    targetPort: 8200
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+    hosts:
+      - host: vault.k8s.tier.f5.si
+        paths:
+          - /
+    tls: []
+
+# UI configuration
+ui:
+  enabled: true
+  serviceType: ClusterIP
+
+# Injector configuration (for Vault sidecar injection)
+injector:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
