@@ -65,6 +65,17 @@ chmod +x /home/${USER}/bin/kubectl_${KUBE_VERSION}/kubectl
 ln -s /home/${USER}/bin/kubectl_${KUBE_VERSION}/kubectl /home/${USER}/bin/kubectl
 ```
 
+#### インストール(ktop)
+- 以下サイトからktopのバイナリをダウンロードする
+```bash
+KTOP_VERSION=v0.4.1
+mkdir -pv /home/${USER}/bin/ktop_${KTOP_VERSION}
+curl -L "https://github.com/vladimirvivien/ktop/releases/download/${KTOP_VERSION}/ktop_${KTOP_VERSION}_linux_amd64.tar.gz" | tar -xz -C /home/${USER}/bin/ktop_${KTOP_VERSION}
+chmod +x /home/${USER}/bin/ktop_${KTOP_VERSION}/ktop
+ln -s /home/${USER}/bin/ktop_${KTOP_VERSION}/ktop /home/${USER}/bin/ktop
+```
+
+
 #### インストール(helm)
 - 以下サイトからhelmのバイナリをダウンロードする
 > https://github.com/helm/helm/releases
