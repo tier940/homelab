@@ -42,7 +42,6 @@ helm show values cilium/cilium --version X.Y.Z
 
 # Traefik Ingress Controller
 helm show values traefik/traefik --version X.Y.Z
-helm show values traefik/traefik-crds --version X.Y.Z
 
 # External DNS
 helm show values external-dns/external-dns --version X.Y.Z
