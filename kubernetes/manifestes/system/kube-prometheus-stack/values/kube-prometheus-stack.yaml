@@ -130,6 +130,10 @@ grafana:
         gnetId: 17347
         revision: 9
         datasource: "K8S Prometheus"
+      k8s-traefik-log:
+        gnetId: 17501
+        revision: 1
+        datasource: "K8S Loki"
       k8s-minio:
         gnetId: 13502
         revision: 26

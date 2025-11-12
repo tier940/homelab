@@ -658,7 +658,7 @@ bpf:
   # -- (bool) Configure the eBPF-based TPROXY (beta) to reduce reliance on iptables rules
   # for implementing Layer 7 policy.
   # @default -- `false`
-  tproxy: ~
+  tproxy: true
   # @schema
   # type: [null, array]
   # @schema
@@ -880,7 +880,7 @@ identityManagementMode: "agent"
 envoyConfig:
   # -- Enable CiliumEnvoyConfig CRD
   # CiliumEnvoyConfig CRD can also be implicitly enabled by other options.
-  enabled: false
+  enabled: true
   # -- SecretsNamespace is the namespace in which envoy SDS will retrieve secrets from.
   secretsNamespace:
     # -- Create secrets namespace for CiliumEnvoyConfig CRDs.
@@ -1185,7 +1185,7 @@ certgen:
   affinity: {}
 hubble:
   # -- Enable Hubble (true by default).
-  enabled: true
+  enabled: false
   # -- Annotations to be added to all top-level hubble objects (resources under templates/hubble)
   annotations: {}
   # -- Buffer size of the channel Hubble uses to receive monitor events. If this
@@ -1488,7 +1488,7 @@ hubble:
       extraIpAddresses: []
   relay:
     # -- Enable Hubble Relay (requires hubble.enabled=true)
-    enabled: true
+    enabled: false
     # -- Roll out Hubble Relay pods automatically when configmap is updated.
     rollOutPods: false
     # -- Specifies the resources for the hubble-relay pods
@@ -1701,7 +1701,7 @@ hubble:
       port: 6062
   ui:
     # -- Whether to enable the Hubble UI.
-    enabled: true
+    enabled: false
     standalone:
       # -- When true, it will allow installing the Hubble UI only, without checking dependencies.
       # It is useful if a cluster already has cilium and Hubble relay installed and you just
@@ -2329,7 +2329,7 @@ prometheus:
 # grafana can import dashboards based on the label and value
 # ref: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-dashboards
 dashboards:
-  enabled: false
+  enabled: true
   label: grafana_dashboard
   # @schema
   # type: [null, string]
@@ -2954,7 +2954,7 @@ operator:
   # grafana can import dashboards based on the label and value
   # ref: https://github.com/grafana/helm-charts/tree/main/charts/grafana#sidecar-for-dashboards
   dashboards:
-    enabled: false
+    enabled: true
     label: grafana_dashboard
     # @schema
     # type: [null, string]
