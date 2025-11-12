@@ -42,8 +42,6 @@ tenant:
   # Buckets to create
   buckets:
     - name: prometheus
-    - name: loki
-    - name: grafana
     - name: backup
 
   # TLS certificate configuration

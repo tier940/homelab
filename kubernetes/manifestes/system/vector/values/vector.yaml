@@ -73,91 +73,79 @@ customConfig:
       type: remap
       inputs: ["kubernetes_logs"]
       source: |
-        # Parse JSON logs if possible
-        if is_string(.message) {
-          parsed, err = parse_json(.message)
-          if err == null {
-            ., err = merge(., parsed)
-          }
-        }
-
-        # Add standard fields
-        .log_type = "application"
-        .cluster = "dev-cluster"
-        .environment = "dev"
-
-        # Extract log level
-        if exists(.level) {
-          .log_level = downcase(string!(.level))
-        } else if exists(.severity) {
-          .log_level = downcase(string!(.severity))
-        } else {
-          .log_level = "info"
-        }
-
-        # Ensure Kubernetes labels exist
+        # Extract fields for labels only (not stored in message)
         .namespace = .kubernetes.pod_namespace || "unknown"
-        .pod_name = .kubernetes.pod_name || "unknown"
-        .container_name = .kubernetes.container_name || "unknown"
-        .node_name = .kubernetes.pod_node_name || "unknown"
+        pod_name = .kubernetes.pod_name || "unknown"
 
-        # Extract service/app name from Kubernetes labels
-        .app = .kubernetes.pod_labels."app.kubernetes.io/name" || .kubernetes.pod_labels.app || .container_name
-
-        # Extract service name from pod name by removing hash/index suffix
-        # Handles patterns like:
-        # - Deployment: cert-manager-6dc64ff865-8xhx8 -> cert-manager
-        # - DaemonSet: cilium-envoy-6j474 -> cilium-envoy
-        # - StatefulSet: loki-write-0 -> loki-write
-        # - Static: kube-apiserver-cluster-001 -> kube-apiserver
-
-        # Use a more comprehensive pattern to remove various suffixes
-        .service = string!(.pod_name)
-
-        # Remove Deployment pattern: -[hash]-[hash] (e.g., -6dc64ff865-8xhx8)
+        # Extract service name from pod name
+        .service = string!(pod_name)
         .service = replace(.service, r'-[a-z0-9]+-[a-z0-9]+$', "")
-
-        # If unchanged, try StatefulSet pattern: -[digits] (e.g., -0, -1, -123)
-        if .service == .pod_name {
+        if .service == pod_name {
           .service = replace(.service, r'-\d+$', "")
         }
-
-        # If still unchanged, try DaemonSet pattern: -[5 chars] (e.g., -6j474)
-        # But be careful not to match meaningful parts like "-proxy"
-        if .service == .pod_name {
-          if match(string!(.pod_name), r'-[a-z0-9]{5}$') && !match(string!(.pod_name), r'-(proxy|cache|agent|admin)$') {
+        if .service == pod_name {
+          if match(string!(pod_name), r'-[a-z0-9]{5}$') {
             .service = replace(.service, r'-[a-z0-9]{5}$', "")
           }
         }
 
-        # Set default values for fields used in common labels (for consistency across log types)
-        .hostname = .node_name
-        .systemd_unit = "none"
+        # Set label values (not stored in JSON to avoid duplication)
         .log_source = "kubernetes"
+        .log_type = "application"
 
-        # Get node IP from pod IP or node name
-        .node_ip = replace(string!(.node_name), "-", ".")
-
-    # Sampling and filtering for application logs
-    sample_application_logs:
-      type: filter
-      inputs: ["parse_application_logs"]
-      condition: |
-        # Always keep ERROR/WARN logs
-        if .log_level == "error" || .log_level == "warn" || .log_level == "warning" {
-          true
-        # Sample 10% of INFO logs
-        } else if .log_level == "info" {
-          rand = random_int(0, 100);
-          rand < 10
-        # Sample 1% of DEBUG/TRACE logs
-        } else if .log_level == "debug" || .log_level == "trace" {
-          rand = random_int(0, 100);
-          rand < 1
-        # Drop everything else
-        } else {
-          false
+        # Parse JSON logs and extract only message + level
+        if is_string(.message) {
+          parsed, err = parse_json(.message)
+          if err == null {
+            if exists(parsed.message) {
+              .message = parsed.message
+            }
+            if exists(parsed.level) {
+              .log_level = downcase(string!(parsed.level))
+            } else if exists(parsed.severity) {
+              .log_level = downcase(string!(parsed.severity))
+            }
+          }
         }
+
+        # Extract log level if not found in JSON
+        if !exists(.log_level) {
+          if exists(.level) {
+            .log_level = downcase(string!(.level))
+          } else if exists(.severity) {
+            .log_level = downcase(string!(.severity))
+          } else {
+            # Try to extract from klog format (e.g., "W1112 09:44:48" or "E1112 09:44:48")
+            msg = string!(.message)
+            if starts_with(msg, "E") {
+              .log_level = "error"
+            } else if starts_with(msg, "W") {
+              .log_level = "warning"
+            } else if starts_with(msg, "I") {
+              .log_level = "info"
+            } else {
+              .log_level = "info"
+            }
+          }
+        }
+
+        # Normalize warn to warning for consistency
+        if .log_level == "warn" {
+          .log_level = "warning"
+        }
+
+        # Store minimal metadata (only fields NOT in labels)
+        .pod = pod_name
+        .container = .kubernetes.container_name
+        .node = .kubernetes.pod_node_name
+        .image = .kubernetes.container_image
+
+        # Remove ALL fields that are already in labels or not needed
+        del(.kubernetes)
+        del(.file)
+        del(.source_type)
+        del(.stream)
+        del(.timestamp_end)
 
     # Parse dataplane logs (systemd journal)
     parse_dataplane_logs:
@@ -166,38 +154,49 @@ customConfig:
         - "dataplane_logs"
       source: |
         .log_type = "dataplane"
-        .cluster = "dev-cluster"
-        .environment = "dev"
-
-        # Extract systemd unit name
-        if exists(._SYSTEMD_UNIT) {
-          .systemd_unit = string!(._SYSTEMD_UNIT)
-        } else {
-          .systemd_unit = "unknown"
-        }
 
         # Rename message field
         if exists(.MESSAGE) {
           .message = string!(.MESSAGE)
         }
 
-        # Extract hostname - prefer journald _HOSTNAME, fallback to env var
-        if exists(._HOSTNAME) {
-          .hostname = string!(._HOSTNAME)
+        # Extract log level from message (e.g., level=info, level=error)
+        if is_string(.message) {
+          msg = string!(.message)
+          if match(msg, r'level=(error|ERROR)') {
+            .log_level = "error"
+          } else if match(msg, r'level=(warn|WARN|warning|WARNING)') {
+            .log_level = "warning"
+          } else if match(msg, r'level=(info|INFO)') {
+            .log_level = "info"
+          } else {
+            .log_level = "info"
+          }
         } else {
-          .hostname = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
+          .log_level = "info"
         }
 
-        # Get host IP from hostname (assuming hostname format like worker-001)
-        .host_ip = replace(.hostname, "-", ".")
+        # Extract hostname for k8s metadata
+        host = ""
+        if exists(._HOSTNAME) {
+          host = string!(._HOSTNAME)
+        } else {
+          host = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
+        }
 
-        # Set default values for fields used in labels
+        # Log source from systemd unit
+        if exists(._SYSTEMD_UNIT) {
+          .log_source = string!(._SYSTEMD_UNIT)
+        } else {
+          .log_source = "journald"
+        }
+
+        # Set values for labels
         .namespace = "system"
-        .pod_name = .hostname
-        .container_name = .systemd_unit
-        .app = .systemd_unit
-        .service = .systemd_unit
-        .log_source = "journald"
+        .service = .log_source
+
+        # Store hostname as field
+        .host = host
 
     # Parse host logs
     parse_host_logs:
@@ -208,8 +207,6 @@ customConfig:
         - "host_messages"
       source: |
         .log_type = "host"
-        .cluster = "dev-cluster"
-        .environment = "dev"
 
         # Determine log source from file path
         if exists(.file) {
@@ -226,95 +223,23 @@ customConfig:
           .log_source = "unknown"
         }
 
-        # Get hostname from environment variable or default
-        .hostname = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
-        .host_ip = replace(.hostname, "-", ".")
+        # Get hostname for k8s metadata
+        host = get_env_var("VECTOR_SELF_NODE_NAME") ?? "unknown"
 
-        # Set default values for fields used in labels
+        # Set values for labels
         .namespace = "system"
-        .pod_name = .hostname
-        .container_name = .log_source
-        .app = .log_source
         .service = .log_source
-        .systemd_unit = "none"
 
-    # Add labels for metrics
-    add_metrics_labels:
-      type: remap
-      inputs: ["internal_metrics"]
-      source: |
-        .tags.environment = "dev"
-        .tags.cluster = "dev-cluster"
+        # Store hostname as field
+        .host = host
+        del(.file)
 
   sinks:
-    # MinIO S3 for application logs
-    minio_application_logs:
-      type: aws_s3
-      inputs: ["sample_application_logs"]
-      bucket: loki
-      region: us-east-1
-      endpoint: "http://minio.minio-tenant.svc.cluster.local"
-      auth:
-        access_key_id: "${MINIO_ACCESS_KEY_ID}"
-        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
-      compression: none
-      key_prefix: 'application/ip-{{ "{{" }} node_ip {{ "}}" }}-{{ "{{" }} node_name {{ "}}" }}-{{ "{{" }} pod_name {{ "}}" }}-'
-      batch:
-        max_bytes: 10485760 # 10MB
-        timeout_secs: 60 # 1 minute
-      encoding:
-        codec: json
-        timestamp_format: rfc3339
-      healthcheck:
-        enabled: true
-
-    # MinIO S3 for dataplane logs
-    minio_dataplane_logs:
-      type: aws_s3
-      inputs: ["parse_dataplane_logs"]
-      bucket: loki
-      region: us-east-1
-      endpoint: "http://minio.minio-tenant.svc.cluster.local"
-      auth:
-        access_key_id: "${MINIO_ACCESS_KEY_ID}"
-        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
-      compression: none
-      key_prefix: 'dataplane/ip-{{ "{{" }} host_ip {{ "}}" }}-{{ "{{" }} hostname {{ "}}" }}-{{ "{{" }} systemd_unit {{ "}}" }}-'
-      batch:
-        max_bytes: 10485760
-        timeout_secs: 60
-      encoding:
-        codec: json
-        timestamp_format: rfc3339
-      healthcheck:
-        enabled: true
-
-    # MinIO S3 for host logs
-    minio_host_logs:
-      type: aws_s3
-      inputs: ["parse_host_logs"]
-      bucket: loki
-      region: us-east-1
-      endpoint: "http://minio.minio-tenant.svc.cluster.local"
-      auth:
-        access_key_id: "${MINIO_ACCESS_KEY_ID}"
-        secret_access_key: "${MINIO_SECRET_ACCESS_KEY}"
-      compression: none
-      key_prefix: 'host/ip-{{ "{{" }} host_ip {{ "}}" }}-{{ "{{" }} hostname {{ "}}" }}-{{ "{{" }} log_source {{ "}}" }}-'
-      batch:
-        max_bytes: 10485760
-        timeout_secs: 60
-      encoding:
-        codec: json
-        timestamp_format: rfc3339
-      healthcheck:
-        enabled: true
-
     # Loki sink for all logs
     loki:
       type: loki
       inputs:
-        - sample_application_logs
+        - parse_application_logs
         - parse_dataplane_logs
         - parse_host_logs
       endpoint: "http://loki.kube-prometheus-stack.svc.cluster.local:3100"
@@ -322,30 +247,13 @@ customConfig:
         codec: json
       labels:
         job: vector
-        cluster: '{{ "{{" }} cluster {{ "}}" }}'
-        environment: '{{ "{{" }} environment {{ "}}" }}'
         log_type: '{{ "{{" }} log_type {{ "}}" }}'
-        # Application log labels
         namespace: '{{ "{{" }} namespace {{ "}}" }}'
-        pod: '{{ "{{" }} pod_name {{ "}}" }}'
-        container: '{{ "{{" }} container_name {{ "}}" }}'
-        app: '{{ "{{" }} app {{ "}}" }}'
         service: '{{ "{{" }} service {{ "}}" }}'
-        # For dataplane/host logs
-        hostname: '{{ "{{" }} hostname {{ "}}" }}'
-        systemd_unit: '{{ "{{" }} systemd_unit {{ "}}" }}'
         log_source: '{{ "{{" }} log_source {{ "}}" }}'
+        level: '{{ "{{" }} log_level {{ "}}" }}'
       healthcheck:
         enabled: true
-
-    # Prometheus Remote Write for metrics (optional - currently failing)
-    # prometheus:
-    #   type: prometheus_remote_write
-    #   inputs: ["add_metrics_labels"]
-    #   endpoint: "http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc.cluster.local:9090/api/v1/write"
-    #   compression: snappy
-    #   healthcheck:
-    #     enabled: true
 
 # Additional volume mounts for systemd journal and host logs
 extraVolumeMounts:
@@ -414,18 +322,8 @@ terminationGracePeriodSeconds: 60
 # DNS policy
 dnsPolicy: ClusterFirst
 
-# Environment variables from secrets
+# Environment variables
 env:
-  - name: MINIO_ACCESS_KEY_ID
-    valueFrom:
-      secretKeyRef:
-        name: minio-credentials
-        key: access_key_id
-  - name: MINIO_SECRET_ACCESS_KEY
-    valueFrom:
-      secretKeyRef:
-        name: minio-credentials
-        key: secret_access_key
   - name: VECTOR_LOG
     value: "info"
 
