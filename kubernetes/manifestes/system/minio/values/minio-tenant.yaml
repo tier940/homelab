@@ -14,30 +14,13 @@ tenant:
       volumesPerServer: 2
       size: 20Gi
       storageClassName: local-path
-      # Anti-affinity to spread pods across different nodes
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: v1.min.io/tenant
-                      operator: In
-                      values:
-                        - dev-storage
-                    - key: v1.min.io/pool
-                      operator: In
-                      values:
-                        - pool-0
-                topologyKey: kubernetes.io/hostname
       resources:
         requests:
-          cpu: 200m
-          memory: 768Mi
+          cpu: 100m
+          memory: 512Mi
         limits:
-          cpu: 1000m
-          memory: 3Gi
+          cpu: 512m
+          memory: 2Gi
 
   # Buckets to create
   buckets:
