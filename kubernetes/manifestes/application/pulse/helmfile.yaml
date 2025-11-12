@@ -14,6 +14,6 @@ releases:
   - name: pulse
     namespace: pulse
     chart: pulse/pulse
-    version: 4.29.0
+    version: 4.29.5
     values:
       - values/pulse.yaml
