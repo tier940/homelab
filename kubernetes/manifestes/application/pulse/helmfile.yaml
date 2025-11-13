@@ -1,7 +1,6 @@
 repositories:
   - name: pulse
-    url: ghcr.io/rcourtman/pulse-chart
-    oci: true
+    url: https://rcourtman.github.io/Pulse/
 
 helmDefaults:
   createNamespace: true
@@ -14,6 +13,6 @@ releases:
   - name: pulse
     namespace: pulse
     chart: pulse/pulse
-    version: 4.29.0
+    version: 4.29.5
     values:
       - values/pulse.yaml

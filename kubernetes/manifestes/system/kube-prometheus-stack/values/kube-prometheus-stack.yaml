@@ -105,6 +105,13 @@ grafana:
       uid: k8s_loki
       access: proxy
       url: http://loki.kube-prometheus-stack.svc.cluster.local:3100
+      jsonData:
+        # Maximum lines to display in Explore
+        maxLines: 1000
+        # Default query for Explore page
+        # This will group by namespace by default
+        timeout: 60
+      editable: true
 
   # Dashboards
   dashboardProviders:
@@ -130,10 +137,6 @@ grafana:
         gnetId: 17347
         revision: 9
         datasource: "K8S Prometheus"
-      k8s-traefik-log:
-        gnetId: 17501
-        revision: 1
-        datasource: "K8S Loki"
       k8s-minio:
         gnetId: 13502
         revision: 26

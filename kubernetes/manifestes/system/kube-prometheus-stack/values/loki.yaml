@@ -13,27 +13,19 @@ loki:
     path_prefix: /var/loki
     replication_factor: 1
 
-  # Storage configuration - use MinIO S3
+  # Storage configuration - use local filesystem
   storage:
-    type: s3
-    bucketNames:
-      chunks: loki
-      ruler: loki
-      admin: loki
-    s3:
-      endpoint: minio.minio-tenant.svc.cluster.local:80
-      region: us-east-1
-      secretAccessKey: Password123
-      accessKeyId: admin
-      s3ForcePathStyle: true
-      insecure: true
+    type: filesystem
+    filesystem:
+      chunks_directory: /var/loki/chunks
+      rules_directory: /var/loki/rules
 
   # Schema configuration
   schemaConfig:
     configs:
       - from: "2024-01-01"
         store: tsdb
-        object_store: s3
+        object_store: filesystem
         schema: v13
         index:
           prefix: loki_index_

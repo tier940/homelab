@@ -1,6 +1,5 @@
 image:
   repository: docker.io/rcourtman/pulse
-  tag: v4.29.0
 
 ingress:
   enabled: true
