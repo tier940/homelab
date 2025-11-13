@@ -3,7 +3,7 @@
 #   debug:
 #     var: genv
 
-- name: copy files
+- name: Copy hosts file
   copy:
     src: hosts/{{ genv.stage }}/{{ genv.env }}
     dest: /etc/hosts
@@ -147,3 +147,31 @@
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: Install cronie package
+  dnf:
+    name: cronie
+    state: present
+
+- name: Enable and start crond service
+  systemd:
+    name: crond
+    state: started
+    enabled: yes
+
+- name: Copy clear_memory_cache.sh file
+  copy:
+    src: misc/clear_memory_cache.sh
+    dest: /opt/clear_memory_cache.sh
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Add cron job to run clear_memory_cache.sh daily
+  cron:
+    name: "Clear memory cache daily"
+    minute: "0"
+    hour: "0"
+    job: "/opt/clear_memory_cache.sh"
+    user: root
+    state: present
