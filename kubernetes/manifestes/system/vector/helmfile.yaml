@@ -14,6 +14,6 @@ namespace: kube-system
 releases:
   - name: vector
     chart: vector/vector
-    version: 0.47.0
+    version: 0.48.0
     values:
       - values/vector.yaml
