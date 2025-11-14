@@ -34,36 +34,19 @@
   dnf:
     update_cache: yes
 
-- name: Temporarily remove package exclusions
-  command: dnf config-manager --save --setopt exclude=
+- name: Get node hostname
+  command: hostname -s
+  register: node_hostname_result
   changed_when: false
 
-- name: Upgrade kubeadm
-  dnf:
-    name: kubeadm
-    state: latest
-    disable_excludes: kubernetes
-
-- name: Re-apply package exclusions
-  dnf:
-    exclude:
-      - cri-o
-      - kubelet
-      - kubeadm
-      - kubectl
-
-- name: Verify kubeadm version after upgrade
-  command: kubeadm version -o short
-  register: new_kubeadm_version
-  changed_when: false
-
-- name: Display new kubeadm version
+- name: Display node name
   debug:
-    msg: "New kubeadm version: {{ new_kubeadm_version.stdout }}"
+    msg: "Using node name: {{ node_hostname_result.stdout }}"
 
 - name: Drain worker node
   delegate_to: localhost
-  command: kubectl drain {{ inventory_hostname }} --ignore-daemonsets --delete-emptydir-data
+  become: false
+  command: kubectl drain {{ node_hostname_result.stdout }} --ignore-daemonsets --delete-emptydir-data
 
 - name: Upgrade kubelet configuration
   command: kubeadm upgrade node
@@ -74,8 +57,8 @@
     msg: "{{ upgrade_node.stdout_lines }}"
 
 - name: Temporarily remove package exclusions for kubelet and kubectl
-  command: dnf config-manager --save --setopt exclude=
-  changed_when: false
+  dnf:
+    exclude: []
 
 - name: Upgrade CRI-O
   dnf:
@@ -117,14 +100,17 @@
 
 - name: Uncordon worker node
   delegate_to: localhost
-  command: kubectl uncordon {{ inventory_hostname }}
+  become: false
+  command: kubectl uncordon {{ node_hostname_result.stdout }}
 
 - name: Wait for node to be ready
   delegate_to: localhost
-  command: kubectl wait --for=condition=Ready node/{{ inventory_hostname }} --timeout=300s
+  become: false
+  command: kubectl wait --for=condition=Ready node/{{ node_hostname_result.stdout }} --timeout=300s
 
 - name: Verify node status
   delegate_to: localhost
+  become: false
   command: kubectl get nodes
   register: nodes_status
   changed_when: false

@@ -22,3 +22,10 @@
   serial: 1
   roles:
     - 03-kubernetes/90-upgrade/worker-nodes
+
+- name: Post-installation configuration
+  hosts:
+    - cluster[0]
+  become: no
+  roles:
+    - 03-kubernetes/05-post
