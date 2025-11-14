@@ -1,8 +1,6 @@
 repositories:
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
-  - name: localpath
-    url: https://charts.containeroo.ch
   - name: external-dns
     url: https://kubernetes-sigs.github.io/external-dns
   - name: minio-operator
@@ -29,13 +27,6 @@ releases:
     version: 3.13.0
     values:
       - values/metrics-server.yaml
-
-  - name: local-path-provisioner
-    namespace: local-path-provisioner
-    chart: localpath/local-path-provisioner
-    version: 0.0.33
-    values:
-      - values/localpath.yaml
 
   - name: external-dns
     namespace: external-dns

@@ -12,8 +12,8 @@ tenant:
     - servers: 3
       name: pool-0
       volumesPerServer: 2
-      size: 20Gi
-      storageClassName: local-path
+      size: 5Gi
+      storageClassName: longhorn
       resources:
         requests:
           cpu: 100m
@@ -46,9 +46,6 @@ tenant:
     enabled: true
     port: 9000
     protocol: http
-
-  # Enable Prometheus Operator integration (creates ServiceMonitor)
-  prometheusOperator: true
 
   # Add labels to MinIO services for ServiceMonitor discovery
   serviceMetadata:

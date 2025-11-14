@@ -48,12 +48,12 @@ server:
   dataStorage:
     enabled: true
     size: 10Gi
-    storageClass: local-path
+    storageClass: longhorn
 
   auditStorage:
     enabled: true
     size: 10Gi
-    storageClass: local-path
+    storageClass: longhorn
 
   # Resource limits
   resources:

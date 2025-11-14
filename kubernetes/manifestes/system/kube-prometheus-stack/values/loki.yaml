@@ -33,7 +33,7 @@ loki:
 
   # Limits - volume_enabled is true by default
   limits_config:
-    retention_period: 168h  # 7 days
+    retention_period: 168h # 7 days
     max_query_series: 10000
     max_query_lookback: 168h
     volume_enabled: true
@@ -43,7 +43,7 @@ singleBinary:
   replicas: 1
   persistence:
     enabled: true
-    storageClass: local-path
+    storageClass: longhorn
     size: 10Gi
   resources:
     requests:

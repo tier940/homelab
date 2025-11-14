@@ -5,6 +5,8 @@ helmfile apply -f ./manifestes/system/00_init/
 helmfile apply -f ./manifestes/system/cilium/
 kubectl apply -k ./manifestes/system/cilium/manifest/
 
+helmfile apply -f ./manifestes/system/longhorn/
+
 helmfile apply -f ./manifestes/system/cert-manager/
 kubectl apply -k ./manifestes/system/cert-manager/manifest/
 
@@ -62,8 +64,8 @@ helm show values vector/vector --version X.Y.Z
 
 #### ストレージ関連
 ```bash
-# Local Path Provisioner
-helm show values localpath/local-path-provisioner --version X.Y.Z
+# Longhorn
+helm show values longhorn/longhorn --version X.Y.Z
 
 # MinIO (S3互換オブジェクトストレージ)
 helm show values minio-operator/operator --version X.Y.Z

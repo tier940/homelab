@@ -25,6 +25,7 @@
   dnf:
     name:
       - iproute-tc
+      - iscsi-initiator-utils
       - container-selinux
       - cri-o
       - kubelet
@@ -76,6 +77,13 @@
     owner: root
     group: root
   register: registries_conf_changed
+
+- name: Start open-iscsi service
+  systemd:
+    name: iscsid
+    state: started
+    enabled: yes
+    daemon_reload: yes
 
 - name: Start CRI-O service
   systemd:
