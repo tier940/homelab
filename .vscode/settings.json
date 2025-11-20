@@ -1,3 +1,7 @@
 {
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "ansible.python.interpreterPath": ".venv/bin/python3",
+  "ansible.ansible.path": ".venv/bin/ansible",
+  "ansible.validation.lint.enabled": true,
+  "ansible.validation.lint.path": ".venv/bin/ansible-lint"
 }

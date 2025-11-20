@@ -2,6 +2,8 @@
 ### apply前の確認
 - 初回実行のみ以下を実行する。sshの初回接続時に聞かれるのを回避してくれる。
 ```bash
+cd ./ansible/
+
 export ANSIBLE_HOST_KEY_CHECKING=false
 export APPLY_STAGE=dev
 ansible all -m ping -i ./inventories/${APPLY_STAGE}/${USER}.yml

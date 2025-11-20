@@ -1,1 +1,2 @@
+ansible/.ansible/*
 kubernetes/manifestes/system/*-secret.yaml

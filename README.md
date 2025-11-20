@@ -46,12 +46,9 @@ terraform version
 #### インストール
 - 以下のコマンドを実行する
 ```bash
-cd ./ansible/
-
 curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv ansible --python python3.13
-source ansible/bin/activate
-uv pip install -r requirements.txt
+uv sync
+source .venv/bin/activate
 ```
 
 ### kubenetes
