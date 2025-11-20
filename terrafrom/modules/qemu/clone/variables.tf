@@ -7,13 +7,13 @@ variable "instances" {
     cores          = number
     memory         = number
     network_bridge = string
-    disk = object({
+    disk = list(object({
       datastore_id = string
       interface    = string
       iothread     = bool
       discard      = string
       size         = number
-    })
+    }))
     initialization = object({
       dns_servers = list(string)
       ip_config = object({

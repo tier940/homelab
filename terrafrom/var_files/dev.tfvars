@@ -42,13 +42,13 @@ basic_vms = {
       cores          = 2
       memory         = 1024
       network_bridge = "vmbr0"
-      disk = {
+      disk = [{
         datastore_id = "local-lvm"
         interface    = "virtio0"
         iothread     = true
         discard      = "on"
         size         = 8
-      }
+      }]
       initialization = {
         dns_servers = ["10.0.0.1"]
         ip_config = {
@@ -67,13 +67,13 @@ basic_vms = {
       cores          = 2
       memory         = 2048
       network_bridge = "vmbr0"
-      disk = {
+      disk = [{
         datastore_id = "local-lvm"
         interface    = "virtio0"
         iothread     = true
         discard      = "on"
         size         = 8
-      }
+      }]
       initialization = {
         dns_servers = ["10.0.0.1"]
         ip_config = {
@@ -102,13 +102,13 @@ clusters = {
       cores          = 2
       memory         = 8192
       network_bridge = "vmbr0"
-      disk = {
+      disk = [{
         datastore_id = "local-lvm"
         interface    = "virtio0"
         iothread     = true
         discard      = "on"
         size         = 50
-      }
+      }]
       initialization = {
         dns_servers = ["10.0.0.1"]
         ip_config = {
@@ -137,13 +137,20 @@ worker = {
       cores          = 4
       memory         = 16384
       network_bridge = "vmbr0"
-      disk = {
+      disk = [{
         datastore_id = "local-lvm"
         interface    = "virtio0"
         iothread     = true
         discard      = "on"
-        size         = 100
-      }
+        size         = 50
+        },
+        {
+          datastore_id = "local-zfs"
+          interface    = "virtio1"
+          iothread     = true
+          discard      = "on"
+          size         = 100
+      }]
       initialization = {
         dns_servers = ["10.0.0.1"]
         ip_config = {
@@ -162,13 +169,20 @@ worker = {
       cores          = 4
       memory         = 16384
       network_bridge = "vmbr0"
-      disk = {
+      disk = [{
         datastore_id = "local-lvm"
         interface    = "virtio0"
         iothread     = true
         discard      = "on"
-        size         = 100
-      }
+        size         = 50
+        },
+        {
+          datastore_id = "local-zfs"
+          interface    = "virtio1"
+          iothread     = true
+          discard      = "on"
+          size         = 100
+      }]
       initialization = {
         dns_servers = ["10.0.0.1"]
         ip_config = {
@@ -187,13 +201,20 @@ worker = {
       cores          = 4
       memory         = 16384
       network_bridge = "vmbr0"
-      disk = {
+      disk = [{
         datastore_id = "local-lvm"
         interface    = "virtio0"
         iothread     = true
         discard      = "on"
-        size         = 100
-      }
+        size         = 50
+        },
+        {
+          datastore_id = "local-zfs"
+          interface    = "virtio1"
+          iothread     = true
+          discard      = "on"
+          size         = 100
+      }]
       initialization = {
         dns_servers = ["10.0.0.1"]
         ip_config = {

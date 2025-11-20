@@ -1,29 +1,34 @@
 ## kubernetes
 ### ansibleでセットアップできるまでの手順
 ```bash
+kubectl create ns vault
+kubectl create ns kube-prometheus-stack
+kubectl create ns minio-tenant
+kubectl apply -f ./manifestes/system/homelab-admin.yaml
+kubectl apply -f ./manifestes/system/vault-secret.yaml
+kubectl apply -f ./manifestes/system/minio-secret.yaml
+kubectl apply -f ./manifestes/system/grafana-secret.yaml
+kubectl apply -f ./manifestes/system/thanos-objstore-secret.yaml
+
 helmfile apply -f ./manifestes/system/00_init/
 helmfile apply -f ./manifestes/system/cilium/
 kubectl apply -k ./manifestes/system/cilium/manifest/
+
+helmfile apply -f ./manifestes/system/traefik/
+kubectl apply -k ./manifestes/system/traefik/manifest/
 
 helmfile apply -f ./manifestes/system/longhorn/
 
 helmfile apply -f ./manifestes/system/cert-manager/
 kubectl apply -k ./manifestes/system/cert-manager/manifest/
 
+helmfile apply -f ./manifestes/system/kubernetes-dashboard/
 helmfile apply -f ./manifestes/system/minio/
 helmfile apply -f ./manifestes/system/vector/
-helmfile apply -f ./manifestes/system/traefik/
-helmfile apply -f ./manifestes/system/kubernetes-dashboard/
 helmfile apply -f ./manifestes/system/kube-prometheus-stack/
 
 helmfile apply -f ./manifestes/system/argocd/
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
-
-kubectl apply -f ./manifestes/system/homelab-admin.yaml
-kubectl apply -f ./manifestes/system/vault-secret.yaml
-kubectl apply -f ./manifestes/system/minio-secret.yaml
-kubectl apply -f ./manifestes/system/grafana-secret.yaml
-kubectl apply -f ./manifestes/system/thanos-objstore-secret.yaml
 ```
 
 ### kubernetes-dashboard

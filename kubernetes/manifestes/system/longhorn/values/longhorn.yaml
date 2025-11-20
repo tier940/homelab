@@ -234,7 +234,7 @@ defaultSettings:
   # -- Setting that allows Longhorn to automatically create a default disk only on nodes with the label "node.longhorn.io/create-default-disk=true" (if no other disks exist). When this setting is disabled, Longhorn creates a default disk on each node that is added to the cluster.
   createDefaultDiskLabeledNodes: ~
   # -- Default path to use for storing data on a host. An absolute directory path indicates a filesystem-type disk used by the V1 Data Engine, while a path to a block device indicates a block-type disk used by the V2 Data Engine. The default value is "/var/lib/longhorn/".
-  defaultDataPath: ~
+  defaultDataPath: /mnt/longhorn/
   # -- Default data locality. A Longhorn volume has data locality if a local replica of the volume exists on the same node as the pod that is using the volume.
   defaultDataLocality: ~
   # -- Setting that allows scheduling on nodes with healthy replicas of the same volume. This setting is disabled by default.
@@ -246,7 +246,7 @@ defaultSettings:
   # -- Percentage of minimum available disk capacity. When the minimum available capacity exceeds the total available capacity, the disk becomes unschedulable until more space is made available for use. The default value is "25".
   storageMinimalAvailablePercentage: ~
   # -- Percentage of disk space that is not allocated to the default disk on each new Longhorn node.
-  storageReservedPercentageForDefaultDisk: ~
+  storageReservedPercentageForDefaultDisk: 5
   # -- Upgrade Checker that periodically checks for new Longhorn versions. When a new version is available, a notification appears on the Longhorn UI. This setting is enabled by default
   upgradeChecker: ~
   # -- The Upgrade Responder sends a notification whenever a new Longhorn version that you can upgrade to becomes available. The default value is https://longhorn-upgrade-responder.rancher.io/v1/checkupgrade.

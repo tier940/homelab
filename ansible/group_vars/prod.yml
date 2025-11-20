@@ -13,7 +13,7 @@ genv:
     coredns:
       version: "1.13.1"
     etcd:
-      version: "3.6.5"
+      version: "3.6.6"
   kubernetes:
     kube_version: 1.34
     crio_version: 1.34

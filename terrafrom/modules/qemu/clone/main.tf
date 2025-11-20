@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.86.0"
+      version = "0.87.0"
     }
   }
 }
@@ -38,12 +38,15 @@ resource "proxmox_virtual_environment_vm" "vm" {
     floating  = each.value.memory
   }
 
-  disk {
-    datastore_id = each.value.disk.datastore_id
-    interface    = each.value.disk.interface
-    iothread     = each.value.disk.iothread
-    discard      = each.value.disk.discard
-    size         = each.value.disk.size
+  dynamic "disk" {
+    for_each = each.value.disk
+    content {
+      datastore_id = disk.value.datastore_id
+      interface    = disk.value.interface
+      iothread     = disk.value.iothread
+      discard      = disk.value.discard
+      size         = disk.value.size
+    }
   }
 
   vga {

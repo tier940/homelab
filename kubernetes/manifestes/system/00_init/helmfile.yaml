@@ -1,4 +1,6 @@
 repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
   - name: metrics-server
     url: https://kubernetes-sigs.github.io/metrics-server/
   - name: external-dns
@@ -16,6 +18,10 @@ helmDefaults:
 ## Document separator to satisfy Helmfile:
 ---
 releases:
+  - name: traefik-crds
+    chart: traefik/traefik-crds
+    version: 1.12.0
+
   - name: prometheus-operator-crds
     namespace: kube-prometheus-stack
     chart: prometheus-community/prometheus-operator-crds

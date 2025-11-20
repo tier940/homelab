@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.86.0"
+      version = "0.87.0"
     }
   }
 }
@@ -46,7 +46,10 @@ resource "proxmox_virtual_environment_vm" "vm" {
     device = "socket"
   }
 
-  lifecycle {
-    ignore_changes = []
+  agent {
+    enabled = true
+    timeout = "15m"
+    trim    = false
+    type    = "virtio"
   }
 }

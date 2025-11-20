@@ -1,4 +1,37 @@
 ---
+- name: Check if /dev/vdb has a filesystem
+  command: blkid /dev/vdb
+  register: vdb_blkid
+  failed_when: false
+  changed_when: false
+
+- name: Create ext4 filesystem on /dev/vdb
+  when: vdb_blkid.rc != 0
+  filesystem:
+    fstype: ext4
+    dev: /dev/vdb
+
+- name: Get UUID of /dev/vdb
+  command: blkid -s UUID -o value /dev/vdb
+  register: vdb_uuid
+  changed_when: false
+
+- name: Create /mnt/longhorn directory
+  file:
+    path: /mnt/longhorn
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Add /dev/vdb to fstab
+  mount:
+    path: /mnt/longhorn
+    src: "UUID={{ vdb_uuid.stdout }}"
+    fstype: ext4
+    opts: defaults
+    state: mounted
+
 - name: Copy join command to worker-node
   copy:
     src: ./output/kubernetes/join_command.txt

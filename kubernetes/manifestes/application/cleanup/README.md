@@ -9,7 +9,7 @@
 
 ## デプロイ
 ```bash
-kubectl apply -k kubernetes/manifestes/application/cleanup/
+kubectl apply -k ./manifestes/application/cleanup/
 ```
 
 ## 手動実行

@@ -14,11 +14,6 @@
     endpoint http://localhost:2379
   }
 
-  kubernetes {{ genv.stage }}-{{ genv.env }}.k8s.local {
-    kubeconfig /etc/coredns/kubeconfig
-    pods insecure
-  }
-
   forward . 127.0.0.1:5301 127.0.0.1:5302 127.0.0.1:5303 {
     policy sequential
   }

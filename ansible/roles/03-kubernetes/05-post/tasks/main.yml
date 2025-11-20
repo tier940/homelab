@@ -15,16 +15,6 @@
     dest: output/kubernetes/coredns-deployment-patch.yaml
     mode: u=rw,g=r,o=r
 
-- name: Wait for Kubernetes API server to be ready
-  delegate_to: localhost
-  become: false
-  command: kubectl --kubeconfig=output/kubernetes/admin.conf get nodes
-  register: kubectl_result
-  retries: 30
-  delay: 10
-  until: kubectl_result.rc == 0
-  changed_when: false
-
 - name: Apply CoreDNS ConfigMap
   delegate_to: localhost
   become: false
@@ -41,18 +31,6 @@
     --patch-file output/kubernetes/coredns-deployment-patch.yaml
   register: coredns_patch_result
   changed_when: "'patched' in coredns_patch_result.stdout"
-
-- name: Wait for CoreDNS pods to be ready
-  delegate_to: localhost
-  become: false
-  command: >
-    kubectl --kubeconfig=output/kubernetes/admin.conf wait
-    --for=condition=ready pod
-    -l k8s-app=kube-dns
-    -n kube-system
-    --timeout=300s
-  register: coredns_ready
-  changed_when: false
 
 - name: Display CoreDNS status
   debug:
