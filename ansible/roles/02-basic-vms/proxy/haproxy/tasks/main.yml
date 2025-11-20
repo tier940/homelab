@@ -10,7 +10,7 @@
     dest: /etc/haproxy/haproxy.cfg
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[{{ genv.proxy.name }}] Fix haproxy.service"
   replace:
@@ -21,6 +21,6 @@
 - name: "[{{ genv.proxy.name }}] Enable haproxy service"
   systemd:
     name: haproxy
-    enabled: yes
+    enabled: true
     state: started
-    daemon_reload: yes
+    daemon_reload: true

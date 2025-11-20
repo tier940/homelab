@@ -2,7 +2,7 @@
 - name: Upgrade Kubernetes control plane (first node)
   hosts:
     - cluster[0]
-  become: yes
+  become: true
   serial: 1
   roles:
     - 03-kubernetes/90-upgrade/control-plane-first
@@ -10,7 +10,7 @@
 - name: Upgrade Kubernetes control plane (remaining nodes)
   hosts:
     - cluster[1:]
-  become: yes
+  become: true
   serial: 1
   roles:
     - 03-kubernetes/90-upgrade/control-plane-others
@@ -18,7 +18,7 @@
 - name: Upgrade Kubernetes worker nodes
   hosts:
     - worker
-  become: yes
+  become: true
   serial: 1
   roles:
     - 03-kubernetes/90-upgrade/worker-nodes
@@ -26,6 +26,6 @@
 - name: Post-installation configuration
   hosts:
     - cluster[0]
-  become: no
+  become: false
   roles:
     - 03-kubernetes/05-post

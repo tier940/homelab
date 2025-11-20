@@ -1,6 +1,6 @@
 {
   "editor.formatOnSave": true,
-  "ansible.python.interpreterPath": ".venv/bin/python3",
+  "ansible.python.interpreterPath": "/home/tier940/Documents/git/private/tier940/homelab/.venv/bin/python",
   "ansible.ansible.path": ".venv/bin/ansible",
   "ansible.validation.lint.enabled": true,
   "ansible.validation.lint.path": ".venv/bin/ansible-lint"

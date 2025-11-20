@@ -3,6 +3,7 @@
   get_url:
     url: "{{ item.url }}"
     dest: "{{ item.dest }}"
+    mode: u=rw,g=r,o=r
   with_items:
     - {
         url: "https://github.com/coredns/coredns/releases/download/v{{ genv.dns.coredns.version }}/coredns_{{ genv.dns.coredns.version }}_linux_amd64.tgz",
@@ -17,7 +18,7 @@
   unarchive:
     src: "{{ item }}"
     dest: /tmp/
-    remote_src: yes
+    remote_src: true
   with_items:
     - "/tmp/coredns_{{ genv.dns.coredns.version }}_linux_amd64.tgz"
     - "/tmp/etcd-v{{ genv.dns.etcd.version }}-linux-amd64.tar.gz"
@@ -26,7 +27,8 @@
   copy:
     src: "{{ item }}"
     dest: /usr/local/bin/
-    remote_src: yes
+    mode: u=rw,g=r,o=r
+    remote_src: true
   with_items:
     - "/tmp/coredns"
     - "/tmp/etcd-v{{ genv.dns.etcd.version }}-linux-amd64/etcd"
@@ -35,7 +37,7 @@
 - name: "[DNS] Ensure binary is executable"
   file:
     path: "{{ item }}"
-    mode: "0755"
+    mode: u=rwx,g=rx,o=rx
     state: file
   with_items:
     - "/usr/local/bin/coredns"
@@ -46,7 +48,7 @@
   file:
     path: "{{ item }}"
     state: directory
-    mode: "0755"
+    mode: u=rwx,g=rx,o=rx
   with_items:
     - "/etc/coredns"
     - "/var/log/coredns"
@@ -59,7 +61,7 @@
     dest: /etc/coredns/Corefile
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[DNS] Copy coredns logrotate"
   copy:
@@ -67,7 +69,7 @@
     dest: /etc/logrotate.d/coredns
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[DNS] Copy etcd logrotate"
   copy:
@@ -75,7 +77,7 @@
     dest: /etc/logrotate.d/etcd
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[DNS] Copy coredns.service"
   copy:
@@ -83,7 +85,7 @@
     dest: /usr/lib/systemd/system/coredns.service
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[DNS] Copy etcd.service"
   template:
@@ -91,7 +93,7 @@
     dest: /usr/lib/systemd/system/etcd.service
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[DNS] Remove resolv.conf"
   file:
@@ -105,25 +107,25 @@
     dest: /etc/resolv.conf
     owner: root
     group: root
-    mode: 0644
+    mode: u=rw,g=r,o=r
 
 - name: "[DNS] Stop systemd-resolved service"
   systemd:
     name: systemd-resolved
     state: stopped
-    enabled: no
-    daemon_reload: yes
+    enabled: false
+    daemon_reload: true
 
 - name: "[DNS] Start coredns service"
   systemd:
     name: coredns
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: "[DNS] Start etcd service"
   systemd:
     name: etcd
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true

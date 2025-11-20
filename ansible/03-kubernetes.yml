@@ -3,41 +3,41 @@
   hosts:
     - cluster
     - worker
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/00-preInit
 
 - name: Initialize Kubernetes cluster
   hosts:
     - cluster[0]
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/01-init
 
 - name: Join Kubernetes HA cluster
   hosts:
     - cluster[1:]
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/02-clusterHA
 
 - name: Join Kubernetes worker nodes
   hosts:
     - worker
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/03-join
 
 - name: Pre post installation configuration
   hosts:
     - cluster
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/04-prePost
 
 - name: Post-installation configuration
   hosts:
     - cluster[0]
-  become: no
+  become: false
   roles:
     - 03-kubernetes/05-post

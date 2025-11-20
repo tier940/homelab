@@ -17,8 +17,8 @@
     name: kubernetes
     description: Kubernetes
     baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     gpgkey: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/repodata/repomd.xml.key"
 
 - name: Update CRI-O repository
@@ -26,13 +26,13 @@
     name: cri-o
     description: CRI-O
     baseurl: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     gpgkey: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/repodata/repomd.xml.key"
 
 - name: Update repository cache
   dnf:
-    update_cache: yes
+    update_cache: true
 
 - name: Get node hostname
   command: hostname -s
@@ -87,13 +87,13 @@
   systemd:
     name: crio
     state: restarted
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: Restart kubelet
   systemd:
     name: kubelet
     state: restarted
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: Wait for kubelet to be ready
   wait_for:
@@ -108,6 +108,7 @@
   delegate_to: localhost
   become: false
   command: kubectl wait --for=condition=Ready node/{{ node_hostname_result.stdout }} --timeout=300s
+  changed_when: false
 
 - name: Verify node status
   delegate_to: localhost

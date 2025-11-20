@@ -4,61 +4,70 @@
   copy:
     src: ./output/kubernetes/join_command.txt
     dest: /tmp/
+    mode: u=rw,g=r,o=r
 
 - name: Create directory
   when: genv.kubernetes.high_availability
   file:
     path: /etc/kubernetes/pki/etcd
     state: directory
-    mode: "0755"
+    mode: u=rwx,g=rx,o=rx
 
 - name: Copy CA certificate
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/ca.crt
     dest: /etc/kubernetes/pki/ca.crt
+    mode: u=rw,g=r,o=r
 
 - name: Copy CA key
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/ca.key
     dest: /etc/kubernetes/pki/ca.key
+    mode: u=rw,g=r,o=r
 
 - name: Copy service account public key
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/sa.pub
     dest: /etc/kubernetes/pki/sa.pub
+    mode: u=rw,g=r,o=r
 
 - name: Copy service account key
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/sa.key
     dest: /etc/kubernetes/pki/sa.key
+    mode: u=rw,g=r,o=r
 
 - name: Copy front-proxy CA certificate
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/front-proxy-ca.crt
     dest: /etc/kubernetes/pki/front-proxy-ca.crt
+    mode: u=rw,g=r,o=r
 
 - name: Copy front-proxy CA key
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/front-proxy-ca.key
     dest: /etc/kubernetes/pki/front-proxy-ca.key
+    mode: u=rw,g=r,o=r
 
 - name: Copy etcd CA certificate
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/etcd/ca.crt
     dest: /etc/kubernetes/pki/etcd/ca.crt
+    mode: u=rw,g=r,o=r
 
 - name: Copy etcd CA key
   when: genv.kubernetes.high_availability
   copy:
     src: ./output/kubernetes/pki/etcd/ca.key
     dest: /etc/kubernetes/pki/etcd/ca.key
+    mode: u=rw,g=r,o=r
 
 - name: Execute kubeadm join
   when: genv.kubernetes.high_availability

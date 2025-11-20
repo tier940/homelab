@@ -17,70 +17,70 @@
   fetch:
     src: /etc/kubernetes/admin.conf
     dest: ./output/kubernetes/admin.conf
-    flat: yes
+    flat: true
 
 - name: Fetch join command to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /tmp/join_command.txt
     dest: ./output/kubernetes/join_command.txt
-    flat: yes
+    flat: true
 
 - name: Fetch CA certificate to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/ca.crt
     dest: ./output/kubernetes/pki/ca.crt
-    flat: yes
+    flat: true
 
 - name: Fetch CA key to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/ca.key
     dest: ./output/kubernetes/pki/ca.key
-    flat: yes
+    flat: true
 
 - name: Fetch service account public key to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/sa.pub
     dest: ./output/kubernetes/pki/sa.pub
-    flat: yes
+    flat: true
 
 - name: Fetch service account key to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/sa.key
     dest: ./output/kubernetes/pki/sa.key
-    flat: yes
+    flat: true
 
 - name: Fetch front-proxy CA certificate to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/front-proxy-ca.crt
     dest: ./output/kubernetes/pki/front-proxy-ca.crt
-    flat: yes
+    flat: true
 
 - name: Create front-proxy CA key to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/front-proxy-ca.key
     dest: ./output/kubernetes/pki/front-proxy-ca.key
-    flat: yes
+    flat: true
 
 - name: Fetch etcd CA certificate to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/etcd/ca.crt
     dest: ./output/kubernetes/pki/etcd/ca.crt
-    flat: yes
+    flat: true
 
 - name: Fetch etcd CA key to local
   when: kubeadm_init_result.rc == 0
   fetch:
     src: /etc/kubernetes/pki/etcd/ca.key
     dest: ./output/kubernetes/pki/etcd/ca.key
-    flat: yes
+    flat: true
 
 - name: Wait for server to restart
   when: kubeadm_init_result.rc == 0

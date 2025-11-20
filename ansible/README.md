@@ -16,6 +16,8 @@ unset ANSIBLE_HOST_KEY_CHECKING
 ```bash
 cp ./group_vars/${APPLY_STAGE}.yml ./group_vars/${USER}.yml
 
+ansible-lint
+
 # plan(dry-run)
 ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./00-all.yml --check --diff
 

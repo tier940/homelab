@@ -2,20 +2,20 @@
 - name: OS Initialization
   hosts:
     - worker
-  become: yes
+  become: true
   roles:
     - 01-os-init
 
 - name: Install Kubernetes
   hosts:
     - worker
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/00-preInit
 
 - name: Join Kubernetes worker nodes
   hosts:
     - worker
-  become: yes
+  become: true
   roles:
     - 03-kubernetes/03-join

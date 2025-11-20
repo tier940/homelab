@@ -3,6 +3,7 @@
   copy:
     src: ./output/kubernetes/join_command.txt
     dest: /tmp/
+    mode: u=rw,g=r,o=r
 
 - name: Join cluster
   shell: "cat /tmp/join_command.txt | bash"

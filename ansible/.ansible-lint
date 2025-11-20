@@ -1,0 +1,20 @@
+---
+# Ansible-lint configuration file
+# See: https://ansible.readthedocs.io/projects/lint/configuring/
+
+# Skip specific rules
+skip_list:
+  - fqcn[action-core] # Skip FQCN (Fully Qualified Collection Names) rule
+  - fqcn # Skip all FQCN related rules
+  - name[template] # Allow Jinja2 templates anywhere in task names
+
+# Exclude paths from linting
+exclude_paths:
+  - output/ # Exclude generated output files
+
+# Optionally, you can also configure other settings:
+# warn_list:
+#   - experimental
+
+# Enable offline mode (no internet required)
+offline: false

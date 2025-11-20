@@ -7,7 +7,7 @@
   copy:
     src: hosts/{{ genv.stage }}/{{ genv.env }}
     dest: /etc/hosts
-    mode: 0644
+    mode: u=rw,g=r,o=r
     owner: root
     group: root
 
@@ -42,8 +42,9 @@
 - name: Ensure kernel modules are loaded at boot
   lineinfile:
     path: /etc/modules-load.d/common.conf
-    create: yes
+    create: true
     line: "{{ item }}"
+    mode: u=rw,g=r,o=r
   with_items:
     - br_netfilter
     - ip_vs
@@ -145,8 +146,8 @@
   systemd:
     name: serial-getty@ttyS0.service
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: Install cronie package
   dnf:
@@ -157,13 +158,13 @@
   systemd:
     name: crond
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Copy clear_memory_cache.sh file
   copy:
     src: misc/clear_memory_cache.sh
     dest: /opt/clear_memory_cache.sh
-    mode: 0755
+    mode: u=rwx,g=rx,o=rx
     owner: root
     group: root
 

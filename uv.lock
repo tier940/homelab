@@ -276,7 +276,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "ansible", specifier = ">=13.0.0" },
-    { name = "ansible-core", specifier = "==2.20.0" },
+    { name = "ansible-core", specifier = ">=2.20.0" },
     { name = "ansible-lint", specifier = ">=25.11.0" },
     { name = "cryptography", specifier = ">=46.0.3" },
 ]

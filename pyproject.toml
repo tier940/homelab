@@ -5,7 +5,7 @@ description = ""
 requires-python = ">=3.13"
 dependencies = [
   "ansible>=13.0.0",
-  "ansible-core==2.20.0",
+  "ansible-core>=2.20.0",
   "ansible-lint>=25.11.0",
   "cryptography>=46.0.3"
 ]

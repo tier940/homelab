@@ -4,8 +4,8 @@
     name: kubernetes
     description: Kubernetes
     baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     gpgkey: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/repodata/repomd.xml.key"
 
 - name: Add CRI-O repository
@@ -13,13 +13,13 @@
     name: cri-o
     description: CRI-O
     baseurl: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     gpgkey: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/repodata/repomd.xml.key"
 
 - name: Update repository cache
   dnf:
-    update_cache: yes
+    update_cache: true
 
 - name: Install packages
   dnf:
@@ -56,7 +56,7 @@
   file:
     path: /etc/crio/crio.conf.d
     state: directory
-    mode: 0755
+    mode: u=rwx,g=rx,o=rx
     owner: root
     group: root
 
@@ -64,7 +64,7 @@
   copy:
     src: 01-shortname.conf
     dest: /etc/crio/crio.conf.d/01-shortname.conf
-    mode: 0644
+    mode: u=rw,g=r,o=r
     owner: root
     group: root
   register: crio_shortname_changed
@@ -73,7 +73,7 @@
   copy:
     src: registries.conf
     dest: /etc/containers/registries.conf
-    mode: 0644
+    mode: u=rw,g=r,o=r
     owner: root
     group: root
   register: registries_conf_changed
@@ -82,15 +82,15 @@
   systemd:
     name: iscsid
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: Start CRI-O service
   systemd:
     name: crio
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: Restart CRI-O if configuration changed
   when: crio_shortname_changed.changed or registries_conf_changed.changed
@@ -102,8 +102,8 @@
   systemd:
     name: kubelet
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: Wait for server to restart
   reboot:

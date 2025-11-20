@@ -5,6 +5,6 @@
     - proxy.*
     - cluster
     - worker
-  become: yes
+  become: true
   roles:
     - 01-os-init
