@@ -24,5 +24,6 @@ all:
         ${name}.${k8s_domain}:%{ endfor }
   vars:
     ansible_user: fedora
+    ansible_ssh_common_args: '-o "SetEnv TERM=dumb"'
     ansible_ssh_private_key_file: roles/01-os-init/files/keys/k8s_homelab_ed25519
     ansible_python_interpreter: /usr/bin/python3

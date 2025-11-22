@@ -24,6 +24,8 @@ resource "proxmox_virtual_environment_vm" "vm" {
   vm_id         = var.vm.vmid
   started       = false
   template      = true
+  bios          = "ovmf"
+  machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
   boot_order    = ["virtio0"]
 
@@ -36,6 +38,13 @@ resource "proxmox_virtual_environment_vm" "vm" {
     file_id      = proxmox_virtual_environment_download_file.image.id
     interface    = var.vm.disk.interface
     iothread     = true
+  }
+
+  efi_disk {
+    datastore_id      = var.vm.disk.datastore_id
+    file_format       = "raw"
+    pre_enrolled_keys = true
+    type              = "4m"
   }
 
   vga {

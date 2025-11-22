@@ -14,13 +14,13 @@ template = {
     target_node  = "pve01"
     datastore_id = "local"
     overwrite    = false
-    file_name    = "Fedora-Cloud-Base-Generic-42-1.1.x86_64.img"
-    url          = "https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux/releases/42/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-42-1.1.x86_64.qcow2"
+    file_name    = "Fedora-Cloud-Base-Generic-43-1.6.x86_64.img"
+    url          = "https://ftp.yz.yamagata-u.ac.jp/pub/linux/fedora-projects/fedora/linux/releases/43/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2"
   }
   vm = {
     node_name = "pve01"
     vmid      = 9000
-    name      = "k8s-template-fedora-42"
+    name      = "k8s-template-fedora-43"
     disk = {
       datastore_id = "local-lvm"
       interface    = "virtio0"

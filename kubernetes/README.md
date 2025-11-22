@@ -14,14 +14,13 @@ helmfile apply -f ./manifestes/system/00_init/
 helmfile apply -f ./manifestes/system/cilium/
 kubectl apply -k ./manifestes/system/cilium/manifest/
 
+helmfile apply -f ./manifestes/system/cert-manager/
+kubectl apply -k ./manifestes/system/cert-manager/manifest/
+
 helmfile apply -f ./manifestes/system/traefik/
 kubectl apply -k ./manifestes/system/traefik/manifest/
 
 helmfile apply -f ./manifestes/system/longhorn/
-
-helmfile apply -f ./manifestes/system/cert-manager/
-kubectl apply -k ./manifestes/system/cert-manager/manifest/
-
 helmfile apply -f ./manifestes/system/kubernetes-dashboard/
 helmfile apply -f ./manifestes/system/minio/
 helmfile apply -f ./manifestes/system/vector/

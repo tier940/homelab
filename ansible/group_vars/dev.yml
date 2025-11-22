@@ -6,7 +6,7 @@ genv:
   proxy:
     name: haproxy
     haproxy:
-      version: "3.0.5-1.fc42.x86_64"
+      version: "3.0.5-4.fc43.x86_64"
     traefik:
       version: "3.5.3"
   dns:
