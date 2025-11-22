@@ -95,6 +95,8 @@
     name:
       - bind-utils
       - yq
+      - lsof
+      - gawk
     state: present
 
 - name: Remove zram-generator-defaults

@@ -10,7 +10,7 @@ helmDefaults:
 ---
 releases:
   - name: longhorn
-    namespace: longhorn
+    namespace: longhorn-system
     chart: longhorn/longhorn
     version: 1.10.1
     values:

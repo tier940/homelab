@@ -5,10 +5,10 @@
   failed_when: false
   changed_when: false
 
-- name: Create ext4 filesystem on /dev/vdb
+- name: Create xfs filesystem on /dev/vdb
   when: vdb_blkid.rc != 0
   filesystem:
-    fstype: ext4
+    fstype: xfs
     dev: /dev/vdb
 
 - name: Get UUID of /dev/vdb
@@ -28,7 +28,7 @@
   mount:
     path: /mnt/longhorn
     src: "UUID={{ vdb_uuid.stdout }}"
-    fstype: ext4
+    fstype: xfs
     opts: defaults
     state: mounted
 

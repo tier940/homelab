@@ -41,6 +41,21 @@
       - kubeadm
       - kubectl
 
+- name: Load kernel modules
+  modprobe:
+    name: "{{ item }}"
+  with_items:
+    - iscsi_tcp
+
+- name: Ensure kernel modules are loaded at boot
+  lineinfile:
+    path: /etc/modules-load.d/common.conf
+    create: true
+    line: "{{ item }}"
+    mode: u=rw,g=r,o=r
+  with_items:
+    - iscsi_tcp
+
 - name: Check if CRI-O bridge network config is disabled
   stat:
     path: /etc/cni/net.d/10-crio-bridge.conflist.disabled

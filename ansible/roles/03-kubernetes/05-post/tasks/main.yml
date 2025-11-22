@@ -15,12 +15,21 @@
     dest: output/kubernetes/coredns-deployment-patch.yaml
     mode: u=rw,g=r,o=r
 
+- name: Wait for etcd pods to be ready
+  delegate_to: localhost
+  become: false
+  command: >
+    kubectl --kubeconfig=output/kubernetes/admin.conf wait
+    --for=condition=Ready
+    --timeout=600s
+    pod -l component=etcd
+    -n kube-system
+  changed_when: false
+
 - name: Apply CoreDNS ConfigMap
   delegate_to: localhost
   become: false
   command: kubectl --kubeconfig=output/kubernetes/admin.conf apply -f output/kubernetes/coredns-cm.yaml
-  register: coredns_cm_result
-  changed_when: "'configured' in coredns_cm_result.stdout or 'created' in coredns_cm_result.stdout"
 
 - name: Patch CoreDNS Deployment with hostPath volume
   delegate_to: localhost
@@ -29,8 +38,6 @@
     kubectl --kubeconfig=output/kubernetes/admin.conf patch deployment coredns
     -n kube-system
     --patch-file output/kubernetes/coredns-deployment-patch.yaml
-  register: coredns_patch_result
-  changed_when: "'patched' in coredns_patch_result.stdout"
 
 - name: Display CoreDNS status
   debug:
