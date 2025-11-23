@@ -94,6 +94,7 @@
   dnf:
     name:
       - bind-utils
+      - unzip
       - yq
       - lsof
       - gawk

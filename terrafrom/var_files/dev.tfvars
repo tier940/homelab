@@ -30,57 +30,64 @@ template = {
 
 basic_vms = {
   base_clone_id = 9000
-  base_name     = ""
   base_domain   = "k8s.local"
   ciuser        = "fedora"
   cipassword    = "fedora"
-  instances = {
-    "proxy" = {
-      target_node    = "pve01"
-      vmid           = 2100
-      started        = true
-      cores          = 2
-      memory         = 1024
-      network_bridge = "vmbr0"
-      disk = [{
-        datastore_id = "local-lvm"
-        interface    = "virtio0"
-        iothread     = true
-        discard      = "on"
-        size         = 8
-      }]
-      initialization = {
-        dns_servers = ["10.0.0.1"]
-        ip_config = {
-          ipv4 = {
-            address = "10.0.8.0"
-            subnet  = "8"
-            gateway = "10.0.0.1"
+  groups = {
+    proxy = {
+      instances = {
+        "001" = {
+          target_node    = "pve01"
+          vmid           = 2100
+          started        = true
+          cores          = 2
+          memory         = 1024
+          network_bridge = "vmbr0"
+          disk = [{
+            datastore_id = "local-lvm"
+            interface    = "virtio0"
+            iothread     = true
+            discard      = "on"
+            size         = 8
+          }]
+          initialization = {
+            dns_servers = ["10.0.0.1"]
+            ip_config = {
+              ipv4 = {
+                address = "10.0.8.0"
+                subnet  = "8"
+                gateway = "10.0.0.1"
+              }
+            }
           }
         }
       }
     }
-    "dns" = {
-      target_node    = "pve01"
-      vmid           = 2101
-      started        = true
-      cores          = 2
-      memory         = 2048
-      network_bridge = "vmbr0"
-      disk = [{
-        datastore_id = "local-lvm"
-        interface    = "virtio0"
-        iothread     = true
-        discard      = "on"
-        size         = 8
-      }]
-      initialization = {
-        dns_servers = ["10.0.0.1"]
-        ip_config = {
-          ipv4 = {
-            address = "10.0.8.1"
-            subnet  = "8"
-            gateway = "10.0.0.1"
+    dns = {
+      instances = {
+        "001" = {
+          target_node    = "pve01"
+          vmid           = 2101
+          started        = true
+          cores          = 2
+          memory         = 2048
+          network_bridge = "vmbr0"
+          disk = [{
+            datastore_id = "local-lvm"
+            interface    = "virtio0"
+            iothread     = true
+            discard      = "on"
+            size         = 8
+          }]
+          initialization = {
+            dns_servers = ["10.0.0.1"]
+            ip_config = {
+              ipv4 = {
+                address = "10.0.8.1"
+                subnet  = "8"
+                gateway = "10.0.0.1"
+              }
+            }
           }
         }
       }

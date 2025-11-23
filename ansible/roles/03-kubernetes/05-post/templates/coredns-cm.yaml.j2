@@ -37,7 +37,7 @@ data:
       cache 30
       etcd {
         path /skydns
-        endpoint http://{{ hostvars['dns.k8s.local']['ansible_host'] }}:2379
+        endpoint http://dns.k8s.local:2379
       }
       loadbalance
     }

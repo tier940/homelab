@@ -1,0 +1,9 @@
+---
+- name: Reboot all VMs
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Reboot and wait 3600 seconds
+      reboot:
+        reboot_timeout: 3600

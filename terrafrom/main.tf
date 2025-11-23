@@ -28,13 +28,26 @@ locals {
     }
   }
 
+  # Flatten basic_vms groups into a single map with {group}-{instance} naming
+  basic_vms_flat = merge([
+    for group_name, group in var.basic_vms.groups : {
+      for instance_key, instance in group.instances :
+      "${group_name}-${instance_key}" => instance
+    }
+  ]...)
+
   basic_vms = {
-    for k, v in var.basic_vms.instances :
-    "${var.basic_vms.base_name}${k}" => {
+    for k, v in local.basic_vms_flat :
+    k => {
       ipv4 = v.initialization.ip_config.ipv4.address
       ipv6 = try(v.initialization.ip_config.ipv6.address, null)
     }
   }
+
+  # Create group-specific maps based on group names
+  dns_vms      = { for k, v in local.basic_vms : k => v if startswith(k, "dns-") }
+  proxy_vms    = { for k, v in local.basic_vms : k => v if startswith(k, "proxy-") }
+  keycloak_vms = { for k, v in local.basic_vms : k => v if startswith(k, "keycloak-") }
 }
 
 module "template" {
@@ -48,8 +61,8 @@ module "template" {
 module "basic_vms" {
   source = "./modules/qemu/clone"
 
-  instances     = var.basic_vms.instances
-  base_name     = var.basic_vms.base_name
+  instances     = local.basic_vms_flat
+  base_name     = ""
   base_clone_id = var.basic_vms.base_clone_id
   base_domain   = var.basic_vms.base_domain
   ciuser        = var.basic_vms.ciuser
@@ -107,11 +120,12 @@ resource "local_file" "inventory" {
   file_permission      = "0644"
   filename             = "../ansible/inventories/${var.tags.stage}/${var.tags.env}.yml"
   content = templatefile("${path.module}/template/ansible/inventory.tpl", {
-    base_domain = var.clusters.base_domain
-    k8s_domain  = "${local.dns_prefix}.${var.clusters.base_domain}"
-    clusters    = local.clusters_ips
-    workers     = local.workers_ips
-    basic_vms   = local.basic_vms
-    tags        = var.tags
+    base_domain      = var.clusters.base_domain
+    k8s_domain       = "${local.dns_prefix}.${var.clusters.base_domain}"
+    clusters         = local.clusters_ips
+    workers          = local.workers_ips
+    basic_vms        = local.basic_vms
+    basic_vms_groups = var.basic_vms.groups
+    tags             = var.tags
   })
 }

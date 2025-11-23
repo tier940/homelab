@@ -18,22 +18,24 @@
 - name: Wait for etcd pods to be ready
   delegate_to: localhost
   become: false
+  changed_when: false
   command: >
     kubectl --kubeconfig=output/kubernetes/admin.conf wait
     --for=condition=Ready
     --timeout=600s
     pod -l component=etcd
     -n kube-system
-  changed_when: false
 
 - name: Apply CoreDNS ConfigMap
   delegate_to: localhost
   become: false
+  changed_when: false
   command: kubectl --kubeconfig=output/kubernetes/admin.conf apply -f output/kubernetes/coredns-cm.yaml
 
 - name: Patch CoreDNS Deployment with hostPath volume
   delegate_to: localhost
   become: false
+  changed_when: false
   command: >
     kubectl --kubeconfig=output/kubernetes/admin.conf patch deployment coredns
     -n kube-system

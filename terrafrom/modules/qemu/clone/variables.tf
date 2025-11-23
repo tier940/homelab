@@ -30,6 +30,7 @@ variable "instances" {
 variable "base_name" {
   description = "Base name for the VMs"
   type        = string
+  default     = ""
 }
 
 variable "base_clone_id" {

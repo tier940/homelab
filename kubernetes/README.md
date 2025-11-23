@@ -21,6 +21,8 @@ helmfile apply -f ./manifestes/system/traefik/
 kubectl apply -k ./manifestes/system/traefik/manifest/
 
 helmfile apply -f ./manifestes/system/longhorn/
+kubectl apply -k ./manifestes/system/longhorn/manifest/
+
 helmfile apply -f ./manifestes/system/kubernetes-dashboard/
 helmfile apply -f ./manifestes/system/minio/
 helmfile apply -f ./manifestes/system/vector/

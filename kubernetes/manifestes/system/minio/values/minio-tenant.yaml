@@ -16,11 +16,11 @@ tenant:
       storageClassName: longhorn
       resources:
         requests:
-          cpu: 100m
-          memory: 512Mi
+          cpu: 200m
+          memory: 500Mi
         limits:
-          cpu: 512m
-          memory: 2Gi
+          cpu: 500m
+          memory: 1Gi
 
   # Buckets to create
   buckets:

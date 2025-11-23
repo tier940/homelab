@@ -70,3 +70,57 @@ backend kube-apiserver
 {% for host in groups['cluster'] %}
     server  {{ host }} {{ hostvars[host]['ansible_host'] }}:6443 check
 {% endfor %}
+
+#---------------------------------------------------------------------
+# etcd Load Balancing (TCP)
+#---------------------------------------------------------------------
+frontend etcd-tcp
+    bind               *:2379
+    mode               tcp
+    option             tcplog
+    default_backend    etcd-servers
+
+backend etcd-servers
+    mode        tcp
+    option      tcp-check
+    balance     roundrobin
+    default-server inter 10s downinter 5s rise 2 fall 2
+{% for host in groups['dns'] %}
+    server  {{ host }} {{ hostvars[host]['ansible_host'] }}:2379 check
+{% endfor %}
+
+#---------------------------------------------------------------------
+# DNS Load Balancing (TCP)
+#---------------------------------------------------------------------
+frontend dns-tcp
+    bind               *:53
+    mode               tcp
+    option             tcplog
+    default_backend    dns-servers-tcp
+
+backend dns-servers-tcp
+    mode        tcp
+    option      tcp-check
+    balance     roundrobin
+    default-server inter 10s downinter 5s rise 2 fall 2
+{% for host in groups['dns'] %}
+    server  {{ host }} {{ hostvars[host]['ansible_host'] }}:53 check
+{% endfor %}
+
+#---------------------------------------------------------------------
+# Keycloak Load Balancing (HTTP)
+#---------------------------------------------------------------------
+frontend keycloak-http
+    bind               *:8080
+    mode               http
+    option             httplog
+    default_backend    keycloak-servers
+
+backend keycloak-servers
+    mode        http
+    balance     roundrobin
+    option      httpchk GET /health/ready
+    default-server inter 10s downinter 5s rise 2 fall 2
+{% for host in groups['keycloak'] %}
+    server  {{ host }} {{ hostvars[host]['ansible_host'] }}:8080 check
+{% endfor %}

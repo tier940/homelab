@@ -13,3 +13,5 @@
 # Other VMs
 %{ for name, ips in basic_vms }${ips.ipv4} ${name}.${base_domain}%{ if ips.ipv6 != null }${ips.ipv6} ${name}.${base_domain}%{ endif }
 %{ endfor }
+# Service Names (load balanced via proxy)
+%{ if length(proxy_vms) > 0 }${values(proxy_vms)[0].ipv4} dns.${base_domain} proxy.${base_domain} keycloak.${base_domain}%{ endif }

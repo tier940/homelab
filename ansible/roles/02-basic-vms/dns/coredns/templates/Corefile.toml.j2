@@ -9,7 +9,7 @@
   log
   prometheus :9253
 
-  etcd {{ genv.stage }}-{{ genv.env }}.k8s.local {
+  etcd k8s.local {
     path /skydns
     endpoint http://localhost:2379
   }

@@ -21,7 +21,10 @@ all:
         ${name}.${k8s_domain}:%{ endfor }
     worker:
       hosts:%{ for name, ips in workers }
-        ${name}.${k8s_domain}:%{ endfor }
+        ${name}.${k8s_domain}:%{ endfor }%{ for group_name, group in basic_vms_groups }
+    ${group_name}:
+      hosts:%{ for instance_key, instance in group.instances }
+        ${group_name}-${instance_key}.${base_domain}:%{ endfor }%{ endfor }
   vars:
     ansible_user: fedora
     ansible_ssh_common_args: '-o "SetEnv TERM=dumb"'

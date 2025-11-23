@@ -1,12 +1,18 @@
 ---
 - name: Setup Proxy VMs
-  hosts: proxy.*
+  hosts: proxy
   become: true
   roles:
     - 02-basic-vms/proxy
 
 - name: Setup DNS VMs
-  hosts: dns.*
+  hosts: dns
   become: true
   roles:
     - 02-basic-vms/dns
+
+- name: Setup Keycloak VMs
+  hosts: keycloak
+  become: true
+  roles:
+    - 02-basic-vms/keycloak

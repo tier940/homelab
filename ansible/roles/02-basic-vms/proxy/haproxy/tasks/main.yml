@@ -18,9 +18,16 @@
     regexp: 'PIDFILE=[^"]*'
     replace: "PIDFILE=/var/run/haproxy.pid"
 
+- name: "[{{ genv.proxy.name }}] Stop systemd-resolved service"
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+    daemon_reload: true
+
 - name: "[{{ genv.proxy.name }}] Enable haproxy service"
   systemd:
     name: haproxy
-    enabled: true
     state: started
+    enabled: true
     daemon_reload: true

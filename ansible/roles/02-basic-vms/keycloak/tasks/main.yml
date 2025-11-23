@@ -1,0 +1,75 @@
+---
+- name: "[Keycloak] Check if Java is already installed"
+  command: java -version
+  register: java_check
+  failed_when: false
+  changed_when: false
+
+- name: "[Keycloak] Install Amazon Corretto 21 JDK"
+  dnf:
+    name: https://corretto.aws/downloads/latest/amazon-corretto-21-x64-linux-jdk.rpm
+    state: present
+    disable_gpg_check: true
+  when: java_check.rc != 0
+
+- name: "[Keycloak] Check if Keycloak is already installed"
+  stat:
+    path: /opt/keycloak-{{ genv.keycloak.version }}
+  register: keycloak_dir
+
+- name: "[Keycloak] Download binary"
+  get_url:
+    url: https://github.com/keycloak/keycloak/releases/download/{{ genv.keycloak.version }}/keycloak-{{ genv.keycloak.version }}.tar.gz
+    dest: /tmp/keycloak.tar.gz
+    mode: u=rw,g=r,o=r
+  when: not keycloak_dir.stat.exists
+
+- name: "[Keycloak] Extract binary to /tmp"
+  unarchive:
+    src: /tmp/keycloak.tar.gz
+    dest: /opt/
+    mode: u=rw,g=r,o=r
+    remote_src: true
+  when: not keycloak_dir.stat.exists
+
+- name: "[Keycloak] Create symbolic link"
+  file:
+    src: /opt/keycloak-{{ genv.keycloak.version }}
+    dest: /opt/keycloak
+    state: link
+  when: not keycloak_dir.stat.exists
+
+- name: "[Keycloak] Make kc.sh executable"
+  file:
+    path: /opt/keycloak/bin/kc.sh
+    mode: u=rwx,g=rx,o=rx
+  when: not keycloak_dir.stat.exists
+
+- name: "[Keycloak] Bootstrap admin user"
+  environment:
+    KC_BOOTSTRAP_ADMIN_USERNAME: "{{ genv.keycloak.config.admin_user }}"
+    KC_BOOTSTRAP_ADMIN_PASSWORD: "{{ genv.keycloak.config.admin_pass }}"
+  changed_when: false
+  command: >
+    /opt/keycloak/bin/kc.sh
+    bootstrap-admin user
+    --username:env KC_BOOTSTRAP_ADMIN_USERNAME
+    --password:env KC_BOOTSTRAP_ADMIN_PASSWORD
+  when: not keycloak_dir.stat.exists
+
+- name: "[Keycloak] Copy keycloak.service"
+  copy:
+    src: "keycloak.service"
+    dest: /usr/lib/systemd/system/keycloak.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  when: not keycloak_dir.stat.exists
+
+- name: "[Keycloak] Start keycloak service"
+  systemd:
+    name: keycloak
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: not keycloak_dir.stat.exists

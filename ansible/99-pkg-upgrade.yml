@@ -1,0 +1,16 @@
+---
+- name: Package upgrade
+  hosts: all
+  become: true
+  tasks:
+    - name: Package upgrade on systems using apt
+      apt:
+        name: "*"
+        state: latest
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Package upgrade on systems using dnf
+      dnf:
+        name: "*"
+        state: latest
+      when: ansible_pkg_mgr == 'dnf'

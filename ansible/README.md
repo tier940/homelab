@@ -60,6 +60,27 @@ ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./90-kubernetes-upg
 ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./90-kubernetes-upgrade.yml --diff
 ```
 
+#### パッケージアップグレード
+```bash
+# plan(dry-run)
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-pkg-upgrade.yml --check --diff
+
+# apply
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-pkg-upgrade.yml --diff
+```
+
+#### VM再起動
+- 全VMを一切再起動を行う
+- k8sに乗っているPodの待避やローリングアップデートのような一台ずつの再起動は行わないので注意
+
+```bash
+# plan(dry-run)
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-reboot.yml --check --diff
+
+# apply
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-reboot.yml --diff
+```
+
 ### Tips
 #### 証明書の用途について
 - 以下を確認すること

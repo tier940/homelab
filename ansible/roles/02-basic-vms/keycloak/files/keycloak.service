@@ -1,0 +1,13 @@
+[Unit]
+Description=Keycloak Service
+After=network.target
+
+[Service]
+User=root
+
+ExecStart=/bin/bash /opt/keycloak/bin/kc.sh start-dev
+
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

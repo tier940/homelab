@@ -14,6 +14,13 @@ ingress:
         - path: /
           pathType: Prefix
 
+persistence:
+  enabled: true
+  storageClass: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 4Gi
+
 server:
   env:
     - name: TZ
