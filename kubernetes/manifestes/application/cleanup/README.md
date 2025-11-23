@@ -1,11 +1,12 @@
-# Image Cleanup CronJob
-- Kubernetesクラスタ内の古いDockerイメージを自動的に削除するCronJob
+# Image Cleanup DaemonSet
+- Kubernetesクラスタ内の全ノード(ワーカー・コントロールプレーン)で古いコンテナイメージを自動的に削除するDaemonSet
 
 ## 機能
-- 毎日午前2時に自動実行
-- 使用されていないイメージを削除
-- 7日以上使用されていないイメージを削除
-- DockerとContainerdの両方に対応
+- 全ノード(ワーカー・コントロールプレーン)で自動実行
+- 毎日午前2時に各ノードでクリーンアップを実行
+- Pod起動時にも即座にクリーンアップを実行
+- 使用されていないイメージを削除(`crictl rmi --prune`)
+- CRI-O対応
 
 ## デプロイ
 ```bash
@@ -13,27 +14,36 @@ kubectl apply -k ./manifestes/application/cleanup/
 ```
 
 ## 手動実行
-- CronJobを待たずに今すぐ実行したい場合はkubernetes dashboardから実行する
+- 特定のノードで即座に実行したい場合は、そのノードのPodを再起動する
+```bash
+# 特定ノードのPodを削除して再起動(起動時にクリーンアップが実行される)
+kubectl delete pod -n kube-system -l app=image-cleanup --field-selector spec.nodeName=<ノード名>
+```
 
 ## 実行状況の確認
 ```bash
-# CronJobの状態確認
-kubectl get cronjob -n kube-system image-cleanup
+# DaemonSetの状態確認
+kubectl get daemonset -n kube-system image-cleanup
 
-# 実行されたJobの確認
-kubectl get jobs -n kube-system | grep image-cleanup
+# 各ノードで実行中のPodの確認
+kubectl get pods -n kube-system -l app=image-cleanup -o wide
 
-# ログの確認
-kubectl logs -n kube-system -l job-name=image-cleanup-manual
+# 特定ノードのログ確認
+kubectl logs -n kube-system -l app=image-cleanup --tail=100
+
+# 特定ノードのPodのログ確認
+kubectl logs -n kube-system <pod-name>
 ```
 
 ## スケジュール変更
-- `cronjob.yaml`の`spec.schedule`を変更すること
+- `daemonset.yaml`内のシェルスクリプトの`TARGET_SECONDS`変数を変更すること
+- デフォルトは午前2時(7200秒 = 2時間 × 3600秒)
 
 ### 変更例
-- `0 */6 * * *` - 6時間ごと
-- `0 0 * * 0` - 毎週日曜日の午前0時
+- `TARGET_SECONDS=0` - 毎日午前0時
+- `TARGET_SECONDS=10800` - 毎日午前3時(3時間 × 3600秒)
+- `TARGET_SECONDS=43200` - 毎日正午(12時間 × 3600秒)
 
-## 削除対象の変更
-- デフォルトでは7日(168時間)以上使用されていないイメージを削除を行う
-- 期間を変更する場合は、`cronjob.yaml`内の`--filter "until=168h"`の値を変更すること
+## 削除対象
+- `crictl rmi --prune`コマンドにより、使用されていないイメージを自動削除
+- 現在実行中のコンテナで使用されているイメージは削除されない
