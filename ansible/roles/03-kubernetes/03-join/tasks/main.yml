@@ -3,7 +3,6 @@
   command: blkid /dev/vdb
   register: vdb_blkid
   failed_when: false
-  changed_when: false
 
 - name: Create xfs filesystem on /dev/vdb
   when: vdb_blkid.rc != 0
@@ -14,7 +13,6 @@
 - name: Get UUID of /dev/vdb
   command: blkid -s UUID -o value /dev/vdb
   register: vdb_uuid
-  changed_when: false
 
 - name: Create /mnt/longhorn directory
   file:
@@ -39,4 +37,6 @@
     mode: u=rw,g=r,o=r
 
 - name: Join cluster
-  shell: "cat /tmp/join_command.txt | bash"
+  shell: set -o pipefail && cat /tmp/join_command.txt | bash
+  args:
+    executable: /bin/bash

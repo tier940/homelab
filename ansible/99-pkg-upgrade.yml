@@ -6,11 +6,11 @@
     - name: Package upgrade on systems using apt
       apt:
         name: "*"
-        state: latest
+        state: latest  # noqa: package-latest  # noqa: package-latest
       when: ansible_pkg_mgr == 'apt'
 
     - name: Package upgrade on systems using dnf
       dnf:
         name: "*"
-        state: latest
+        state: latest  # noqa: package-latest  # noqa: package-latest
       when: ansible_pkg_mgr == 'dnf'

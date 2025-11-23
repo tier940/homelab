@@ -109,7 +109,6 @@
 - name: Check if swap is enabled
   command: swapon --show
   register: swap_status
-  changed_when: false
 
 - name: Disable swap
   when: swap_status.stdout != ""

@@ -5,14 +5,10 @@
     dest: "{{ item.dest }}"
     mode: u=rw,g=r,o=r
   with_items:
-    - {
-        url: "https://github.com/coredns/coredns/releases/download/v{{ genv.dns.coredns.version }}/coredns_{{ genv.dns.coredns.version }}_linux_amd64.tgz",
-        dest: "/tmp/coredns_{{ genv.dns.coredns.version }}_linux_amd64.tgz",
-      }
-    - {
-        url: "https://github.com/etcd-io/etcd/releases/download/v{{ genv.dns.etcd.version }}/etcd-v{{ genv.dns.etcd.version }}-linux-amd64.tar.gz",
-        dest: "/tmp/etcd-v{{ genv.dns.etcd.version }}-linux-amd64.tar.gz",
-      }
+    - url: "https://github.com/coredns/coredns/releases/download/v{{ genv.dns.coredns.version }}/coredns_{{ genv.dns.coredns.version }}_linux_amd64.tgz"
+      dest: "/tmp/coredns_{{ genv.dns.coredns.version }}_linux_amd64.tgz"
+    - url: "https://github.com/etcd-io/etcd/releases/download/v{{ genv.dns.etcd.version }}/etcd-v{{ genv.dns.etcd.version }}-linux-amd64.tar.gz"
+      dest: "/tmp/etcd-v{{ genv.dns.etcd.version }}-linux-amd64.tar.gz"
 
 - name: "[DNS] Extract binary to /tmp"
   unarchive:
@@ -141,10 +137,12 @@
   shell: |
     /usr/local/bin/etcdctl put /skydns/local/k8s/{{ item.name }}/x{{ idx }} '{"host":"{{ item.host }}"}'
   loop:
-    - { name: "dns", host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}" }
-    - { name: "proxy", host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}" }
-    - { name: "keycloak", host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}" }
+    - name: "dns"
+      host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}"
+    - name: "proxy"
+      host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}"
+    - name: "keycloak"
+      host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}"
   loop_control:
     index_var: idx
   when: inventory_hostname == groups['dns'][0]
-  changed_when: false

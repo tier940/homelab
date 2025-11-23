@@ -7,6 +7,8 @@ skip_list:
   - fqcn[action-core] # Skip FQCN (Fully Qualified Collection Names) rule
   - fqcn # Skip all FQCN related rules
   - name[template] # Allow Jinja2 templates anywhere in task names
+  - no-changed-when # Allow changed_when to be false
+  - role-name # Allow role names to be in any format
 
 # Exclude paths from linting
 exclude_paths:

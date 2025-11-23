@@ -3,7 +3,6 @@
   command: java -version
   register: java_check
   failed_when: false
-  changed_when: false
 
 - name: "[Keycloak] Install Amazon Corretto 21 JDK"
   dnf:
@@ -49,7 +48,6 @@
   environment:
     KC_BOOTSTRAP_ADMIN_USERNAME: "{{ genv.keycloak.config.admin_user }}"
     KC_BOOTSTRAP_ADMIN_PASSWORD: "{{ genv.keycloak.config.admin_pass }}"
-  changed_when: false
   command: >
     /opt/keycloak/bin/kc.sh
     bootstrap-admin user

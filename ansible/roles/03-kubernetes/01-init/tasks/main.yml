@@ -3,9 +3,12 @@
   template:
     src: kubeadm-config.yaml.j2
     dest: /etc/kubernetes/kubeadm-config.yaml
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
 
 - name: Execute kubeadm init
-  shell: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml
+  command: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml
   register: kubeadm_init_result
 
 - name: Save join command to file

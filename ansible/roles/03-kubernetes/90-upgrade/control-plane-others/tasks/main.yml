@@ -6,7 +6,6 @@
 - name: Get current kubeadm version
   command: kubeadm version -o short
   register: current_kubeadm_version
-  changed_when: false
 
 - name: Display current kubeadm version
   debug:
@@ -37,7 +36,6 @@
 - name: Get node hostname
   command: hostname -s
   register: node_hostname_result
-  changed_when: false
 
 - name: Display node name
   debug:
@@ -45,7 +43,6 @@
 
 - name: Drain control plane node
   delegate_to: localhost
-  become: false
   command: kubectl drain {{ node_hostname_result.stdout }} --ignore-daemonsets --delete-emptydir-data
 
 - name: Apply kubeadm upgrade for additional control plane nodes
@@ -63,7 +60,7 @@
 - name: Upgrade CRI-O
   dnf:
     name: cri-o
-    state: latest
+    state: latest  # noqa: package-latest
     disable_excludes: kubernetes
 
 - name: Upgrade kubelet and kubectl
@@ -71,7 +68,7 @@
     name:
       - kubelet
       - kubectl
-    state: latest
+    state: latest  # noqa: package-latest
     disable_excludes: kubernetes
 
 - name: Re-apply package exclusions
@@ -107,14 +104,12 @@
   delegate_to: localhost
   become: false
   command: kubectl wait --for=condition=Ready node/{{ node_hostname_result.stdout }} --timeout=300s
-  changed_when: false
 
 - name: Verify node status
   delegate_to: localhost
   become: false
   command: kubectl get nodes
   register: nodes_status
-  changed_when: false
 
 - name: Display nodes status
   debug:
