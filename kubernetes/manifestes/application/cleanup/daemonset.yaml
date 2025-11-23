@@ -1,0 +1,165 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: image-cleanup
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: image-cleanup
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: image-cleanup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: image-cleanup
+subjects:
+  - kind: ServiceAccount
+    name: image-cleanup
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: image-cleanup
+spec:
+  selector:
+    matchLabels:
+      app: image-cleanup
+  template:
+    metadata:
+      labels:
+        app: image-cleanup
+    spec:
+      serviceAccountName: image-cleanup
+      hostPID: true
+      tolerations:
+        # Allow running on control plane nodes
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        # Allow running on any tainted nodes
+        - effect: NoSchedule
+          operator: Exists
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: image-cleanup
+          image: docker.io/library/busybox:1.37
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              echo "Image cleanup daemon starting on node: $(hostname)"
+
+              # Download and install crictl
+              echo "Installing crictl..."
+              mkdir -p /usr/local/bin
+              CRICTL_VERSION="v1.31.1"
+              wget -O /tmp/crictl.tar.gz "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz"
+              tar -C /usr/local/bin -xzf /tmp/crictl.tar.gz
+              rm /tmp/crictl.tar.gz
+
+              # Configure crictl for CRI-O
+              cat > /etc/crictl.yaml <<EOF
+              runtime-endpoint: unix:///var/run/crio/crio.sock
+              image-endpoint: unix:///var/run/crio/crio.sock
+              timeout: 10
+              debug: false
+              EOF
+
+              echo "Container runtime information:"
+              crictl version || true
+              crictl info || true
+
+              # Function to perform cleanup
+              cleanup_images() {
+                echo "=========================================="
+                echo "Starting image cleanup at $(date)"
+                echo "Node: $(hostname)"
+                echo "=========================================="
+
+                # Show current disk usage
+                echo "Current images:"
+                crictl images
+
+                # Remove unused images
+                echo "Removing unused images..."
+                crictl rmi --prune || echo "Failed to prune images, but continuing..."
+
+                echo "Images after cleanup:"
+                crictl images
+
+                echo "Image cleanup completed at $(date)"
+                echo "=========================================="
+              }
+
+              # Run cleanup immediately on startup
+              cleanup_images
+
+              # Run cleanup daily at 2:00 AM (matching original CronJob schedule)
+              while true; do
+                # Calculate seconds until next 2:00 AM
+                CURRENT_HOUR=$(date +%H)
+                CURRENT_MINUTE=$(date +%M)
+                CURRENT_SECOND=$(date +%S)
+
+                # Calculate seconds since midnight
+                SECONDS_SINCE_MIDNIGHT=$(expr $(expr $CURRENT_HOUR \* 3600) + $(expr $CURRENT_MINUTE \* 60) + $CURRENT_SECOND)
+
+                # Target is 2:00 AM (7200 seconds since midnight)
+                TARGET_SECONDS=7200
+
+                if [ $SECONDS_SINCE_MIDNIGHT -lt $TARGET_SECONDS ]; then
+                  # If before 2 AM today, wait until 2 AM today
+                  SLEEP_SECONDS=$(expr $TARGET_SECONDS - $SECONDS_SINCE_MIDNIGHT)
+                else
+                  # If after 2 AM today, wait until 2 AM tomorrow
+                  SLEEP_SECONDS=$(expr 86400 - $SECONDS_SINCE_MIDNIGHT + $TARGET_SECONDS)
+                fi
+
+                echo "Next cleanup scheduled in $SLEEP_SECONDS seconds (at 2:00 AM)"
+                sleep $SLEEP_SECONDS
+
+                cleanup_images
+              done
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: crio-sock
+              mountPath: /var/run/crio/crio.sock
+              readOnly: false
+            - name: containers-storage
+              mountPath: /var/lib/containers
+              readOnly: false
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+      volumes:
+        - name: crio-sock
+          hostPath:
+            path: /var/run/crio/crio.sock
+            type: Socket
+        - name: containers-storage
+          hostPath:
+            path: /var/lib/containers
+            type: Directory
