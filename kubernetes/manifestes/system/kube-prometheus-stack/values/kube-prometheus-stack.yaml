@@ -49,15 +49,6 @@ grafana:
     userKey: admin-user
     passwordKey: admin-password
 
-  # Persistence configuration for dashboards and data
-  persistence:
-    enabled: true
-    type: pvc
-    storageClassName: longhorn
-    accessModes:
-      - ReadWriteOnce
-    size: 5Gi
-
   # Disable init chown container to avoid permission issues with existing PVC
   initChownData:
     enabled: false
