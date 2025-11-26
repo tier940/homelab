@@ -86,7 +86,7 @@
 - name: Update all packages
   dnf:
     name: "*"
-    state: latest
+    state: latest  # noqa: package-latest  # noqa: package-latest
 
 - name: Install python3-pip
   when: "'python3-pip' not in ansible_facts.packages"
