@@ -4,7 +4,7 @@
 ::1 localhost.localdomain localhost
 ::1 localhost6.localdomain6 localhost6
 
-# Kubernetes Control Plain
+# Kubernetes Control Plane
 %{ for name, ips in clusters }${ips.ipv4} ${name}.${k8s_domain}%{ if ips.ipv6 != null }${ips.ipv6} ${name}.${k8s_domain}%{ endif }
 %{ endfor }
 # Kubernetes Workers

@@ -7,7 +7,7 @@ ARG UID=1000
 ARG GID=1000
 ARG KUBE_VERSION=v1.34.1
 ARG HELM_VERSION=v3.7.1
-ARG HELMDILE_VERSION=1.0.0
+ARG HELMFILE_VERSION=1.0.0
 
 # Install dependencies
 RUN apt-get update -y && \
@@ -33,10 +33,10 @@ RUN mkdir -pv /home/${USERNAME}/bin/helm_${HELM_VERSION} && \
   ln -s /home/${USERNAME}/bin/helm_${HELM_VERSION}/linux-amd64/helm /home/${USERNAME}/bin/helm
 
 # Install helmfile
-RUN mkdir -pv /home/${USERNAME}/bin/helmfile_v${HELMDILE_VERSION} && \
-  curl -L "https://github.com/helmfile/helmfile/releases/download/v${HELMDILE_VERSION}/helmfile_${HELMDILE_VERSION}_linux_amd64.tar.gz" | tar -xz -C /home/${USERNAME}/bin/helmfile_v${HELMDILE_VERSION} && \
-  chmod +x /home/${USERNAME}/bin/helmfile_v${HELMDILE_VERSION}/helmfile && \
-  ln -s /home/${USERNAME}/bin/helmfile_v${HELMDILE_VERSION}/helmfile /home/${USERNAME}/bin/helmfile
+RUN mkdir -pv /home/${USERNAME}/bin/helmfile_v${HELMFILE_VERSION} && \
+  curl -L "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" | tar -xz -C /home/${USERNAME}/bin/helmfile_v${HELMFILE_VERSION} && \
+  chmod +x /home/${USERNAME}/bin/helmfile_v${HELMFILE_VERSION}/helmfile && \
+  ln -s /home/${USERNAME}/bin/helmfile_v${HELMFILE_VERSION}/helmfile /home/${USERNAME}/bin/helmfile
 
 # Finalize
 ENV PATH=$PATH:/home/${USERNAME}/bin

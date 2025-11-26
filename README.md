@@ -51,7 +51,7 @@ uv sync
 source .venv/bin/activate
 ```
 
-### kubenetes
+### kubernetes
 #### インストール(kubectl)
 - 以下のコマンドを実行する
 ```bash
@@ -89,11 +89,11 @@ helm plugin install https://github.com/databus23/helm-diff
 - 以下サイトからhelmfileのバイナリをダウンロードする
 > https://github.com/helmfile/helmfile/releases
 ```bash
-HELMDILE_VERSION=1.1.7
-mkdir -pv /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}
-curl -L "https://github.com/helmfile/helmfile/releases/download/v${HELMDILE_VERSION}/helmfile_${HELMDILE_VERSION}_linux_amd64.tar.gz" | tar -xz -C /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}
-chmod +x /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}/helmfile
-ln -s /home/${USER}/bin/helmfile_v${HELMDILE_VERSION}/helmfile /home/${USER}/bin/helmfile
+HELMFILE_VERSION=1.1.7
+mkdir -pv /home/${USER}/bin/helmfile_v${HELMFILE_VERSION}
+curl -L "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" | tar -xz -C /home/${USER}/bin/helmfile_v${HELMFILE_VERSION}
+chmod +x /home/${USER}/bin/helmfile_v${HELMFILE_VERSION}/helmfile
+ln -s /home/${USER}/bin/helmfile_v${HELMFILE_VERSION}/helmfile /home/${USER}/bin/helmfile
 ```
 
 #### インストール(cilium-cli)
