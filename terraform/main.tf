@@ -109,6 +109,7 @@ resource "local_file" "hosts" {
     clusters    = local.clusters_ips
     workers     = local.workers_ips
     basic_vms   = local.basic_vms
+    proxy_vms   = local.proxy_vms
     tags        = var.tags
   })
 }
