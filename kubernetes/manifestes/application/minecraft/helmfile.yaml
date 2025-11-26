@@ -1,0 +1,18 @@
+repositories:
+  - name: itzg
+    url: https://itzg.github.io/minecraft-server-charts/
+
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
+releases:
+  - name: minecraft
+    namespace: minecraft
+    chart: itzg/minecraft
+    version: 5.0.0
+    values:
+      - values/minecraft.yaml

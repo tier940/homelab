@@ -1,0 +1,7 @@
+minecraftServer:
+  eula: true
+  version: 1.12.2
+  motd: "[001] Welcome to Minecraft on Kubernetes!"
+
+extraEnv:
+  JAVA_VERSION: "8"

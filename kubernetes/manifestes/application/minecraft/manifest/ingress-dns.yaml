@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minecraft-dns
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: mc-001.k8s.tier.f5.si
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minecraft
+                port:
+                  number: 25565
