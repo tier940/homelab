@@ -135,7 +135,7 @@
 
 - name: "[DNS] Register service DNS records in etcd"
   shell: |
-    /usr/local/bin/etcdctl put /skydns/local/k8s/{{ item.name }}/x{{ idx }} '{"host":"{{ item.host }}"}'
+    /usr/local/bin/etcdctl put /skydns/local/k8s/{{ item.name }} '{"host":"{{ item.host }}"}'
   loop:
     - name: "dns"
       host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}"
@@ -143,6 +143,4 @@
       host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}"
     - name: "keycloak"
       host: "{{ hostvars[groups['proxy'][0]]['ansible_host'] }}"
-  loop_control:
-    index_var: idx
   when: inventory_hostname == groups['dns'][0]
