@@ -1,3 +1,31 @@
+tier.local:53 {
+  bind 0.0.0.0 ::
+  errors
+  log
+
+  etcd {
+    path /skydns
+    endpoint http://localhost:2379
+  }
+
+  cache 30
+  reload
+}
+
+k8s.tier.f5.si:53 {
+  bind 0.0.0.0 ::
+  errors
+  log
+
+  etcd {
+    path /skydns
+    endpoint http://10.0.0.201:2379
+  }
+
+  cache 30
+  reload
+}
+
 .:53 {
   bind 0.0.0.0 ::
   prometheus :9153
@@ -7,16 +35,6 @@
   }
   ready
   log
-
-  etcd k8s.tier.f5.si {
-    path /skydns
-    endpoint http://10.0.0.201:2379
-  }
-
-  etcd tier.f5.si {
-    path /skydns
-    endpoint http://localhost:2379
-  }
 
   forward . 127.0.0.1:5301 127.0.0.1:5302 127.0.0.1:5303 {
     policy sequential
