@@ -1,0 +1,71 @@
+# Server configuration
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+    hostname: argocd.k8s.tier.f5.si
+    tls: false
+
+# Repo server with Helmfile support
+repoServer:
+  extraContainers:
+    - name: helmfile
+      command:
+        - /var/run/argocd/argocd-cmp-server
+      image: ghcr.io/helmfile/helmfile:v1.2.1
+      env:
+        - name: HELM_CACHE_HOME
+          value: /tmp
+        - name: HELM_CONFIG_HOME
+          value: /tmp
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        fsGroupChangePolicy: "OnRootMismatch"
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+          subPath: helmfile.yaml
+          name: argocd-cmp-cm
+        - mountPath: /tmp
+          name: helmfile-tmp
+  volumes:
+    - name: argocd-cmp-cm
+      configMap:
+        name: argocd-cmp-cm
+    - name: helmfile-tmp
+      emptyDir: {}
+
+# Config management
+configs:
+  params:
+    # Enable insecure mode for dev environment
+    server.insecure: true
+    # Set the server URL
+    server.url: https://argocd.k8s.tier.f5.si
+  cm:
+    # Server URL for UI redirects
+    url: https://argocd.k8s.tier.f5.si
+  cmp:
+    create: true
+    plugins:
+      helmfile:
+        discover:
+          fileName: "helmfile.yaml"
+        generate:
+          command:
+            - bash
+            - "-c"
+            - |
+              helmfile template --include-crds -q
+  repositories: {}
+  secret:
+    createSecret: true

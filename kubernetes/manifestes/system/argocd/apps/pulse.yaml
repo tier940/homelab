@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pulse
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tier940/homelab.git
+    targetRevision: main
+    path: kubernetes/manifestes/application/pulse
+    plugin:
+      name: helmfile
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pulse
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
