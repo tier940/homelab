@@ -104,10 +104,10 @@
       - gawk
     state: present
 
-- name: Remove zram-generator-defaults
-  when: "'zram-generator-defaults' in ansible_facts.packages"
+- name: Remove zram-generator
+  when: "'zram-generator' in ansible_facts.packages"
   dnf:
-    name: zram-generator-defaults
+    name: zram-generator
     state: absent
 
 - name: Check if swap is enabled

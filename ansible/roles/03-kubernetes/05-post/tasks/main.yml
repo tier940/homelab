@@ -21,7 +21,6 @@
   command: >
     kubectl --kubeconfig=output/kubernetes/admin.conf wait
     --for=condition=Ready
-    --timeout=600s
     pod -l component=etcd
     -n kube-system
 
