@@ -9,9 +9,10 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
+namespace: pulse
+
 releases:
   - name: pulse
-    namespace: pulse
     chart: pulse/pulse
     version: 4.33.1
     values:

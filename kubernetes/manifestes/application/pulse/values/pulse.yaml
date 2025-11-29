@@ -5,9 +5,7 @@ ingress:
   enabled: true
   className: traefik
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
-    traefik.ingress.kubernetes.io/service.serversscheme: https
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
   hosts:
     - host: pulse.k8s.tier.f5.si
       paths:
@@ -19,7 +17,7 @@ persistence:
   storageClass: longhorn
   accessModes:
     - ReadWriteOnce
-  size: 4Gi
+  size: 5Gi
 
 server:
   env:

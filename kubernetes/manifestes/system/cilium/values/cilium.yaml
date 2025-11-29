@@ -880,7 +880,7 @@ identityManagementMode: "agent"
 envoyConfig:
   # -- Enable CiliumEnvoyConfig CRD
   # CiliumEnvoyConfig CRD can also be implicitly enabled by other options.
-  enabled: true
+  enabled: false
   # -- SecretsNamespace is the namespace in which envoy SDS will retrieve secrets from.
   secretsNamespace:
     # -- Create secrets namespace for CiliumEnvoyConfig CRDs.
@@ -1185,7 +1185,7 @@ certgen:
   affinity: {}
 hubble:
   # -- Enable Hubble (true by default).
-  enabled: false
+  enabled: true
   # -- Annotations to be added to all top-level hubble objects (resources under templates/hubble)
   annotations: {}
   # -- Buffer size of the channel Hubble uses to receive monitor events. If this
@@ -1861,9 +1861,8 @@ hubble:
     # -- hubble-ui ingress configuration.
     ingress:
       enabled: true
-      annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
       className: "traefik"
       hosts:
         - hubble.k8s.tier.f5.si
@@ -2213,7 +2212,7 @@ loadBalancer:
     # Applicable values:
     #   - envoy: Enable L7 load balancing via envoy proxy. This will automatically set enable-envoy-config as well.
     #   - disabled: Disable L7 load balancing by way of service annotation.
-    backend: envoy
+    backend: disabled
     # -- List of ports from service to be automatically redirected to above backend.
     # Any service exposing one of these ports will be automatically redirected.
     # Fine-grained control can be achieved by using the service annotation.

@@ -3,8 +3,7 @@ replicaCount: 3
 ingress:
   className: traefik
   traefikAnnotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
   hosts:
     - host: rustfs.k8s.tier.f5.si
       paths:

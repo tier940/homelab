@@ -22,7 +22,7 @@ deployment:
   # -- Deployment or DaemonSet
   kind: Deployment
   # -- Number of pods of the deployment (only applies when kind == Deployment)
-  replicas: 1
+  replicas: 3
   # -- Number of old history to retain to allow rollback (If not set, default Kubernetes value is set to 10)
   revisionHistoryLimit: # @schema type:[integer, null];minimum:0
   # -- Amount of time (in seconds) before Kubernetes will send the SIGKILL signal if Traefik does not shut down
@@ -69,15 +69,18 @@ deployment:
   #   hostPath:
   #     path: /var/run/statsd-exporter
   # -- Additional initContainers (e.g. for setting file permission as shown below)
-  initContainers: []
-  # The "volume-permissions" init container is required if you run into permission issues.
-  # Related issue: https://github.com/traefik/traefik-helm-chart/issues/396
-  # - name: volume-permissions
-  #   image: busybox:latest
-  #   command: ["sh", "-c", "touch /data/acme.json; chmod -v 600 /data/acme.json"]
-  #   volumeMounts:
-  #     - name: data
-  #       mountPath: /data
+  initContainers:
+    - name: volume-permissions
+      image: docker.io/busybox:latest
+      command:
+        ["sh", "-c", "touch /data/acme.json; chmod -v 600 /data/acme.json"]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+      volumeMounts:
+        - name: data
+          mountPath: /data
   # -- Use process namespace sharing
   shareProcessNamespace: false
   # -- Custom pod DNS policy. Apply if `hostNetwork: true`
@@ -205,14 +208,11 @@ ingressRoute:
     enabled: true
     # -- Additional ingressRoute annotations (e.g. for kubernetes.io/ingress.class)
     annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
-      traefik.ingress.kubernetes.io/service.serversscheme: https
       external-dns.alpha.kubernetes.io/target: "10.0.0.230"
     # -- Additional ingressRoute labels (e.g. for filtering IngressRoute by custom labels)
     labels: {}
     # -- The router match rule used for the dashboard ingressRoute
     matchRule: Host(`traefik.k8s.tier.f5.si`)
-    # -- The internal service used for the dashboard ingressRoute
     services:
       - name: api@internal
         kind: TraefikService
@@ -223,7 +223,8 @@ ingressRoute:
     # -- Additional ingressRoute middlewares (e.g. for authentication)
     middlewares: []
     # -- TLS options (e.g. secret containing certificate)
-    tls: {}
+    tls:
+      certResolver: letsencrypt
   healthcheck:
     # -- Create an IngressRoute for the healthcheck probe
     enabled: false
@@ -249,8 +250,8 @@ updateStrategy: # @schema additionalProperties: false
   # -- Customize updateStrategy of Deployment or DaemonSet
   type: RollingUpdate
   rollingUpdate:
-    maxUnavailable: 0 # @schema type:[integer, string, null]
-    maxSurge: 1 # @schema type:[integer, string, null]
+    maxUnavailable: 2 # @schema type:[integer, string, null]
+    maxSurge: 4 # @schema type:[integer, string, null]
 
 readinessProbe: # @schema additionalProperties: false
   # -- The number of consecutive failures allowed before considering the probe as failed.
@@ -310,7 +311,8 @@ providers: # @schema additionalProperties: false
     namespaces: []
     # IP used for Kubernetes Ingress endpoints
     publishedService:
-      # -- Enable [publishedService](https://doc.traefik.io/traefik/providers/kubernetes-ingress/#publishedservice)
+      # -- Enable [publishedService](https://doc.traefik.io/traefik/providers/kubernetes-ingress/#publishedservice),
+      # usually with the Service provided by this Chart. It's possible to use it with an external Service using pathOverride.
       enabled: true
       # -- Override path of Kubernetes Service used to copy status from. Format: namespace/servicename.
       # Default to Service deployed with this Chart.
@@ -350,6 +352,40 @@ providers: # @schema additionalProperties: false
     watch: true
     # -- File content (YAML format, go template supported) (see https://doc.traefik.io/traefik/providers/file/)
     content: ""
+
+  kubernetesIngressNginx:
+    # -- Enable Kubernetes Ingress NGINX provider (experimental)
+    enabled: false
+    # -- Ingress Class Controller value this controller satisfies
+    controllerClass: "k8s.io/ingress-nginx"
+    # -- Name of the ingress class this controller satisfies
+    ingressClass: "nginx"
+    # -- Define if Ingress Controller should watch for Ingress Class by Name together with Controller Class
+    ingressClassByName: false
+    # -- Define if Ingress Controller should also watch for Ingresses without an IngressClass or the annotation specified
+    watchIngressWithoutClass: false
+    # -- Namespace the controller watches for updates to Kubernetes objects. All namespaces are watched if this parameter is left empty. When using `rbac.namespaced`, it will watch helm release namespace and namespaces listed in this array.
+    namespaces: []
+    # -- Selector selects namespaces the controller watches for updates to Kubernetes objects
+    namespaceSelector: ""
+    # -- Service fronting the Ingress controller. Takes the form 'namespace/name'
+    publishService:
+      enabled: false
+      pathOverride: ""
+    # -- Customized address (or addresses, separated by comma) to set as the load-balancer status of Ingress objects this controller satisfies
+    publishStatusAddress: ""
+    # -- Service used to serve HTTP requests not matching any known server name (catch-all). Takes the form 'namespace/name'
+    defaultBackendService: ""
+    # -- Disable support for Services of type ExternalName
+    disableSvcExternalName: false
+    # -- Ingress refresh throttle duration
+    throttleDuration: ""
+    # -- Kubernetes certificate authority file path (not needed for in-cluster client)
+    certAuthFilePath: ""
+    # -- Kubernetes server endpoint (required for external cluster client)
+    endpoint: ""
+    # -- Kubernetes bearer token (not needed for in-cluster client). It accepts either a token value or a file path to the token
+    token: ""
 
   knative:
     # -- Enable Knative provider
@@ -748,10 +784,17 @@ additionalArguments: []
 
 # -- Additional Environment variables to be passed to Traefik's binary
 # @default -- See _values.yaml_
-env: []
+env:
+  - name: CF_DNS_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: api-token
 
 # -- Environment variables to be passed to Traefik's binary from configMaps or secrets
-envFrom: []
+envFrom:
+  - secretRef:
+      name: cloudflare-api-token
 
 ports:
   traefik:
@@ -886,7 +929,7 @@ ports:
     tls:
       enabled: true
       options: ""
-      certResolver: ""
+      certResolver: letsencrypt
       domains: []
     # -- One can apply Middlewares on an entrypoint
     # https://doc.traefik.io/traefik/middlewares/overview/
@@ -1006,12 +1049,12 @@ persistence:
   # -- Enable persistence using Persistent Volume Claims
   # ref: http://kubernetes.io/docs/user-guide/persistent-volumes/.
   # It can be used to store TLS certificates along with `certificatesResolvers.<name>.acme.storage`  option
-  enabled: false
+  enabled: true
   name: data
   existingClaim: ""
-  accessMode: ReadWriteOnce
-  size: 128Mi
-  storageClass: ""
+  accessMode: ReadWriteMany
+  size: 512Mi
+  storageClass: longhorn-rwx
   volumeName: ""
   path: /data
   annotations: {}
@@ -1021,7 +1064,16 @@ persistence:
 # -- Certificates resolvers configuration.
 # Ref: https://doc.traefik.io/traefik/https/acme/#certificate-resolvers
 # See EXAMPLES.md for more details.
-certificatesResolvers: {}
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: tsubasa.ito@relightings.com
+      storage: /data/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
 
 # -- If hostNetwork is true, runs traefik in the host network namespace
 # To prevent unschedulable pods due to port collisions, if hostNetwork=true
@@ -1106,6 +1158,7 @@ podSecurityContext:
   runAsGroup: 65532
   runAsNonRoot: true
   runAsUser: 65532
+  fsGroup: 65532
 
 #
 # -- Extra objects to deploy (value evaluated as a template)

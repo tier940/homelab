@@ -4,8 +4,7 @@ server:
     enabled: true
     ingressClassName: traefik
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
     hostname: argocd.k8s.tier.f5.si
     tls: false
 
