@@ -9,7 +9,7 @@ helmDefaults:
 
 ## Document separator to satisfy Helmfile:
 ---
-namespace: kube-system
+namespace: vector
 
 releases:
   - name: vector
