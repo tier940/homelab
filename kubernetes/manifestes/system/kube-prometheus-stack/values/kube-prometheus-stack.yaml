@@ -4,9 +4,9 @@
 prometheus:
   enabled: true
   prometheusSpec:
-    replicas: 1
+    replicas: 3
     retention: 7d
-    retentionSize: "8GB"
+    retentionSize: "8GiB"
 
     # Storage configuration
     storageSpec:
@@ -16,7 +16,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 10Gi
+              storage: 5Gi
 
     # Thanos sidecar for MinIO/S3 object storage
     thanos:
@@ -29,19 +29,10 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
 
-    # Resources for development
-    resources:
-      requests:
-        cpu: 200m
-        memory: 1Gi
-      limits:
-        cpu: 2000m
-        memory: 4Gi
-
 # Grafana
 grafana:
   enabled: true
-  replicas: 1
+  replicas: 3
   adminUser: "admin"
   admin:
     ## Name of the secret. Can be templated.
@@ -49,29 +40,28 @@ grafana:
     userKey: admin-user
     passwordKey: admin-password
 
-  # Disable init chown container to avoid permission issues with existing PVC
-  initChownData:
-    enabled: false
+  # Persistence configuration for RWX storage
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: longhorn-rwx
+    accessModes:
+      - ReadWriteMany
+    size: 5Gi
 
   # Timezone and locale settings
   grafana.ini:
     server:
       root_url: "https://grafana.k8s.tier.f5.si"
-    users:
-      default_theme: dark
-      default_timezone: Asia/Tokyo
     date_formats:
-      default_timezone: Asia/Tokyo
+      default_timezone: "Asia/Tokyo"
+    plugin:
+      grafana-image-renderer:
+        rendering_timezone: "Asia/Tokyo"
 
   # Install plugins for S3/MinIO log access
   plugins:
     - yesoreyeram-infinity-datasource
-
-  # Data sources - disable default and configure manually
-  sidecar:
-    datasources:
-      enabled: true
-      defaultDatasourceEnabled: false
 
   additionalDataSources:
     - name: "SelfHost Prometheus"
@@ -97,10 +87,7 @@ grafana:
       access: proxy
       url: http://loki.kube-prometheus-stack.svc.cluster.local:3100
       jsonData:
-        # Maximum lines to display in Explore
         maxLines: 1000
-        # Default query for Explore page
-        # This will group by namespace by default
         timeout: 60
       editable: true
 
@@ -128,16 +115,20 @@ grafana:
         gnetId: 17347
         revision: 9
         datasource: "K8S Prometheus"
+      k8s-longhorn:
+        gnetId: 16888
+        revision: 11
+        datasource: "K8S Prometheus"
       k8s-minio:
         gnetId: 13502
         revision: 26
         datasource:
           - name: DS_PROMETHEUS
             value: K8S Prometheus
-      k8s-hashicorp-vault:
-        gnetId: 12904
-        revision: 2
-        datasource: "K8S Prometheus"
+      # k8s-hashicorp-vault:
+      #   gnetId: 12904
+      #   revision: 2
+      #   datasource: "K8S Prometheus"
 
   # Ingress
   ingress:
@@ -146,23 +137,13 @@ grafana:
     hosts:
       - grafana.k8s.tier.f5.si
     annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-      traefik.ingress.kubernetes.io/router.middlewares: traefik-redirect-https@kubernetescrd
-
-  # Resources - increased for Loki queries
-  resources:
-    requests:
-      cpu: 200m
-      memory: 256Mi
-    limits:
-      cpu: 2000m
-      memory: 2Gi
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
 
 # AlertManager
 alertmanager:
-  enabled: true
+  enabled: false
   alertmanagerSpec:
-    replicas: 1
+    replicas: 3
     storage:
       volumeClaimTemplate:
         spec:
@@ -171,27 +152,3 @@ alertmanager:
           resources:
             requests:
               storage: 5Gi
-
-# node-exporter
-nodeExporter:
-  enabled: true
-
-# kube-state-metrics
-kubeStateMetrics:
-  enabled: true
-
-# kubelet
-kubelet:
-  enabled: true
-  serviceMonitor:
-    interval: 30s
-
-# Prometheus Operator
-prometheusOperator:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
