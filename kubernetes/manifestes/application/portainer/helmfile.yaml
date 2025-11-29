@@ -1,0 +1,19 @@
+repositories:
+  - name: portainer
+    url: https://portainer.github.io/k8s/
+
+helmDefaults:
+  createNamespace: true
+  wait: true
+  timeout: 600
+
+## Document separator to satisfy Helmfile:
+---
+namespace: portainer
+
+releases:
+  - name: portainer
+    chart: portainer/portainer
+    version: 2.33.5
+    values:
+      - values/portainer.yaml

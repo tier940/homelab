@@ -6,13 +6,10 @@ metadata:
     external-dns.alpha.kubernetes.io/target: 10.0.0.230
 spec:
   entryPoints:
-    - web
     - websecure
   routes:
     - kind: Rule
-      match: Host(`etcd.k8s.tier.f5.si`)
+      match: Host(`etcd.k8s.tier.f5.si`) && PathPrefix(`/`)
       services:
         - name: etcd-workbench
           port: 8002
-      middlewares:
-        - name: traefik-redirect-https@kubernetescrd

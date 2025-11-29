@@ -1,0 +1,7 @@
+tls:
+  force: true
+
+persistence:
+  enabled: true
+  size: "10Gi"
+  storageClass: longhorn
