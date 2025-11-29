@@ -24,6 +24,10 @@
 - name: Install packages
   dnf:
     name:
+      - nfs-utils
+      - cryptsetup
+      - device-mapper
+      - device-mapper-multipath
       - iproute-tc
       - iscsi-initiator-utils
       - container-selinux
@@ -45,6 +49,8 @@
   modprobe:
     name: "{{ item }}"
   with_items:
+    - nfs
+    - dm_crypt
     - iscsi_tcp
 
 - name: Ensure kernel modules are loaded at boot
@@ -54,6 +60,8 @@
     line: "{{ item }}"
     mode: u=rw,g=r,o=r
   with_items:
+    - nfs
+    - dm_crypt
     - iscsi_tcp
 
 - name: Check if CRI-O bridge network config is disabled
@@ -93,9 +101,47 @@
     group: root
   register: registries_conf_changed
 
+- name: Check if iSCSI initiator name exists
+  stat:
+    path: /etc/iscsi/initiatorname.iscsi
+  register: iscsi_initiator_file
+
+- name: Generate iSCSI initiator name
+  command: /sbin/iscsi-iname
+  register: iscsi_initiator_name
+  changed_when: false
+  when: not iscsi_initiator_file.stat.exists
+
+- name: Configure iSCSI initiator name
+  copy:
+    content: "InitiatorName={{ iscsi_initiator_name.stdout }}\n"
+    dest: /etc/iscsi/initiatorname.iscsi
+    mode: u=rw,g=r,o=r
+    owner: root
+    group: root
+  when: not iscsi_initiator_file.stat.exists
+
 - name: Start open-iscsi service
   systemd:
     name: iscsid
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Configure multipath blacklist
+  copy:
+    content: |
+      blacklist {
+          devnode "^sd[a-z0-9]+"
+      }
+    dest: /etc/multipath.conf
+    mode: u=rw,g=r,o=r
+    owner: root
+    group: root
+
+- name: Start multipathd service
+  systemd:
+    name: multipathd
     state: started
     enabled: true
     daemon_reload: true
