@@ -1,5 +1,6 @@
 image:
   repository: docker.io/rcourtman/pulse
+  tag: 4.36.1
 
 ingress:
   enabled: true
@@ -14,9 +15,9 @@ ingress:
 
 persistence:
   enabled: true
-  storageClass: longhorn
+  storageClass: longhorn-rwx
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   size: 5Gi
 
 server:
