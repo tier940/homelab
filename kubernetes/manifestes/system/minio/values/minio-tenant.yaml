@@ -12,7 +12,7 @@ tenant:
     - servers: 3
       name: pool-0
       volumesPerServer: 2
-      size: 5Gi
+      size: 10Gi
       storageClassName: longhorn
       resources:
         requests:
@@ -44,7 +44,7 @@ tenant:
   # Prometheus metrics configuration
   metrics:
     enabled: true
-    port: 9000
+    port: 9090
     protocol: http
 
   # Add labels to MinIO services for ServiceMonitor discovery

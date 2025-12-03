@@ -4,7 +4,7 @@
 prometheus:
   enabled: true
   prometheusSpec:
-    replicas: 3
+    replicas: 1
     retention: 7d
     retentionSize: "8GiB"
 
@@ -16,7 +16,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 5Gi
+              storage: 10Gi
 
     # Thanos sidecar for MinIO/S3 object storage
     thanos:
@@ -33,6 +33,7 @@ prometheus:
 grafana:
   enabled: true
   replicas: 3
+  defaultDashboardsTimezone: "Asia/Tokyo"
   adminUser: "admin"
   admin:
     ## Name of the secret. Can be templated.
@@ -47,17 +48,19 @@ grafana:
     storageClassName: longhorn-rwx
     accessModes:
       - ReadWriteMany
-    size: 5Gi
+    size: 2Gi
 
   # Timezone and locale settings
   grafana.ini:
     server:
       root_url: "https://grafana.k8s.tier.f5.si"
+    users:
+      default_timezone: "Asia/Tokyo"
+      default_language: "ja-JP"
     date_formats:
       default_timezone: "Asia/Tokyo"
-    plugin:
-      grafana-image-renderer:
-        rendering_timezone: "Asia/Tokyo"
+    rendering:
+      default_timezone: "Asia/Tokyo"
 
   # Install plugins for S3/MinIO log access
   plugins:
@@ -67,29 +70,12 @@ grafana:
     - name: "SelfHost Prometheus"
       type: prometheus
       uid: self_prometheus
-      url: http://10.0.0.18:9090
-      isDefault: false
-      jsonData:
-        httpMethod: POST
-        timeInterval: 30s
-    - name: "K8S Prometheus"
-      type: prometheus
-      uid: k8s_prometheus
-      access: proxy
-      url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack.svc:9090
-      isDefault: true
-      jsonData:
-        httpMethod: POST
-        timeInterval: 30s
+      url: http://10.0.0.18:9090/
     - name: "K8S Loki"
       type: loki
       uid: k8s_loki
       access: proxy
-      url: http://loki.kube-prometheus-stack.svc.cluster.local:3100
-      jsonData:
-        maxLines: 1000
-        timeout: 60
-      editable: true
+      url: http://loki.kube-prometheus-stack.svc.cluster.local:3100/
 
   # Dashboards
   dashboardProviders:
@@ -114,17 +100,17 @@ grafana:
       k8s-traefik:
         gnetId: 17347
         revision: 9
-        datasource: "K8S Prometheus"
+        datasource: "Prometheus"
       k8s-longhorn:
         gnetId: 16888
         revision: 11
-        datasource: "K8S Prometheus"
+        datasource: "Prometheus"
       k8s-minio:
         gnetId: 13502
         revision: 26
         datasource:
           - name: DS_PROMETHEUS
-            value: K8S Prometheus
+            value: "Prometheus"
       # k8s-hashicorp-vault:
       #   gnetId: 12904
       #   revision: 2
@@ -151,4 +137,4 @@ alertmanager:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 5Gi
+              storage: 2Gi
