@@ -1,0 +1,55 @@
+---
+# LVM extend role for adding new disk and extending Longhorn storage
+# Required variables:
+#   - new_disk: New disk device to add (e.g., /dev/vdc)
+
+- name: Validate new_disk variable is defined
+  assert:
+    that:
+      - new_disk is defined
+      - new_disk | length > 0
+    fail_msg: "Variable 'new_disk' must be defined (e.g., -e new_disk=/dev/vdc)"
+
+- name: Check if new disk exists
+  stat:
+    path: "{{ new_disk }}"
+  register: disk_stat
+
+- name: Fail if disk does not exist
+  fail:
+    msg: "Disk {{ new_disk }} does not exist"
+  when: not disk_stat.stat.exists
+
+- name: Check if disk is already a PV
+  command: "pvs {{ new_disk }}"
+  register: disk_pvs
+  failed_when: false
+
+- name: Create PV on new disk
+  when: disk_pvs.rc != 0
+  command: "pvcreate {{ new_disk }}"
+
+- name: Extend VG with new disk
+  lvg:
+    vg: vg_longhorn
+    pvs: "{{ existing_pvs }},{{ new_disk }}"
+  vars:
+    existing_pvs: "{{ ansible_lvm.pvs | dict2items | selectattr('value.vg', 'equalto', 'vg_longhorn') | map(attribute='key') | join(',') }}"
+
+- name: Extend LV to use all available space
+  lvol:
+    vg: vg_longhorn
+    lv: lv_longhorn
+    size: 100%VG
+    resizefs: false
+
+- name: Grow xfs filesystem
+  command: xfs_growfs /mnt/longhorn
+
+- name: Show new filesystem size
+  command: df -h /mnt/longhorn
+  register: df_output
+
+- name: Display result
+  debug:
+    msg: "{{ df_output.stdout_lines }}"

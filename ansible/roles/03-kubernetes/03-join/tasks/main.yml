@@ -1,18 +1,28 @@
 ---
-- name: Check if /dev/vdb has a filesystem
-  command: blkid /dev/vdb
-  register: vdb_blkid
+- name: Check if /dev/vdb is already a PV
+  command: pvs /dev/vdb
+  register: vdb_pvs
   failed_when: false
 
-- name: Create xfs filesystem on /dev/vdb
-  when: vdb_blkid.rc != 0
+- name: Create LVM physical volume on /dev/vdb
+  when: vdb_pvs.rc != 0
+  command: pvcreate /dev/vdb
+
+- name: Create LVM volume group
+  lvg:
+    vg: vg_longhorn
+    pvs: /dev/vdb
+
+- name: Create LVM logical volume (use 100% of VG)
+  lvol:
+    vg: vg_longhorn
+    lv: lv_longhorn
+    size: 100%VG
+
+- name: Create xfs filesystem on LV
   filesystem:
     fstype: xfs
-    dev: /dev/vdb
-
-- name: Get UUID of /dev/vdb
-  command: blkid -s UUID -o value /dev/vdb
-  register: vdb_uuid
+    dev: /dev/vg_longhorn/lv_longhorn
 
 - name: Create /mnt/longhorn directory
   file:
@@ -22,10 +32,10 @@
     owner: root
     group: root
 
-- name: Add /dev/vdb to fstab
+- name: Mount LV to /mnt/longhorn
   mount:
     path: /mnt/longhorn
-    src: "UUID={{ vdb_uuid.stdout }}"
+    src: /dev/vg_longhorn/lv_longhorn
     fstype: xfs
     opts: defaults
     state: mounted

@@ -107,6 +107,7 @@ backend dns-servers-tcp
     server  {{ host }} {{ hostvars[host]['ansible_host'] }}:53 check
 {% endfor %}
 
+{% if 'keycloak' in groups and groups['keycloak'] %}
 #---------------------------------------------------------------------
 # Keycloak Load Balancing (HTTP)
 #---------------------------------------------------------------------
@@ -124,3 +125,4 @@ backend keycloak-servers
 {% for host in groups['keycloak'] %}
     server  {{ host }} {{ hostvars[host]['ansible_host'] }}:8080 check
 {% endfor %}
+{% endif %}

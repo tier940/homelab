@@ -23,6 +23,11 @@
     --for=condition=Ready
     pod -l component=etcd
     -n kube-system
+    --timeout=300s
+  register: etcd_wait_result
+  retries: 3
+  delay: 30
+  until: etcd_wait_result.rc == 0
 
 - name: Apply CoreDNS ConfigMap
   delegate_to: localhost

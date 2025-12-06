@@ -1,0 +1,19 @@
+---
+# Extend Longhorn LVM storage by adding a new disk
+#
+# Usage:
+#   ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-lvm-extend.yml \
+#     -e new_disk=/dev/vdc \
+#     --limit worker01
+#
+# Options:
+#   -e new_disk=/dev/vdX   : New disk device to add (required)
+#   --limit <host>         : Target specific host(s)
+#   --check --diff         : Dry-run mode
+
+- name: Extend Longhorn LVM storage
+  hosts: worker
+  become: true
+  gather_facts: true
+  roles:
+    - 03-kubernetes/99-lvm-extend

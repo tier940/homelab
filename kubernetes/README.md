@@ -74,9 +74,13 @@ helm show values vector/vector --version X.Y.Z
 # Longhorn
 helm show values longhorn/longhorn --version X.Y.Z
 
-# MinIO (S3互換オブジェクトストレージ)
+# S3互換オブジェクトストレージ
+## MinIO Operator & Tenant
 helm show values minio-operator/operator --version X.Y.Z
 helm show values minio-operator/tenant --version X.Y.Z
+
+# RustFS
+helm show values rustfs/rustfs --version X.Y.Z
 ```
 
 #### 管理ツール関連

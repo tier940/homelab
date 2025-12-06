@@ -107,7 +107,9 @@
 - name: Remove zram-generator
   when: "'zram-generator' in ansible_facts.packages"
   dnf:
-    name: zram-generator
+    name:
+      - zram-generator
+      - zram-generator-defaults
     state: absent
 
 - name: Check if swap is enabled
@@ -182,3 +184,14 @@
     job: "/opt/clear_memory_cache.sh"
     user: root
     state: present
+
+- name: Install kexec-tools for kdump
+  dnf:
+    name: kexec-tools
+    state: present
+
+- name: Enable and start kdump service
+  systemd:
+    name: kdump
+    state: started
+    enabled: true

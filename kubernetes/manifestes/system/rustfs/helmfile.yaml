@@ -12,18 +12,18 @@ helmDefaults:
 ## Document separator to satisfy Helmfile:
 ---
 releases:
-  - name: local-path-provisioner
-    namespace: local-path-provisioner
-    chart: localpath/local-path-provisioner
-    version: 0.0.33
-    values:
-      - values/localpath.yaml
+  # - name: local-path-provisioner
+  #   namespace: local-path-provisioner
+  #   chart: localpath/local-path-provisioner
+  #   version: 0.0.33
+  #   values:
+  #     - values/localpath.yaml
 
   - name: rustfs
     chart: rustfs/rustfs
     namespace: rustfs
-    version: 0.0.70
+    version: 0.0.72
     values:
       - values/rustfs.yaml
-    needs:
-      - local-path-provisioner/local-path-provisioner
+    # needs:
+    #   - local-path-provisioner/local-path-provisioner
