@@ -38,11 +38,6 @@ variable "base_clone_id" {
   type        = number
 }
 
-variable "base_domain" {
-  description = "Base domain for the VMs"
-  type        = string
-}
-
 variable "ciuser" {
   description = "Username for the VM"
   type        = string

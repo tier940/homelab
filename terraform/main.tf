@@ -64,7 +64,6 @@ module "basic_vms" {
   instances     = local.basic_vms_flat
   base_name     = ""
   base_clone_id = var.basic_vms.base_clone_id
-  base_domain   = var.basic_vms.base_domain
   ciuser        = var.basic_vms.ciuser
   cipassword    = var.basic_vms.cipassword
   tags          = var.tags
@@ -77,7 +76,6 @@ module "clusters" {
   instances     = var.clusters.instances
   base_name     = var.clusters.base_name
   base_clone_id = var.clusters.base_clone_id
-  base_domain   = var.clusters.base_domain
   ciuser        = var.clusters.ciuser
   cipassword    = var.clusters.cipassword
   tags          = var.tags
@@ -90,7 +88,6 @@ module "workers" {
   instances     = var.worker.instances
   base_name     = var.worker.base_name
   base_clone_id = var.worker.base_clone_id
-  base_domain   = var.worker.base_domain
   ciuser        = var.worker.ciuser
   cipassword    = var.worker.cipassword
   tags          = var.tags
