@@ -41,6 +41,7 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
+  notify: Restart Traefik
 
 - name: "[{{ genv.proxy.name }}] Copy dynamic configuration"
   template:
@@ -51,6 +52,7 @@
     mode: u=rw,g=r,o=r
   with_items:
     - { src: "dynamic/kubernetes.yaml.j2", dest: "dynamic/kubernetes.yaml" }
+  notify: Restart Traefik
 
 - name: "[{{ genv.proxy.name }}] Copy traefik.service"
   copy:
@@ -59,6 +61,7 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
+  notify: Restart Traefik
 
 - name: "[{{ genv.proxy.name }}] Start traefik service"
   systemd:

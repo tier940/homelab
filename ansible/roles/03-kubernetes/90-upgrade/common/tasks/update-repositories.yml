@@ -1,0 +1,25 @@
+---
+# Common task for updating Kubernetes and CRI-O repositories
+# Used by all upgrade roles (control-plane-first, control-plane-others, worker-nodes)
+
+- name: Update Kubernetes repository
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/"
+    enabled: true
+    gpgcheck: true
+    gpgkey: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/repodata/repomd.xml.key"
+
+- name: Update CRI-O repository
+  yum_repository:
+    name: cri-o
+    description: CRI-O
+    baseurl: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/"
+    enabled: true
+    gpgcheck: true
+    gpgkey: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/repodata/repomd.xml.key"
+
+- name: Update repository cache
+  dnf:
+    update_cache: true

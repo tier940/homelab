@@ -11,27 +11,9 @@
   debug:
     msg: "Current kubeadm version: {{ current_kubeadm_version.stdout }}"
 
-- name: Update Kubernetes repository
-  yum_repository:
-    name: kubernetes
-    description: Kubernetes
-    baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/"
-    enabled: true
-    gpgcheck: true
-    gpgkey: "https://pkgs.k8s.io/core:/stable:/v{{ genv.kubernetes.kube_version }}/rpm/repodata/repomd.xml.key"
-
-- name: Update CRI-O repository
-  yum_repository:
-    name: cri-o
-    description: CRI-O
-    baseurl: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/"
-    enabled: true
-    gpgcheck: true
-    gpgkey: "https://download.opensuse.org/repositories/isv:/cri-o:/stable:/v{{ genv.kubernetes.crio_version }}/rpm/repodata/repomd.xml.key"
-
-- name: Update repository cache
-  dnf:
-    update_cache: true
+# Update repositories using common task
+- name: Update Kubernetes and CRI-O repositories
+  include_tasks: ../common/tasks/update-repositories.yml
 
 - name: Get node hostname
   command: hostname -s
@@ -63,6 +45,7 @@
     name: cri-o
     state: latest  # noqa: package-latest
     disable_excludes: kubernetes
+  notify: Restart CRI-O
 
 - name: Upgrade kubelet and kubectl
   dnf:
@@ -71,6 +54,7 @@
       - kubectl
     state: latest  # noqa: package-latest
     disable_excludes: kubernetes
+  notify: Restart kubelet
 
 - name: Re-apply package exclusions
   dnf:
@@ -80,17 +64,8 @@
       - kubeadm
       - kubectl
 
-- name: Restart CRI-O
-  systemd:
-    name: crio
-    state: restarted
-    daemon_reload: true
-
-- name: Restart kubelet
-  systemd:
-    name: kubelet
-    state: restarted
-    daemon_reload: true
+- name: Flush handlers to restart services
+  meta: flush_handlers
 
 - name: Wait for kubelet to be ready
   wait_for:

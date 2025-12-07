@@ -88,7 +88,7 @@
     mode: u=rw,g=r,o=r
     owner: root
     group: root
-  register: crio_shortname_changed
+  notify: Restart CRI-O
 
 - name: Copy registries.conf for CRI-O
   copy:
@@ -97,7 +97,7 @@
     mode: u=rw,g=r,o=r
     owner: root
     group: root
-  register: registries_conf_changed
+  notify: Restart CRI-O
 
 - name: Check if iSCSI initiator name exists
   stat:
@@ -118,28 +118,23 @@
     owner: root
     group: root
   when: not iscsi_initiator_file.stat.exists
+  notify: Restart iscsid
 
-- name: Start open-iscsi service
+- name: Start and enable open-iscsi service
   systemd:
     name: iscsid
-    state: restarted
+    state: started
     enabled: true
     daemon_reload: true
 
-- name: Start CRI-O service
+- name: Start and enable CRI-O service
   systemd:
     name: crio
     state: started
     enabled: true
     daemon_reload: true
 
-- name: Restart CRI-O if configuration changed
-  when: crio_shortname_changed.changed or registries_conf_changed.changed
-  systemd:
-    name: crio
-    state: restarted
-
-- name: Start kubelet service
+- name: Start and enable kubelet service
   systemd:
     name: kubelet
     state: started

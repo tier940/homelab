@@ -62,7 +62,7 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
-  when: not keycloak_dir.stat.exists
+  notify: Restart Keycloak
 
 - name: "[Keycloak] Start keycloak service"
   systemd:

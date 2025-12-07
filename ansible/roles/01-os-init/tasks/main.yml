@@ -86,7 +86,10 @@
 - name: Update all packages
   dnf:
     name: "*"
-    state: latest  # noqa: package-latest  # noqa: package-latest
+    state: latest  # noqa: package-latest
+  tags:
+    - never
+    - initial_setup
 
 - name: Install python3-pip
   when: "'python3-pip' not in ansible_facts.packages"
@@ -122,8 +125,9 @@
 
 - name: Drop caches
   command: sysctl -w vm.drop_caches=3
-  args:
-    creates: /proc/sys/vm/drop_caches
+  changed_when: false
+  tags:
+    - never
 
 - name: Check if zram0 exists
   stat:
