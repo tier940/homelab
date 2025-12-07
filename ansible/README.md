@@ -42,10 +42,10 @@ ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./03-kubernetes.yml
 #### Workerノード追加
 ```bash
 # plan(dry-run)
-ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --check --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-worker.yml --check --diff
 
 # apply
-ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-woker.yml --diff
+ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./99-kubernetes-add-worker.yml --diff
 ```
 
 #### Kubernetesバージョンアップグレード

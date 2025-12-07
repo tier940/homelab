@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: lxde
+  name: cleanup
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/tier940/homelab.git
     targetRevision: main
-    path: kubernetes/manifestes/application/lxde
+    path: kubernetes/manifests/application/cleanup
   destination:
     server: https://kubernetes.default.svc
     namespace: default

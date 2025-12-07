@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebrowser
+  template:
+    metadata:
+      labels:
+        app: filebrowser
+    spec:
+      containers:
+        - name: filebrowser
+          image: filebrowser/filebrowser:v2.31.2
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: traefik-data
+              mountPath: /srv/traefik
+              readOnly: true
+            - name: config
+              mountPath: /database
+          env:
+            - name: FB_DATABASE
+              value: /database/filebrowser.db
+            - name: FB_ROOT
+              value: /srv
+            - name: FB_PORT
+              value: "80"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      volumes:
+        - name: traefik-data
+          persistentVolumeClaim:
+            claimName: traefik
+        - name: config
+          emptyDir: {}

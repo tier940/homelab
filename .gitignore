@@ -1,2 +1,32 @@
+# Ansible
 ansible/.ansible/*
+ansible/output/
+ansible/group_vars/**/vault*.yml
+ansible/roles/01-os-init/files/keys/*
+!ansible/roles/01-os-init/files/keys/*.pub
+
+# Terraform
+terraform/*.tfstate*
+terraform/.terraform/
+terraform/var_files/ignore/*.tfvars
+
+# Kubernetes Secrets
 kubernetes/manifestes/system/*-secret.yaml
+kubernetes/manifests/system/*-secret.yaml
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor
+**/*.swp
+**/*.swo
+**/*.swn
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

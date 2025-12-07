@@ -51,6 +51,7 @@ variable "ciuser" {
 variable "cipassword" {
   description = "Password for the VM"
   type        = string
+  sensitive   = true
 }
 
 variable "tags" {

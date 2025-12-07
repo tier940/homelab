@@ -5,31 +5,31 @@ kubectl create ns traefik
 kubectl create ns vault
 kubectl create ns kube-prometheus-stack
 kubectl create ns minio-tenant
-kubectl apply -f ./manifestes/system/homelab-admin.yaml
-kubectl apply -f ./manifestes/system/cloudflare-secret.yaml
-kubectl apply -f ./manifestes/system/vault-secret.yaml
-kubectl apply -f ./manifestes/system/minio-secret.yaml
-kubectl apply -f ./manifestes/system/grafana-secret.yaml
-kubectl apply -f ./manifestes/system/thanos-objstore-secret.yaml
+kubectl apply -f ./manifests/system/homelab-admin.yaml
+kubectl apply -f ./manifests/system/cloudflare-secret.yaml
+kubectl apply -f ./manifests/system/vault-secret.yaml
+kubectl apply -f ./manifests/system/minio-secret.yaml
+kubectl apply -f ./manifests/system/grafana-secret.yaml
+kubectl apply -f ./manifests/system/thanos-objstore-secret.yaml
 
-helmfile apply -f ./manifestes/system/00_init/
-helmfile apply -f ./manifestes/system/cilium/
-kubectl apply -k ./manifestes/system/cilium/manifest/
+helmfile apply -f ./manifests/system/00_init/
+helmfile apply -f ./manifests/system/cilium/
+kubectl apply -k ./manifests/system/cilium/manifest/
 
-# helmfile apply -f ./manifestes/system/cert-manager/
-# kubectl apply -k ./manifestes/system/cert-manager/manifest/
+# helmfile apply -f ./manifests/system/cert-manager/
+# kubectl apply -k ./manifests/system/cert-manager/manifest/
 
-helmfile apply -f ./manifestes/system/longhorn/
-kubectl apply -k ./manifestes/system/longhorn/manifest/
+helmfile apply -f ./manifests/system/longhorn/
+kubectl apply -k ./manifests/system/longhorn/manifest/
 
-helmfile apply -f ./manifestes/system/traefik/
+helmfile apply -f ./manifests/system/traefik/
 
-helmfile apply -f ./manifestes/system/kubernetes-dashboard/
-helmfile apply -f ./manifestes/system/minio/
-helmfile apply -f ./manifestes/system/vector/
-helmfile apply -f ./manifestes/system/kube-prometheus-stack/
+helmfile apply -f ./manifests/system/kubernetes-dashboard/
+helmfile apply -f ./manifests/system/minio/
+helmfile apply -f ./manifests/system/vector/
+helmfile apply -f ./manifests/system/kube-prometheus-stack/
 
-helmfile apply -f ./manifestes/system/argocd/
+helmfile apply -f ./manifests/system/argocd/
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
 ```
 
@@ -111,5 +111,5 @@ kubectl run -it --rm --restart=Never --image=ubuntu:24.04 ubuntu
 
 kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 
-kubectl apply -k ./manifestes/application/lxde/
+kubectl apply -k ./manifests/application/lxde/
 ```

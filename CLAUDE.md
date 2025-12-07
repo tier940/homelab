@@ -12,8 +12,8 @@ This is a homelab infrastructure-as-code repository for managing a Kubernetes cl
 homelab/
 ├── ansible/          # Configuration management for VMs and Kubernetes
 ├── kubernetes/       # Helm charts and Kubernetes manifests
-│   ├── manifestes/system/    # System components (Cilium, Traefik, etc.)
-│   └── manifestes/application/
+│   ├── manifests/system/    # System components (Cilium, Traefik, etc.)
+│   └── manifests/application/
 ├── terrafrom/        # VM provisioning on Proxmox VE (note: typo in dir name)
 ├── proxmox/          # Proxmox-related utilities (etcd registration)
 └── misc/             # Shell scripts for maintenance
@@ -51,7 +51,7 @@ ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./00-all.yml --chec
 ansible-playbook -i ./inventories/${APPLY_STAGE}/${USER}.yml ./00-all.yml --diff
 
 # Individual playbooks: 01-os-init.yml, 02-basic-vms.yml, 03-kubernetes.yml
-# Special operations: 90-kubernetes-upgrade.yml, 99-kubernetes-add-woker.yml, 99-pkg-upgrade.yml, 99-reboot.yml
+# Special operations: 90-kubernetes-upgrade.yml, 99-kubernetes-add-worker.yml, 99-pkg-upgrade.yml, 99-reboot.yml
 ```
 
 ### Terraform
@@ -68,11 +68,11 @@ terraform apply -var-file=var_files/ignore/${USER}.tfvars
 cd kubernetes/
 
 # Deploy system components in order
-helmfile apply -f ./manifestes/system/00_init/
-helmfile apply -f ./manifestes/system/cilium/
-helmfile apply -f ./manifestes/system/cert-manager/
-helmfile apply -f ./manifestes/system/traefik/
-helmfile apply -f ./manifestes/system/longhorn/
+helmfile apply -f ./manifests/system/00_init/
+helmfile apply -f ./manifests/system/cilium/
+helmfile apply -f ./manifests/system/cert-manager/
+helmfile apply -f ./manifests/system/traefik/
+helmfile apply -f ./manifests/system/longhorn/
 # ... then other components
 
 # View Helm chart values

@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/tier940/homelab.git
     targetRevision: main
-    path: kubernetes/manifestes/application/etcd-workbench
+    path: kubernetes/manifests/application/etcd-workbench
   destination:
     server: https://kubernetes.default.svc
     namespace: default

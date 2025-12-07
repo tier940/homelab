@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - etcd-workbench.yaml
+  #- etcd-workbench.yaml
   # - lxde.yaml
   - cleanup.yaml
   - pulse.yaml

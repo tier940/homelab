@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/tier940/homelab.git
     targetRevision: main
-    path: kubernetes/manifestes/application/pulse
+    path: kubernetes/manifests/application/pulse
     plugin:
       name: helmfile
   destination:
