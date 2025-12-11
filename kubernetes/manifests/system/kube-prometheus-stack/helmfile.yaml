@@ -16,12 +16,12 @@ namespace: kube-prometheus-stack
 releases:
   - name: kube-prometheus-stack
     chart: prometheus-community/kube-prometheus-stack
-    version: 79.12.0
+    version: 80.2.0
     values:
       - values/kube-prometheus-stack.yaml
 
   - name: loki
     chart: grafana/loki
-    version: 6.46.0
+    version: 6.48.0
     values:
       - values/loki.yaml

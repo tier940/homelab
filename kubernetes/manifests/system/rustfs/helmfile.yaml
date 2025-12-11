@@ -22,7 +22,7 @@ releases:
   - name: rustfs
     chart: rustfs/rustfs
     namespace: rustfs
-    version: 0.0.72
+    version: 0.0.73
     values:
       - values/rustfs.yaml
     # needs:
